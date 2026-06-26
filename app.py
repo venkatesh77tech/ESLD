@@ -50,6 +50,9 @@ def normalize_module(value):
 def home():
     return send_from_directory('.', 'index.html')
 
+@app.route('/<path:filename>')
+def serve_files(filename):
+    return send_from_directory('.', filename)
 # ════════════════════════════════════════
 #  STUDENT AUTH
 # ════════════════════════════════════════
