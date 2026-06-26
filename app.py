@@ -12,7 +12,7 @@ exactly once.
 Run with: python app.py
 """
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from flask_mysqldb import MySQL
 import bcrypt
@@ -46,11 +46,9 @@ def normalize_module(value):
 # ════════════════════════════════════════
 #  HOME
 # ════════════════════════════════════════
-
 @app.route('/')
 def home():
-    return "ESLD Backend Running Successfully 🚀"
-
+    return send_from_directory('.', 'index.html')
 
 # ════════════════════════════════════════
 #  STUDENT AUTH
