@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Rhythm & Read 🎵 | ESLD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     ESLD Mini-Game: Rhythm & Read
+     Self-contained, works standalone or embedded as an <iframe>.
+
+     Integration notes for the ESLD platform:
+     - On round complete, saveProgress() writes to localStorage under
+       key "esld_progress_rhythm-read" AND posts a
+       window.parent.postMessage({type:'esld-game-progress', ...})
+       so a parent dashboard can listen for it if this is embedded.
+     - Swap saveProgress()'s localStorage block for a fetch() call to
+       your Flask /api/progress endpoint whenever the backend is ready.
+     ============================================================ */
+
+  :root{
+    --accent1:#06d6a0;
+    --accent2:#1b9aaa;
+    --glow: rgba(6,214,160,.18);
+    --bg-deep:#0b0f1a;
+    --bg-panel:#141a2b;
+    --bg-panel2:#1c2338;
+    --text:#eef2ff;
+    --text-dim:#9aa5c0;
+    --success:#06d6a0;
+    --danger:#ef476f;
+    --warning:#ffd166;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:'Nunito',sans-serif;
+    color:var(--text);
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 15% -10%, var(--glow), transparent 55%),
+      radial-gradient(circle at 110% 110%, rgba(27,154,170,.16), transparent 50%),
+      var(--bg-deep);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:18px 14px 40px;
+    user-select:none;
+  }
+  h1,h2,h3,.display{font-family:'Fredoka',sans-serif; margin:0;}
+
+  .topbar{
+    width:100%; max-width:560px;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:10px; margin-bottom:14px;
+  }
+  .title-block{display:flex; align-items:center; gap:10px;}
+  .title-block .emoji{font-size:32px;}
+  .title-block h1{font-size:22px; line-height:1.1;}
+  .title-block p{margin:2px 0 0; font-size:13px; color:var(--text-dim);}
+  .icon-btn{
+    background:var(--bg-panel);
+    border:1px solid rgba(255,255,255,.08);
+    color:var(--text);
+    border-radius:12px;
+    width:42px; height:42px;
+    font-size:18px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    transition:.15s transform ease, .15s background ease;
+  }
+  .icon-btn:hover{background:var(--bg-panel2); transform:translateY(-1px);}
+  .icon-btn.active{box-shadow:0 0 0 2px var(--accent1) inset;}
+  .icon-btn:focus-visible, .btn:focus-visible, .tapzone:focus-visible{
+    outline:3px solid var(--accent1); outline-offset:2px;
+  }
+  .header-actions{display:flex; gap:8px;}
+
+  .hud{
+    width:100%; max-width:560px;
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--bg-panel);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:16px;
+    padding:10px 16px; margin-bottom:18px;
+    font-weight:700; font-size:14px;
+    flex-wrap:wrap; gap:8px;
+  }
+  .hud .stat{display:flex; align-items:center; gap:6px; color:var(--text-dim);}
+  .hud .stat b{color:var(--text); font-size:15px;}
+  .xp-pill{
+    background:linear-gradient(135deg,var(--accent1),var(--accent2));
+    color:#0b0f1a; padding:4px 12px; border-radius:999px; font-size:13px;
+  }
+
+  .stage{
+    width:100%; max-width:560px;
+    background:var(--bg-panel);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:24px;
+    padding:24px 20px 28px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .stage::before{
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(135deg,var(--accent1),var(--accent2));
+    opacity:.05; pointer-events:none;
+  }
+  .badge{
+    display:inline-block; font-size:12px; font-weight:800;
+    letter-spacing:.04em; text-transform:uppercase; color:#0b0f1a;
+    background:linear-gradient(135deg,var(--accent1),var(--accent2));
+    padding:5px 14px; border-radius:999px; margin-bottom:10px;
+  }
+  .stage h2{font-size:24px; margin-bottom:6px;}
+  .stage .sub{color:var(--text-dim); font-size:14.5px; max-width:380px; margin:0 auto 18px;}
+
+  .btn{
+    font-family:'Fredoka',sans-serif; font-size:16px; font-weight:600;
+    border:none; border-radius:14px; padding:13px 26px; cursor:pointer;
+    color:#0b0f1a;
+    background:linear-gradient(135deg,var(--accent1),var(--accent2));
+    box-shadow:0 8px 22px rgba(27,154,170,.35);
+    transition:.15s transform ease;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn.secondary{
+    background:var(--bg-panel2); color:var(--text);
+    box-shadow:none; border:1px solid rgba(255,255,255,.1);
+  }
+  .btn-row{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:6px;}
+
+  /* ---------- Pulse / tap zone ---------- */
+  .tapzone{
+    margin:6px auto 18px;
+    width:220px; height:220px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    position:relative;
+    background:radial-gradient(circle, rgba(6,214,160,.10), transparent 70%);
+    border:2px dashed rgba(255,255,255,.08);
+  }
+  .pulse-ring{
+    position:absolute; inset:0; border-radius:50%;
+    border:3px solid var(--accent1);
+    opacity:.5;
+  }
+  .pulse-ring.beat{
+    animation:pulseBeat var(--beat-dur,800ms) ease-out;
+  }
+  @keyframes pulseBeat{
+    0%{ transform:scale(0.78); opacity:.95; }
+    60%{ transform:scale(1.04); opacity:.35; }
+    100%{ transform:scale(1.08); opacity:0; }
+  }
+  .word-display{
+    font-family:'Fredoka',sans-serif;
+    font-size:30px;
+    font-weight:600;
+    z-index:2;
+    padding:0 10px;
+    word-break:break-word;
+  }
+  .feedback-pop{
+    position:absolute;
+    top:-8px;
+    font-family:'Fredoka',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    z-index:3;
+    animation:popUp 700ms ease-out forwards;
+    pointer-events:none;
+  }
+  @keyframes popUp{
+    0%{ transform:translateY(0); opacity:1; }
+    100%{ transform:translateY(-26px); opacity:0; }
+  }
+  .feedback-pop.perfect{color:var(--success);}
+  .feedback-pop.good{color:var(--warning);}
+  .feedback-pop.miss{color:var(--danger);}
+
+  .countdown-num{
+    font-family:'Fredoka',sans-serif;
+    font-size:64px;
+    font-weight:700;
+    color:var(--accent1);
+  }
+
+  .progress-track{
+    width:100%; max-width:340px; height:8px; border-radius:99px;
+    background:var(--bg-panel2); margin:0 auto 6px; overflow:hidden;
+  }
+  .progress-fill{
+    height:100%; background:linear-gradient(135deg,var(--accent1),var(--accent2));
+    width:0%; transition:width .25s ease;
+  }
+  .progress-label{font-size:12.5px; color:var(--text-dim); margin-bottom:14px;}
+
+  .combo-tag{
+    position:absolute; top:14px; right:18px;
+    font-size:13px; font-weight:700; color:var(--text-dim);
+  }
+
+  .stat-grid{
+    display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;
+    max-width:380px; margin:14px auto 18px;
+  }
+  .stat-box{
+    background:var(--bg-panel2); border-radius:14px; padding:12px 6px;
+  }
+  .stat-box .num{font-family:'Fredoka',sans-serif; font-size:22px;}
+  .stat-box .lbl{font-size:11.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.03em;}
+
+  .confetti-piece{
+    position:fixed; top:-10px; width:8px; height:14px; border-radius:2px;
+    z-index:50; pointer-events:none; animation:fall linear forwards;
+  }
+  @keyframes fall{ to{ transform:translateY(110vh) rotate(540deg); opacity:0.6; } }
+
+  @media (prefers-reduced-motion: reduce){
+    .pulse-ring.beat{animation:pulseFade var(--beat-dur,800ms) ease-out;}
+    @keyframes pulseFade{ 0%{opacity:.7;} 100%{opacity:.2;} }
+    .confetti-piece{display:none;}
+  }
+
+  footer{
+    margin-top:18px; font-size:12.5px; color:var(--text-dim);
+    text-align:center; max-width:480px;
+  }
+  @media (max-width:380px){
+    .title-block h1{font-size:19px;}
+    .stage{padding:20px 14px 24px;}
+    .tapzone{width:180px; height:180px;}
+    .word-display{font-size:24px;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="title-block">
+      <span class="emoji">🎵</span>
+      <div>
+        <h1>Rhythm & Read</h1>
+        <p>Tap to the beat as you read!</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn active" id="speakBtn" title="Speak words aloud" aria-label="Toggle word read-aloud">🗣️</button>
+      <button class="icon-btn" id="muteBtn" title="Mute metronome" aria-label="Toggle metronome sound">🔊</button>
+      <button class="icon-btn" id="backBtn" title="Back to games" aria-label="Back to games">←</button>
+    </div>
+  </div>
+
+  <div class="hud">
+    <div class="stat">Level <b id="hudLevel">1</b></div>
+    <div class="stat">Best combo <b id="hudCombo">0</b></div>
+    <div class="xp-pill">⚡ <span id="hudXp">0</span> XP</div>
+  </div>
+
+  <div class="stage" id="stage"></div>
+
+  <footer>Tip: tap the circle (or press Space) right when each word appears — close counts! There's no penalty for missing a beat, just keep grooving. 🎶</footer>
+
+<script>
+(function(){
+  "use strict";
+  const GAME_ID = 'rhythm-read';
+  const STORAGE_KEY = 'esld_progress_' + GAME_ID;
+  const SID = (function(){ try{ return sessionStorage.getItem('studentId')||'guest'; }catch(e){ return 'guest'; } })();
+
+  const WORD_BANKS = [
+    ['cat','dog','sun','run','big','red','sit','top','hop','win'],
+    ['frog','play','jump','blue','tree','fish','rain','star','swim','glow'],
+    ['happy','quick','green','table','smile','plant','clock','grape','bunny','tiger'],
+    ['yellow','basket','pencil','window','wonder','garden','animal','picture','rainbow','journey'],
+    ['elephant','butterfly','dinosaur','adventure','chocolate','wonderful','beautiful','mountain','dangerous','important'],
+  ];
+  const BPM_BY_LEVEL = [60, 66, 72, 78, 86];
+  const BEATS_PER_ROUND = 12;
+
+  let level = 1;
+  let xp = 0;
+  let bestCombo = 0;
+  let combo = 0;
+  let muted = false;
+  let speakOn = true;
+  let audioCtx = null;
+
+  let beatTimer = null;
+  let currentBeat = 0;
+  let beatInterval = 1000;
+  let lastBeatTime = 0;
+  let tappedThisBeat = false;
+  let results = []; // 'perfect' | 'good' | 'miss'
+  let roundWords = [];
+
+  const stage = document.getElementById('stage');
+
+  function bankForLevel(lvl){
+    return WORD_BANKS[Math.min(WORD_BANKS.length - 1, lvl - 1)];
+  }
+  function bpmForLevel(lvl){
+    return BPM_BY_LEVEL[Math.min(BPM_BY_LEVEL.length - 1, lvl - 1)];
+  }
+
+  // ---------------- Persistence ----------------
+  function saveProgress(xpEarned){
+    try{
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      data.bestLevel = Math.max(data.bestLevel || 1, level);
+      data.totalXP = (data.totalXP || 0) + xpEarned;
+      data.bestCombo = Math.max(data.bestCombo || 0, bestCombo);
+      data.lastPlayed = new Date().toISOString();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }catch(e){}
+    try{
+      window.parent.postMessage({type:'esld-game-progress', game:GAME_ID, xp:xpEarned, level:level}, '*');
+    }catch(e){}
+  }
+
+  // ---------------- Sound ----------------
+  function tone(freq, dur, type){
+    if (muted) return;
+    try{
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + dur);
+    }catch(e){}
+  }
+  const sfx = {
+    click: ()=>tone(700,.05,'square'),
+    perfect: ()=>tone(880,.1,'triangle'),
+    good: ()=>tone(600,.1,'triangle'),
+    miss: ()=>tone(200,.15,'sawtooth'),
+    levelup: ()=>{ tone(523,.1); setTimeout(()=>tone(659,.1),100); setTimeout(()=>tone(784,.18),200); }
+  };
+
+  function speak(word){
+    if (!speakOn) return;
+    try{
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(word);
+      u.rate = 0.95;
+      window.speechSynthesis.speak(u);
+    }catch(e){}
+  }
+
+  document.getElementById('muteBtn').addEventListener('click', function(){
+    muted = !muted;
+    this.textContent = muted ? '🔇' : '🔊';
+    this.classList.toggle('active', !muted);
+  });
+  document.getElementById('speakBtn').addEventListener('click', function(){
+    speakOn = !speakOn;
+    this.classList.toggle('active', speakOn);
+    try{ window.speechSynthesis && window.speechSynthesis.cancel(); }catch(e){}
+  });
+  document.getElementById('backBtn').addEventListener('click', function(){
+    stopBeat();
+    try{ window.parent.postMessage({type:'esld-close-game', game:GAME_ID}, '*'); }catch(e){}
+    if (window.history.length > 1) window.history.back();
+  });
+
+  function updateHud(){
+    document.getElementById('hudLevel').textContent = level;
+    document.getElementById('hudCombo').textContent = bestCombo;
+    document.getElementById('hudXp').textContent = xp;
+  }
+
+  function confettiBurst(){
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const colors = ['#06d6a0','#1b9aaa','#4cc9f0','#ffd166'];
+    for(let i=0;i<26;i++){
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = Math.random()*100 + 'vw';
+      piece.style.background = colors[i % colors.length];
+      piece.style.animationDuration = (1.6 + Math.random()*1.2) + 's';
+      document.body.appendChild(piece);
+      setTimeout(()=>piece.remove(), 3000);
+    }
+  }
+
+  // ---------------- Phase: Intro ----------------
+  function renderIntro(){
+    const bpm = bpmForLevel(level);
+    const bank = bankForLevel(level);
+    stage.innerHTML = `
+      <span class="badge">Level ${level}</span>
+      <h2>Find the groove</h2>
+      <p class="sub">Words will appear at ${bpm} beats per minute. Tap the circle (or press Space) right as each word lands. Example word: "${bank[0]}"</p>
+      <div class="btn-row">
+        <button class="btn" id="startBtn">Start Round ▶</button>
+      </div>
+    `;
+    document.getElementById('startBtn').addEventListener('click', beginCountdown);
+  }
+
+  // ---------------- Phase: Countdown ----------------
+  function beginCountdown(){
+    let n = 3;
+    stage.innerHTML = `<span class="badge">Level ${level}</span><h2>Get ready...</h2><div class="countdown-num" id="cd">${n}</div>`;
+    sfx.click();
+    const cd = document.getElementById('cd');
+    const iv = setInterval(()=>{
+      n--;
+      if (n <= 0){
+        clearInterval(iv);
+        beginRound();
+      } else {
+        cd.textContent = n;
+        sfx.click();
+      }
+    }, 700);
+  }
+
+  // ---------------- Phase: Round ----------------
+  function beginRound(){
+    const bank = bankForLevel(level);
+    const bpm = bpmForLevel(level);
+    beatInterval = Math.round(60000 / bpm);
+    currentBeat = 0;
+    combo = 0;
+    results = [];
+    roundWords = [];
+    for(let i=0;i<BEATS_PER_ROUND;i++){
+      roundWords.push(bank[Math.floor(Math.random()*bank.length)]);
+    }
+
+    stage.innerHTML = `
+      <span class="badge">Level ${level}</span>
+      <div class="combo-tag" id="comboTag">Combo x0</div>
+      <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
+      <p class="progress-label" id="progLabel">Beat 0 / ${BEATS_PER_ROUND}</p>
+      <div class="tapzone" id="tapzone" tabindex="0" role="button" aria-label="Tap to the beat" style="--beat-dur:${beatInterval}ms">
+        <div class="pulse-ring" id="pulseRing"></div>
+        <div class="word-display" id="wordDisplay">♪</div>
+      </div>
+      <p class="sub" style="margin-top:0;">Tap the circle or press Space on each beat.</p>
+    `;
+
+    const tapzone = document.getElementById('tapzone');
+    tapzone.addEventListener('click', handleTap);
+    document.addEventListener('keydown', spaceHandler);
+
+    runBeat();
+  }
+
+  function spaceHandler(e){
+    if (e.code === 'Space'){
+      e.preventDefault();
+      handleTap();
+    }
+  }
+
+  function runBeat(){
+    currentBeat++;
+    if (currentBeat > BEATS_PER_ROUND){
+      finishRound();
+      return;
+    }
+    tappedThisBeat = false;
+    lastBeatTime = performance.now();
+    const word = roundWords[currentBeat - 1];
+    document.getElementById('wordDisplay').textContent = word;
+    document.getElementById('progLabel').textContent = `Beat ${currentBeat} / ${BEATS_PER_ROUND}`;
+    document.getElementById('progFill').style.width = (currentBeat / BEATS_PER_ROUND * 100) + '%';
+    const ring = document.getElementById('pulseRing');
+    ring.classList.remove('beat');
+    // restart animation
+    void ring.offsetWidth;
+    ring.classList.add('beat');
+    sfx.click();
+    speak(word);
+
+    beatTimer = setTimeout(()=>{
+      if (!tappedThisBeat) registerResult('miss');
+      runBeat();
+    }, beatInterval);
+  }
+
+  function handleTap(){
+    if (tappedThisBeat || currentBeat === 0 || currentBeat > BEATS_PER_ROUND) return;
+    const delta = Math.abs(performance.now() - lastBeatTime);
+    tappedThisBeat = true;
+    let grade;
+    if (delta <= 180) grade = 'perfect';
+    else if (delta <= 380) grade = 'good';
+    else grade = 'miss';
+    registerResult(grade);
+  }
+
+  function registerResult(grade){
+    results.push(grade);
+    const tapzone = document.getElementById('tapzone');
+    if (tapzone){
+      const pop = document.createElement('div');
+      pop.className = 'feedback-pop ' + grade;
+      pop.textContent = grade === 'perfect' ? 'Perfect!' : grade === 'good' ? 'Good!' : 'Miss';
+      tapzone.appendChild(pop);
+      setTimeout(()=>pop.remove(), 700);
+    }
+    if (grade === 'miss'){
+      combo = 0;
+      sfx.miss();
+    } else {
+      combo++;
+      bestCombo = Math.max(bestCombo, combo);
+      grade === 'perfect' ? sfx.perfect() : sfx.good();
+    }
+    const tag = document.getElementById('comboTag');
+    if (tag) tag.textContent = 'Combo x' + combo;
+  }
+
+  function stopBeat(){
+    if (beatTimer) clearTimeout(beatTimer);
+    document.removeEventListener('keydown', spaceHandler);
+  }
+
+  // ---------------- Phase: Results ----------------
+  function finishRound(){
+    stopBeat();
+    const perfectCt = results.filter(r=>r==='perfect').length;
+    const goodCt = results.filter(r=>r==='good').length;
+    const missCt = results.filter(r=>r==='miss').length;
+    const accuracy = Math.round(((perfectCt + goodCt * 0.6) / BEATS_PER_ROUND) * 100);
+    let earned = Math.round(15 + (accuracy/100) * 10); // 15-25 XP range
+    earned = Math.max(15, Math.min(25, earned));
+    xp += earned;
+    saveProgress(earned);
+    try{
+      const hist = JSON.parse(localStorage.getItem('ml-history-'+SID)||'[]');
+      hist.unshift({date:new Date().toISOString().split('T')[0],game:'Rhythm Read',module:'adhd',mode:'level'+level,accuracy,correct:perfectCt+goodCt,wrong:missCt,coins:earned});
+      localStorage.setItem('ml-history-'+SID, JSON.stringify(hist.slice(0,60)));
+      localStorage.setItem('coins-'+SID, (Number(localStorage.getItem('coins-'+SID))||0)+earned);
+      localStorage.setItem('gamesPlayed-'+SID, (Number(localStorage.getItem('gamesPlayed-'+SID))||0)+1);
+    }catch(e){}
+    updateHud();
+    if (accuracy >= 60) confettiBurst();
+    if (level < WORD_BANKS.length && accuracy >= 50) sfx.levelup();
+
+    stage.innerHTML = `
+      <h2>${accuracy >= 75 ? 'In the groove! 🎶' : accuracy >= 40 ? 'Nice rhythm! 🎵' : 'Good try — keep practicing!'}</h2>
+      <p class="sub">+${earned} XP earned this round.</p>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="num">${perfectCt}</div><div class="lbl">Perfect</div></div>
+        <div class="stat-box"><div class="num">${goodCt}</div><div class="lbl">Good</div></div>
+        <div class="stat-box"><div class="num">${missCt}</div><div class="lbl">Missed</div></div>
+      </div>
+      <p class="sub">Accuracy: <b>${accuracy}%</b> • Best combo this round: <b>${bestCombo}</b></p>
+      <div class="btn-row">
+        <button class="btn secondary" id="replayBtn">Replay Level</button>
+        <button class="btn" id="nextBtn">${level < WORD_BANKS.length ? 'Next Level →' : 'Replay Top Level'}</button>
+      </div>
+    `;
+    document.getElementById('replayBtn').addEventListener('click', renderIntro);
+    document.getElementById('nextBtn').addEventListener('click', ()=>{
+      if (level < WORD_BANKS.length) level++;
+      renderIntro();
+    });
+  }
+
+  // ---------------- Init ----------------
+  updateHud();
+  renderIntro();
+})();
+</script>
+</body>
+</html>

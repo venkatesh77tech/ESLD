@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ESLD – Teacher Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{
+  --bg:#0b1120;--sidebar:#0f172a;--card:rgba(255,255,255,.06);
+  --border:rgba(255,255,255,.1);--radius:18px;
+  --blue:#38bdf8;--green:#22c55e;--purple:#a78bfa;
+  --yellow:#fbbf24;--orange:#fb923c;--red:#ef4444;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:#f1f5f9;min-height:100vh;display:grid;grid-template-columns:240px 1fr;grid-template-rows:auto 1fr}
+.sidebar{background:var(--sidebar);border-right:1px solid var(--border);padding:18px 12px;display:flex;flex-direction:column;gap:4px;height:100vh;position:sticky;top:0;overflow-y:auto;grid-row:1/-1}
+.logo{font-family:'Fredoka One';font-size:1.3rem;padding:8px 8px 16px;border-bottom:1px solid var(--border);margin-bottom:8px;background:linear-gradient(90deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;cursor:pointer;transition:.2s;font-weight:700;font-size:.86rem;color:#64748b;border:none;background:none;font-family:'Nunito',sans-serif;width:100%;text-align:left;position:relative}
+.nav-item:hover{background:rgba(255,255,255,.07);color:#f1f5f9}
+.nav-item.active{background:rgba(56,189,248,.12);color:var(--blue)}
+.nav-item .ni{font-size:17px;width:22px;text-align:center;flex-shrink:0}
+.nav-badge{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:var(--red);color:#fff;border-radius:999px;font-size:.62rem;font-weight:900;padding:1px 6px;min-width:18px;text-align:center}
+.teacher-box{margin-top:auto;background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.18);border-radius:14px;padding:14px;text-align:center}
+.t-avatar{width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:grid;place-items:center;font-size:20px;margin:0 auto 8px;font-weight:900}
+.t-name{font-weight:800;font-size:.88rem}
+.t-id{color:#64748b;font-size:.72rem;margin-top:2px}
+.header{background:rgba(15,23,42,.75);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50}
+.header h2{font-family:'Fredoka One';font-size:1.35rem}
+.hdate{color:#64748b;font-size:.78rem;margin-top:2px}
+.header-right{display:flex;gap:8px;align-items:center}
+.hbadge{padding:5px 12px;border-radius:999px;font-size:.75rem;font-weight:800;background:rgba(56,189,248,.13);border:1px solid rgba(56,189,248,.28);color:var(--blue)}
+.btn{padding:7px 15px;border-radius:999px;border:1px solid var(--border);background:var(--card);color:#f1f5f9;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.8rem;transition:.2s}
+.btn:hover{background:rgba(255,255,255,.12)}
+.btn.primary{background:linear-gradient(135deg,var(--blue),#0ea5e9);border:none;color:#0c2340}
+.btn.success{background:linear-gradient(135deg,var(--green),#16a34a);border:none;color:#fff}
+.btn.danger{background:rgba(239,68,68,.13);border-color:rgba(239,68,68,.28);color:var(--red)}
+.btn.warn{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.3);color:var(--yellow)}
+main{padding:20px 24px;overflow-y:auto;max-height:calc(100vh - 64px)}
+.sec{display:none}.sec.active{display:block}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;position:relative;overflow:hidden;transition:.25s;cursor:pointer}
+.stat:hover{transform:translateY(-3px);background:rgba(255,255,255,.09)}
+.stat::after{content:'';position:absolute;top:-14px;right:-14px;width:56px;height:56px;border-radius:50%;opacity:.13}
+.s1::after{background:var(--blue)}.s2::after{background:var(--green)}.s3::after{background:var(--purple)}.s4::after{background:var(--orange)}
+.stat-ic{font-size:24px;margin-bottom:6px}
+.stat-n{font-family:'Fredoka One';font-size:2.1rem;line-height:1}
+.s1 .stat-n{color:var(--blue)}.s2 .stat-n{color:var(--green)}.s3 .stat-n{color:var(--purple)}.s4 .stat-n{color:var(--orange)}
+.stat-l{color:#64748b;font-size:.75rem;margin-top:3px}
+.stat-delta{font-size:.7rem;margin-top:4px;font-weight:700}
+.delta-up{color:var(--green)}.delta-down{color:var(--red)}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.chart-card h4{font-family:'Fredoka One';margin-bottom:12px;font-size:.92rem}
+canvas{max-height:190px}
+.full{grid-column:1/-1}
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:18px}
+.table-head{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.table-head h4{font-family:'Fredoka One';font-size:.95rem}
+.search-box{padding:7px 13px;border-radius:999px;border:1px solid var(--border);background:rgba(0,0,0,.3);color:#f1f5f9;font-family:'Nunito',sans-serif;font-size:.82rem;outline:none;width:180px}
+.search-box:focus{border-color:var(--blue)}
+table{width:100%;border-collapse:collapse}
+th{padding:10px 14px;text-align:left;font-size:.72rem;font-weight:800;color:#64748b;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.5px}
+td{padding:10px 14px;font-size:.83rem;border-bottom:1px solid rgba(255,255,255,.04)}
+tr:last-child td{border:none}
+tr:hover td{background:rgba(255,255,255,.025)}
+.s-cell{display:flex;align-items:center;gap:9px}
+.s-av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:900;flex-shrink:0}
+.tag{padding:3px 9px;border-radius:999px;font-size:.7rem;font-weight:800;display:inline-block}
+.tag.dyslexia{background:rgba(34,197,94,.13);color:var(--green)}
+.tag.dysgraphia{background:rgba(56,189,248,.13);color:var(--blue)}
+.tag.adhd{background:rgba(251,146,60,.13);color:var(--orange)}
+.tag.high{background:rgba(34,197,94,.13);color:var(--green)}
+.tag.medium{background:rgba(251,191,36,.13);color:var(--yellow)}
+.tag.low{background:rgba(239,68,68,.13);color:var(--red)}
+.act-btn{padding:4px 11px;border-radius:999px;border:1px solid var(--border);background:transparent;color:#94a3b8;cursor:pointer;font-size:.72rem;font-weight:700;font-family:'Nunito',sans-serif;transition:.2s}
+.act-btn:hover{background:rgba(56,189,248,.13);color:var(--blue);border-color:var(--blue)}
+.alert-list{display:flex;flex-direction:column;gap:9px;margin-bottom:18px}
+.alert{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:12px 15px;display:flex;align-items:center;gap:12px}
+.alert.warn{border-color:rgba(251,146,60,.28);background:rgba(251,146,60,.05)}
+.alert.good{border-color:rgba(34,197,94,.28);background:rgba(34,197,94,.05)}
+.alert.info{border-color:rgba(56,189,248,.28);background:rgba(56,189,248,.05)}
+.alert.doubt{border-color:rgba(251,191,36,.28);background:rgba(251,191,36,.05)}
+.alert-ic{font-size:24px;flex-shrink:0}
+.alert-text b{display:block;font-size:.87rem;margin-bottom:2px}
+.alert-text span{color:#64748b;font-size:.78rem}
+.alert-time{margin-left:auto;color:#475569;font-size:.72rem;white-space:nowrap}
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:18px}
+.form-card h4{font-family:'Fredoka One';font-size:1.05rem;margin-bottom:14px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+label{font-size:.77rem;font-weight:700;color:#64748b}
+input[type=text],input[type=date],input[type=number],select,textarea{padding:9px 12px;border-radius:11px;border:1px solid var(--border);background:rgba(0,0,0,.3);color:#f1f5f9;font-family:'Nunito',sans-serif;font-size:.85rem;outline:none;transition:.2s}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(56,189,248,.12)}
+select option{background:#0f172a}
+textarea{resize:vertical;min-height:75px}
+.btn-row{display:flex;gap:9px;margin-top:12px;flex-wrap:wrap}
+/* MESSAGES SECTION */
+.msg-layout{display:grid;grid-template-columns:340px 1fr;gap:14px;min-height:500px}
+.msg-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column}
+.msg-panel-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.msg-panel-header h4{font-family:'Fredoka One';font-size:.95rem}
+.msg-tabs{display:flex;gap:4px;padding:8px 12px;border-bottom:1px solid var(--border)}
+.mtab{padding:4px 12px;border-radius:999px;border:none;background:transparent;color:#64748b;font-weight:700;font-size:.76rem;font-family:'Nunito',sans-serif;cursor:pointer;transition:.2s;position:relative}
+.mtab.active{background:rgba(56,189,248,.15);color:var(--blue)}
+.mtab-count{background:var(--red);color:#fff;border-radius:999px;font-size:.6rem;padding:1px 5px;margin-left:4px}
+.msg-list{flex:1;overflow-y:auto;padding:6px}
+.msg-item-t{padding:10px 12px;border-radius:10px;cursor:pointer;transition:.2s;border:1px solid transparent;margin-bottom:3px}
+.msg-item-t:hover{background:rgba(255,255,255,.05)}
+.msg-item-t.active{background:rgba(56,189,248,.08);border-color:rgba(56,189,248,.2)}
+.msg-item-t.unread{border-left:3px solid var(--blue)}
+.msg-item-t.doubt-msg{border-left:3px solid var(--yellow)}
+.msg-sender-row{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+.msg-av-sm{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));display:grid;place-items:center;font-size:10px;font-weight:900;flex-shrink:0}
+.msg-from{font-weight:800;font-size:.8rem;color:#e2e8f0}
+.msg-time-s{font-size:.68rem;color:#475569;margin-left:auto}
+.msg-subject{font-weight:700;font-size:.78rem;margin-bottom:2px}
+.msg-preview{color:#64748b;font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.thread-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);display:flex;flex-direction:column}
+.thread-header{padding:14px 18px;border-bottom:1px solid var(--border)}
+.thread-header h4{font-family:'Fredoka One';font-size:.95rem}
+.thread-header .meta{color:#64748b;font-size:.78rem;margin-top:4px;display:flex;gap:10px;flex-wrap:wrap}
+.thread-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.bubble{max-width:80%;padding:12px 16px;border-radius:16px;font-size:.85rem;line-height:1.5}
+.bubble.recv{background:rgba(255,255,255,.07);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px}
+.bubble.sent{background:linear-gradient(135deg,rgba(56,189,248,.2),rgba(167,139,250,.15));border:1px solid rgba(56,189,248,.25);align-self:flex-end;border-bottom-right-radius:4px}
+.bubble-name{font-weight:800;font-size:.76rem;margin-bottom:4px;color:#94a3b8}
+.bubble-time{font-size:.68rem;color:#475569;margin-top:4px}
+.reply-form{padding:14px 16px;border-top:1px solid var(--border);background:rgba(0,0,0,.15)}
+.reply-form textarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:rgba(0,0,0,.3);color:#f1f5f9;font-family:'Nunito',sans-serif;font-size:.83rem;outline:none;resize:none;min-height:80px}
+.reply-form textarea:focus{border-color:var(--blue)}
+.reply-row{display:flex;gap:8px;margin-top:8px;align-items:center}
+.reply-send{padding:8px 20px;border-radius:999px;border:none;background:linear-gradient(135deg,var(--blue),#0ea5e9);color:#0c2340;font-weight:800;font-family:'Nunito',sans-serif;font-size:.8rem;cursor:pointer}
+.reply-send:hover{opacity:.9}
+.empty-thread{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#475569;gap:10px}
+.empty-thread .big{font-size:48px}
+/* REPORTS */
+.report-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.rep-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center;cursor:pointer;transition:.25s}
+.rep-card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.22)}
+.rep-ic{font-size:36px;margin-bottom:8px;display:block}
+.rep-card h4{font-family:'Fredoka One';font-size:.92rem;margin-bottom:4px}
+.rep-card p{color:#64748b;font-size:.76rem}
+.rep-btn{margin-top:10px;padding:5px 14px;border-radius:999px;border:1px solid var(--border);background:transparent;color:#94a3b8;cursor:pointer;font-size:.74rem;font-weight:700;font-family:'Nunito',sans-serif;transition:.2s}
+.rep-card:hover .rep-btn{background:rgba(56,189,248,.13);color:var(--blue);border-color:var(--blue)}
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(2,6,23,.88);backdrop-filter:blur(14px);z-index:1000;display:none;place-items:center}
+.overlay.open{display:grid}
+.modal{background:#0f172a;border:1px solid var(--border);border-radius:22px;padding:26px;width:min(680px,95vw);max-height:85vh;overflow-y:auto}
+.modal h3{font-family:'Fredoka One';font-size:1.3rem;margin-bottom:14px}
+.modal-close{display:block;margin:14px auto 0;padding:7px 22px;border-radius:999px;border:1px solid var(--border);background:transparent;color:#94a3b8;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700}
+.det-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.det-item{background:rgba(255,255,255,.05);border-radius:11px;padding:11px}
+.det-l{font-size:.72rem;color:#64748b;font-weight:700;margin-bottom:3px}
+.det-v{font-weight:800;font-size:.96rem}
+.toast{position:fixed;bottom:24px;right:24px;background:#0f172a;border:1px solid var(--green);border-radius:14px;padding:14px 20px;color:var(--green);font-weight:800;font-size:.88rem;z-index:9999;transform:translateY(80px);transition:.4s;display:flex;align-items:center;gap:10px}
+.toast.show{transform:translateY(0)}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.15);border-top-color:var(--blue);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading{text-align:center;padding:30px;color:#64748b;font-size:.88rem}
+.quick-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.quick-action{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center;cursor:pointer;transition:.2s}
+.quick-action:hover{background:rgba(255,255,255,.09);transform:translateY(-2px)}
+.quick-action .ic{font-size:24px;margin-bottom:6px}
+.quick-action span{font-size:.76rem;font-weight:700;color:#94a3b8}
+@media(max-width:900px){body{grid-template-columns:1fr}.sidebar{display:none}.header{grid-column:1}main{grid-column:1;padding:14px}.stats-grid{grid-template-columns:1fr 1fr}.charts-grid{grid-template-columns:1fr}.report-grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.msg-layout{grid-template-columns:1fr}.quick-actions{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">👩‍🏫 ESLD Teacher</div>
+  <button class="nav-item active" onclick="goTab('overview',this)"><span class="ni">📊</span>Overview</button>
+  <button class="nav-item" onclick="goTab('students',this)"><span class="ni">👥</span>My Students</button>
+  <button class="nav-item" onclick="goTab('analytics',this)"><span class="ni">📈</span>Analytics</button>
+  <button class="nav-item" onclick="goTab('assignments',this)"><span class="ni">📝</span>Assignments</button>
+  <button class="nav-item" onclick="goTab('alerts',this)"><span class="ni">🔔</span>Alerts</button>
+  <button class="nav-item" onclick="goTab('messages',this)" id="msgNavBtn"><span class="ni">💬</span>Messages<span class="nav-badge" id="msgNavBadge" style="display:none">0</span></button>
+  <button class="nav-item" onclick="goTab('doubts',this)" id="doubtNavBtn"><span class="ni">💡</span>Doubts<span class="nav-badge" id="doubtNavBadge" style="display:none">0</span></button>
+  <button class="nav-item" onclick="goTab('reports',this)"><span class="ni">📄</span>Reports</button>
+  <button class="nav-item" onclick="doLogout()"><span class="ni">🚪</span>Logout</button>
+  <div class="teacher-box">
+    <div class="t-avatar" id="tAvatar">T</div>
+    <div class="t-name" id="tName">Teacher</div>
+    <div class="t-id" id="tId">ID: --</div>
+  </div>
+</aside>
+
+<div class="header">
+  <div>
+    <h2 id="pageTitle">Dashboard Overview</h2>
+    <div class="hdate" id="hDate"></div>
+  </div>
+  <div class="header-right">
+    <span class="hbadge">👩‍🏫 Teacher Portal</span>
+    <button class="btn primary" onclick="goTab('assignments',null)">+ Assign Activity</button>
+    <button class="btn danger" onclick="doLogout()">Logout</button>
+  </div>
+</div>
+
+<main>
+
+<!-- OVERVIEW -->
+<div class="sec active" id="sec-overview">
+  <div class="stats-grid">
+    <div class="stat s1" onclick="goTab('students',null)"><div class="stat-ic">👩‍🎓</div><div class="stat-n" id="ovTotal">--</div><div class="stat-l">Total Students</div><div class="stat-delta delta-up">↑ vs last week</div></div>
+    <div class="stat s2"><div class="stat-ic">✅</div><div class="stat-n" id="ovActive">--</div><div class="stat-l">Active Today</div><div class="stat-delta delta-up" id="activeRate">--%</div></div>
+    <div class="stat s3"><div class="stat-ic">📈</div><div class="stat-n" id="ovAcc">--%</div><div class="stat-l">Class Avg Accuracy</div></div>
+    <div class="stat s4" onclick="goTab('alerts',null)"><div class="stat-ic">⚠️</div><div class="stat-n" id="ovLow">--</div><div class="stat-l">Need Attention</div></div>
+  </div>
+  <div class="quick-actions">
+    <div class="quick-action" onclick="goTab('assignments',null)"><div class="ic">📝</div><span>New Assignment</span></div>
+    <div class="quick-action" onclick="goTab('messages',null)"><div class="ic">💬</div><span>Messages <span id="qaUnread" style="color:var(--red)"></span></span></div>
+    <div class="quick-action" onclick="goTab('doubts',null)"><div class="ic">💡</div><span>Student Doubts</span></div>
+    <div class="quick-action" onclick="downloadCSV()"><div class="ic">📄</div><span>Export Report</span></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card"><h4>📊 Accuracy by Disability</h4><canvas id="cDis"></canvas></div>
+    <div class="chart-card"><h4>📅 Weekly Activity</h4><canvas id="cWeek"></canvas></div>
+    <div class="chart-card"><h4>🏆 Performance Split</h4><canvas id="cLevel"></canvas></div>
+    <div class="chart-card"><h4>📈 30-Day Trend</h4><canvas id="cTrend"></canvas></div>
+  </div>
+  <h4 style="font-family:'Fredoka One';margin-bottom:10px;font-size:.95rem">⚠️ Students Needing Attention</h4>
+  <div class="alert-list" id="atRiskList"></div>
+</div>
+
+<!-- STUDENTS -->
+<div class="sec" id="sec-students">
+  <div class="table-wrap">
+    <div class="table-head">
+      <h4>👥 All Students (<span id="stuCount">0</span>)</h4>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input class="search-box" placeholder="🔍 Search name / ID…" oninput="filterStudents(this.value)"/>
+        <select class="search-box" style="width:130px" onchange="filterDisability(this.value)">
+          <option value="">All Types</option>
+          <option value="dyslexia">Dyslexia</option>
+          <option value="dysgraphia">Dysgraphia</option>
+          <option value="adhd">ADHD</option>
+        </select>
+        <select class="search-box" style="width:120px" onchange="filterStatus(this.value)">
+          <option value="">All Status</option>
+          <option value="high">On Track</option>
+          <option value="medium">Average</option>
+          <option value="low">Struggling</option>
+        </select>
+        <button class="btn" onclick="loadStudents()">🔄 Refresh</button>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>Student</th><th>ID</th><th>Disability</th><th>Accuracy</th><th>Sessions</th><th>Coins</th><th>Last Active</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody id="stuBody"><tr><td colspan="9" class="loading"><span class="spinner"></span> Loading...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ANALYTICS -->
+<div class="sec" id="sec-analytics">
+  <div class="stats-grid">
+    <div class="stat s1"><div class="stat-ic">📖</div><div class="stat-n" id="anDys">--%</div><div class="stat-l">Dyslexia Avg</div></div>
+    <div class="stat s2"><div class="stat-ic">✍️</div><div class="stat-n" id="anDysg">--%</div><div class="stat-l">Dysgraphia Avg</div></div>
+    <div class="stat s3"><div class="stat-ic">⚡</div><div class="stat-n" id="anAdhd">--%</div><div class="stat-l">ADHD Avg</div></div>
+    <div class="stat s4"><div class="stat-ic">🪙</div><div class="stat-n" id="anCoins">--</div><div class="stat-l">Total Coins</div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card full"><h4>📊 All Students – Accuracy Comparison</h4><canvas id="cAllStu" style="max-height:260px"></canvas></div>
+    <div class="chart-card"><h4>🥧 Disability Distribution</h4><canvas id="cPie"></canvas></div>
+    <div class="chart-card"><h4>📊 Performance Status</h4><canvas id="cStatus"></canvas></div>
+  </div>
+</div>
+
+<!-- ASSIGNMENTS -->
+<div class="sec" id="sec-assignments">
+  <div class="form-card">
+    <h4>📝 Create New Assignment</h4>
+    <div class="form-grid">
+      <div class="form-group"><label>Assignment Title</label><input type="text" id="aTitle" placeholder="e.g., Letter Confusion Practice"/></div>
+      <div class="form-group"><label>Game / Activity</label>
+        <select id="aGame">
+          <option>Missing Letter Game</option><option>Letter Confusion</option><option>Word Builder</option>
+          <option>Read & Match</option><option>Sound Match</option><option>Focus Training</option><option>Memory Challenge</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Assign To</label>
+        <select id="aGroup"><option>All Students</option><option>Dyslexia Group</option><option>Dysgraphia Group</option><option>ADHD Group</option></select>
+      </div>
+      <div class="form-group"><label>Difficulty</label>
+        <select id="aDiff"><option>Easy</option><option>Medium</option><option>Hard</option></select>
+      </div>
+      <div class="form-group"><label>Due Date</label><input type="date" id="aDue"/></div>
+      <div class="form-group"><label>Coins Reward</label><input type="number" id="aCoins" placeholder="50" min="5" max="500"/></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Instructions for Students</label><textarea id="aInstr" placeholder="e.g., Focus on b/d confusion in this activity. Take your time with each question."></textarea></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn primary" onclick="submitAssign()">📤 Assign Now</button>
+      <button class="btn" onclick="saveDraft()">💾 Save Draft</button>
+      <button class="btn warn" onclick="previewAssign()">👁️ Preview</button>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <div class="table-head"><h4>📋 All Assignments</h4><button class="btn" onclick="renderAssignments()">🔄 Refresh</button></div>
+    <table>
+      <thead><tr><th>Title</th><th>Game</th><th>Assigned To</th><th>Due</th><th>Difficulty</th><th>Completed</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody id="assignBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ALERTS -->
+<div class="sec" id="sec-alerts">
+  <div class="stats-grid">
+    <div class="stat s4"><div class="stat-ic">🔴</div><div class="stat-n" id="alCrit">0</div><div class="stat-l">Critical</div></div>
+    <div class="stat s1"><div class="stat-ic">🟡</div><div class="stat-n" id="alWarn">0</div><div class="stat-l">Warnings</div></div>
+    <div class="stat s2"><div class="stat-ic">🟢</div><div class="stat-n" id="alGood">0</div><div class="stat-l">Positive</div></div>
+    <div class="stat s3"><div class="stat-ic">📩</div><div class="stat-n" id="alTotal">0</div><div class="stat-l">Total</div></div>
+  </div>
+  <div class="alert-list" id="alertList"></div>
+</div>
+
+<!-- MESSAGES -->
+<div class="sec" id="sec-messages">
+  <div class="msg-layout">
+    <div class="msg-panel">
+      <div class="msg-panel-header">
+        <h4>📬 Inbox</h4>
+        <button class="btn" style="padding:4px 10px;font-size:.74rem" onclick="markAllRead()">Mark all read</button>
+      </div>
+      <div class="msg-tabs">
+        <button class="mtab active" onclick="switchMsgTab('all',this)">All <span class="mtab-count" id="allCount" style="display:none"></span></button>
+        <button class="mtab" onclick="switchMsgTab('student',this)">Students <span class="mtab-count" id="stuMsgCount" style="display:none"></span></button>
+        <button class="mtab" onclick="switchMsgTab('sent',this)">Sent</button>
+      </div>
+      <div class="msg-list" id="tInboxList"></div>
+    </div>
+    <div class="thread-panel" id="threadPanel">
+      <div class="thread-header">
+        <h4 id="threadTitle">Select a message</h4>
+        <div class="meta" id="threadMeta"></div>
+      </div>
+      <div class="thread-body" id="threadBody">
+        <div class="empty-thread">
+          <div class="big">💬</div>
+          <p style="font-weight:700">Select a message to read</p>
+          <p style="font-size:.8rem">Student messages appear here</p>
+        </div>
+      </div>
+      <div class="reply-form" id="replyForm" style="display:none">
+        <textarea id="replyText" placeholder="Write your reply to the student..." rows="3"></textarea>
+        <div class="reply-row">
+          <button class="reply-send" onclick="sendReply()">📤 Send Reply</button>
+          <button class="btn" onclick="document.getElementById('replyForm').style.display='none'">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- COMPOSE TO STUDENT/PARENT -->
+  <div class="form-card" style="margin-top:14px">
+    <h4>📤 Send Message to Student / Parent</h4>
+    <div class="form-grid">
+      <div class="form-group"><label>Send To</label>
+        <select id="tMsgTo">
+          <option value="all-students">All Students</option>
+          <option value="all-parents">All Parents</option>
+          <option value="specific">Specific Student</option>
+          <option value="dyslexia">Dyslexia Group</option>
+          <option value="adhd">ADHD Group</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Student Name (if specific)</label><input type="text" id="tMsgStudent" placeholder="Enter student name"/></div>
+      <div class="form-group"><label>Subject</label><input type="text" id="tMsgSubject" placeholder="Message subject"/></div>
+      <div class="form-group"><label>Type</label>
+        <select id="tMsgType">
+          <option>📢 Announcement</option>
+          <option>✅ Encouragement</option>
+          <option>⚠️ Concern</option>
+          <option>📝 Assignment Note</option>
+          <option>📈 Progress Update</option>
+        </select>
+      </div>
+      <div class="form-group" style="grid-column:1/-1"><label>Message</label><textarea id="tMsgBody" placeholder="Write your message..."></textarea></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn primary" onclick="teacherSendMsg()">📨 Send</button>
+      <button class="btn" onclick="alert('Draft saved!')">💾 Draft</button>
+    </div>
+  </div>
+</div>
+
+<!-- DOUBTS SECTION -->
+<div class="sec" id="sec-doubts">
+  <div class="stats-grid">
+    <div class="stat s4"><div class="stat-ic">💡</div><div class="stat-n" id="doubtTotal">0</div><div class="stat-l">Total Doubts</div></div>
+    <div class="stat s1"><div class="stat-ic">📬</div><div class="stat-n" id="doubtUnread">0</div><div class="stat-l">Unanswered</div></div>
+    <div class="stat s2"><div class="stat-ic">✅</div><div class="stat-n" id="doubtReplied">0</div><div class="stat-l">Replied</div></div>
+    <div class="stat s3"><div class="stat-ic">👥</div><div class="stat-n" id="doubtStudents">0</div><div class="stat-l">Students</div></div>
+  </div>
+  <div id="doubtList"></div>
+</div>
+
+<!-- REPORTS -->
+<div class="sec" id="sec-reports">
+  <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+    <button class="btn" onclick="setRF(this)">All</button>
+    <button class="btn" onclick="setRF(this)">This Week</button>
+    <button class="btn" onclick="setRF(this)">This Month</button>
+    <button class="btn primary" onclick="downloadCSV()">📄 Download CSV</button>
+    <button class="btn success" onclick="downloadPDF()">📋 Download PDF</button>
+  </div>
+  <div class="report-grid">
+    <div class="rep-card"><span class="rep-ic">📊</span><h4>Class Performance</h4><p>Accuracy and improvement for all students</p><button class="rep-btn" onclick="genReport('class')">Generate →</button></div>
+    <div class="rep-card"><span class="rep-ic">👤</span><h4>Individual Report</h4><p>Detailed breakdown per student</p><button class="rep-btn" onclick="genReport('individual')">Generate →</button></div>
+    <div class="rep-card"><span class="rep-ic">🏥</span><h4>Disability Report</h4><p>Dyslexia, Dysgraphia & ADHD stats</p><button class="rep-btn" onclick="genReport('disability')">Generate →</button></div>
+    <div class="rep-card"><span class="rep-ic">📈</span><h4>Progress Trend</h4><p>Weekly & monthly improvement tracking</p><button class="rep-btn" onclick="genReport('trend')">Generate →</button></div>
+    <div class="rep-card"><span class="rep-ic">🏆</span><h4>Achievements</h4><p>Coins and milestones earned</p><button class="rep-btn" onclick="genReport('achievements')">Generate →</button></div>
+    <div class="rep-card"><span class="rep-ic">⚠️</span><h4>At-Risk Students</h4><p>Students needing immediate support</p><button class="rep-btn" onclick="genReport('risk')">Generate →</button></div>
+  </div>
+  <div class="form-card" id="reportOut" style="display:none">
+    <h4 id="reportTitle">Report</h4>
+    <div id="reportBody"></div>
+  </div>
+</div>
+
+</main>
+
+<!-- STUDENT DETAIL MODAL -->
+<div class="overlay" id="stuModal">
+  <div class="modal">
+    <h3 id="modalName">Student Details</h3>
+    <div class="det-grid" id="modalDets"></div>
+    <canvas id="modalChart" height="110"></canvas>
+    <div style="margin-top:13px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn primary" onclick="closeModal();messageStudent()">💬 Message Student</button>
+      <button class="btn" onclick="closeModal();goTab('assignments',null)">📝 Assign Activity</button>
+      <button class="btn warn" onclick="closeModal()">📊 View Progress</button>
+      <button class="btn danger" onclick="closeModal();showToast('⚠️ Student flagged for review!')">⚠️ Flag</button>
+    </div>
+    <button class="modal-close" onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+Chart.defaults.color='#64748b';
+Chart.defaults.borderColor='rgba(255,255,255,.07)';
+
+if(!sessionStorage.getItem('teacherLoggedIn')){
+  sessionStorage.setItem('teacherId','TEA-DEMO-001');
+  sessionStorage.setItem('teacherName','Ms. Priya Sharma');
+  sessionStorage.setItem('teacherLoggedIn','true');
+}
+document.getElementById('tName').textContent=sessionStorage.getItem('teacherName')||'Teacher';
+document.getElementById('tId').textContent='ID: '+(sessionStorage.getItem('teacherId')||'TEA-001');
+document.getElementById('tAvatar').textContent=(sessionStorage.getItem('teacherName')||'T')[0].toUpperCase();
+document.getElementById('hDate').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+let STUDENTS=[];
+const DEMO=[
+  {student_id:'ESLD2026ST001',name:'Arjun Sharma',disability:'dyslexia',avg_accuracy:85,sessions:22,total_coins:420,status:'high',last_active:'2026-05-16'},
+  {student_id:'ESLD2026ST002',name:'Priya Mehta',disability:'dysgraphia',avg_accuracy:72,sessions:18,total_coins:310,status:'medium',last_active:'2026-05-15'},
+  {student_id:'ESLD2026ST003',name:'Ravi Kumar',disability:'adhd',avg_accuracy:58,sessions:10,total_coins:180,status:'low',last_active:'2026-05-13'},
+  {student_id:'ESLD2026ST004',name:'Sneha Reddy',disability:'dyslexia',avg_accuracy:91,sessions:30,total_coins:560,status:'high',last_active:'2026-05-17'},
+  {student_id:'ESLD2026ST005',name:'Kiran Nair',disability:'adhd',avg_accuracy:45,sessions:7,total_coins:95,status:'low',last_active:'2026-05-12'},
+  {student_id:'ESLD2026ST006',name:'Anita Patel',disability:'dysgraphia',avg_accuracy:78,sessions:15,total_coins:280,status:'medium',last_active:'2026-05-14'},
+  {student_id:'ESLD2026ST007',name:'Dev Singh',disability:'dyslexia',avg_accuracy:88,sessions:26,total_coins:480,status:'high',last_active:'2026-05-17'},
+  {student_id:'ESLD2026ST008',name:'Meera Iyer',disability:'adhd',avg_accuracy:63,sessions:12,total_coins:220,status:'medium',last_active:'2026-05-15'},
+  {student_id:'ESLD2026ST009',name:'Rohan Das',disability:'dyslexia',avg_accuracy:41,sessions:5,total_coins:60,status:'low',last_active:'2026-05-10'},
+  {student_id:'ESLD2026ST010',name:'Fatima Khan',disability:'dysgraphia',avg_accuracy:82,sessions:21,total_coins:390,status:'high',last_active:'2026-05-16'},
+  {student_id:'ESLD2026ST011',name:'Vikram Rao',disability:'adhd',avg_accuracy:69,sessions:14,total_coins:250,status:'medium',last_active:'2026-05-14'},
+  {student_id:'ESLD2026ST012',name:'Lakshmi Pillai',disability:'dyslexia',avg_accuracy:94,sessions:35,total_coins:680,status:'high',last_active:'2026-05-17'},
+];
+
+async function loadStudents(){
+  STUDENTS = DEMO;
+  renderOverview(); renderStudents(STUDENTS); renderAnalytics(); renderAlerts(); renderAssignments(); renderMessages(); renderDoubts(); updateBadges();
+}
+
+// TABS
+const TITLES={overview:'Dashboard Overview',students:'My Students',analytics:'Class Analytics',assignments:'Assignments',alerts:'Alerts & Notifications',messages:'Messages',doubts:'Student Doubts',reports:'Reports'};
+function goTab(name,btn){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  const sec=document.getElementById('sec-'+name);
+  if(sec)sec.classList.add('active');
+  if(btn)btn.classList.add('active');
+  else{document.querySelectorAll('.nav-item').forEach(b=>{if(b.textContent.trim().toLowerCase().includes(name.split('-')[0].toLowerCase()))b.classList.add('active')})}
+  document.getElementById('pageTitle').textContent=TITLES[name]||name;
+  if(name==='messages') renderMessages();
+  if(name==='doubts') renderDoubts();
+}
+
+// OVERVIEW
+let OVC={};
+function renderOverview(){
+  const T=STUDENTS.length,L=STUDENTS.filter(s=>s.status==='low').length;
+  const H=STUDENTS.filter(s=>s.status==='high').length,M=STUDENTS.filter(s=>s.status==='medium').length;
+  const acc=T?Math.round(STUDENTS.reduce((a,s)=>a+s.avg_accuracy,0)/T):0;
+  document.getElementById('ovTotal').textContent=T;
+  const active=H+Math.floor(M*.7);
+  document.getElementById('ovActive').textContent=active;
+  document.getElementById('activeRate').textContent=Math.round(active/T*100)+'% active rate';
+  document.getElementById('ovAcc').textContent=acc+'%';
+  document.getElementById('ovLow').textContent=L;
+  const dg={dyslexia:[],dysgraphia:[],adhd:[]};
+  STUDENTS.forEach(s=>{if(dg[s.disability])dg[s.disability].push(s.avg_accuracy)});
+  const da=k=>dg[k].length?Math.round(dg[k].reduce((a,v)=>a+v,0)/dg[k].length):0;
+  Object.values(OVC).forEach(c=>{try{c.destroy()}catch{}});OVC={};
+  OVC.d=new Chart(document.getElementById('cDis'),{type:'bar',data:{labels:['Dyslexia','Dysgraphia','ADHD'],datasets:[{data:[da('dyslexia'),da('dysgraphia'),da('adhd')],backgroundColor:['#22c55e40','#38bdf840','#fb923c40'],borderColor:['#22c55e','#38bdf8','#fb923c'],borderWidth:2,borderRadius:8}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:100}}}});
+  OVC.w=new Chart(document.getElementById('cWeek'),{type:'line',data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{data:[18,22,17,24,20,14,11],borderColor:'#38bdf8',backgroundColor:'#38bdf820',tension:.4,fill:true}]},options:{responsive:true,plugins:{legend:{display:false}}}});
+  OVC.l=new Chart(document.getElementById('cLevel'),{type:'doughnut',data:{labels:['On Track','Average','Struggling'],datasets:[{data:[H,M,L],backgroundColor:['#22c55e50','#fbbf2450','#ef444450'],borderColor:['#22c55e','#fbbf24','#ef4444'],borderWidth:2}]},options:{responsive:true,cutout:'60%'}});
+  const d30=[...Array(30)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-29+i);return d.toLocaleDateString('en-IN',{day:'numeric',month:'short'})});
+  OVC.t=new Chart(document.getElementById('cTrend'),{type:'line',data:{labels:d30,datasets:[{data:d30.map((_,i)=>Math.max(35,Math.min(98,acc-18+i*.65+Math.sin(i*.4)*5))),borderColor:'#a78bfa',backgroundColor:'#a78bfa15',tension:.4,fill:true}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{min:25,max:100}}}});
+  const ar=STUDENTS.filter(s=>s.status==='low');
+  const el=document.getElementById('atRiskList');
+  if(!ar.length){el.innerHTML=`<div class="alert good"><div class="alert-ic">🎉</div><div class="alert-text"><b>All students are on track!</b></div></div>`;return;}
+  el.innerHTML=ar.map(s=>`<div class="alert warn"><div class="alert-ic">⚠️</div><div class="alert-text"><b>${s.name}</b><span>${s.disability.toUpperCase()} • ${s.avg_accuracy}% accuracy • Last active: ${s.last_active||'N/A'}</span></div><button class="btn" onclick="openModal('${s.student_id}')" style="margin-left:auto">View →</button></div>`).join('');
+  // Quick action unread count
+  const msgs = JSON.parse(localStorage.getItem('teacher-inbox')||'[]');
+  const unread = msgs.filter(m=>!m.read).length;
+  if(unread>0) document.getElementById('qaUnread').textContent = '('+unread+' new)';
+}
+
+// STUDENTS
+function renderStudents(list){
+  document.getElementById('stuCount').textContent=list.length;
+  const colors=['#22c55e','#38bdf8','#a78bfa','#f472b6','#fbbf24','#fb923c'];
+  if(!list.length){document.getElementById('stuBody').innerHTML=`<tr><td colspan="9" class="loading">No students found</td></tr>`;return;}
+  document.getElementById('stuBody').innerHTML=list.map((s,i)=>{
+    const clr=colors[i%colors.length],pc=s.status==='high'?'#22c55e':s.status==='medium'?'#fbbf24':'#ef4444';
+    const stTxt=s.status==='high'?'✅ On Track':s.status==='medium'?'⚡ Average':'🔴 Struggling';
+    return`<tr><td><div class="s-cell"><div class="s-av" style="background:linear-gradient(135deg,${clr}55,${clr}25);color:${clr}">${s.name[0]}</div><div><div style="font-weight:800;font-size:.85rem">${s.name}</div><div style="color:#64748b;font-size:.72rem">${s.disability}</div></div></div></td><td style="color:#64748b;font-size:.78rem">${s.student_id}</td><td><span class="tag ${s.disability}">${s.disability}</span></td><td style="font-weight:800;color:${pc}">${s.avg_accuracy}%</td><td>${s.sessions}</td><td style="color:var(--yellow)">🪙${s.total_coins}</td><td style="color:#64748b;font-size:.78rem">${s.last_active||'Never'}</td><td><span class="tag ${s.status}">${stTxt}</span></td><td style="display:flex;gap:4px;flex-wrap:wrap"><button class="act-btn" onclick="openModal('${s.student_id}')">Details</button><button class="act-btn" onclick="quickMsg('${s.name}')">💬</button></td></tr>`;
+  }).join('');
+}
+function filterStudents(q){renderStudents(STUDENTS.filter(s=>s.name.toLowerCase().includes(q.toLowerCase())||s.student_id.toLowerCase().includes(q.toLowerCase())))}
+function filterDisability(d){renderStudents(d?STUDENTS.filter(s=>s.disability===d):STUDENTS)}
+function filterStatus(st){renderStudents(st?STUDENTS.filter(s=>s.status===st):STUDENTS)}
+function quickMsg(stuName){goTab('messages',null);document.getElementById('tMsgTo').value='specific';document.getElementById('tMsgStudent').value=stuName;}
+
+// ANALYTICS
+let ANC={};
+function renderAnalytics(){
+  if(!STUDENTS.length)return;
+  const dg={dyslexia:[],dysgraphia:[],adhd:[]};
+  STUDENTS.forEach(s=>{if(dg[s.disability])dg[s.disability].push(s.avg_accuracy)});
+  const da=k=>dg[k].length?Math.round(dg[k].reduce((a,v)=>a+v,0)/dg[k].length):0;
+  document.getElementById('anDys').textContent=da('dyslexia')+'%';
+  document.getElementById('anDysg').textContent=da('dysgraphia')+'%';
+  document.getElementById('anAdhd').textContent=da('adhd')+'%';
+  document.getElementById('anCoins').textContent=STUDENTS.reduce((a,s)=>a+s.total_coins,0);
+  Object.values(ANC).forEach(c=>{try{c.destroy()}catch{}});ANC={};
+  ANC.b=new Chart(document.getElementById('cAllStu'),{type:'bar',data:{labels:STUDENTS.map(s=>s.name.split(' ')[0]),datasets:[{data:STUDENTS.map(s=>s.avg_accuracy),backgroundColor:STUDENTS.map(s=>s.status==='high'?'#22c55e60':s.status==='medium'?'#fbbf2460':'#ef444460'),borderColor:STUDENTS.map(s=>s.status==='high'?'#22c55e':s.status==='medium'?'#fbbf24':'#ef4444'),borderWidth:2,borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:100}}}});
+  const dc={dyslexia:0,dysgraphia:0,adhd:0};STUDENTS.forEach(s=>dc[s.disability]++);
+  ANC.p=new Chart(document.getElementById('cPie'),{type:'doughnut',data:{labels:['Dyslexia','Dysgraphia','ADHD'],datasets:[{data:Object.values(dc),backgroundColor:['#22c55e50','#38bdf850','#fb923c50'],borderColor:['#22c55e','#38bdf8','#fb923c'],borderWidth:2}]},options:{responsive:true,cutout:'55%'}});
+  const sc={high:0,medium:0,low:0};STUDENTS.forEach(s=>sc[s.status]++);
+  ANC.s=new Chart(document.getElementById('cStatus'),{type:'bar',data:{labels:['On Track','Average','Struggling'],datasets:[{data:[sc.high,sc.medium,sc.low],backgroundColor:['#22c55e60','#fbbf2460','#ef444460'],borderColor:['#22c55e','#fbbf24','#ef4444'],borderWidth:2,borderRadius:8}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+}
+
+// ASSIGNMENTS
+let ASSIGNS=[
+  {title:'Missing Letter – Easy',game:'Missing Letter',to:'Dyslexia Group',due:'2026-05-20',difficulty:'Easy',done:'18/20',status:'Active'},
+  {title:'Letter Confusion Practice',game:'Letter Confusion',to:'All Students',due:'2026-05-17',difficulty:'Medium',done:'22/24',status:'Due Today'},
+  {title:'Word Builder – Medium',game:'Word Builder',to:'Dyslexia Group',due:'2026-05-14',difficulty:'Medium',done:'12/12',status:'Completed'},
+  {title:'Focus Training Set 1',game:'Focus Training',to:'ADHD Group',due:'2026-05-25',difficulty:'Hard',done:'4/8',status:'Active'},
+];
+function renderAssignments(){
+  const teacherA = JSON.parse(localStorage.getItem('teacher-assignments')||'[]');
+  const all = [...ASSIGNS, ...teacherA.map(a=>({...a,difficulty:a.difficulty||'Medium',done:'0/'+STUDENTS.length,status:'Active'}))];
+  document.getElementById('assignBody').innerHTML=all.map(a=>{
+    const clr=a.status==='Completed'?'#22c55e':a.status==='Due Today'?'#ef4444':'#38bdf8';
+    return`<tr><td style="font-weight:700">${a.title}</td><td>${a.game}</td><td>${a.to}</td><td>${a.due}</td><td><span class="tag" style="background:rgba(251,191,36,.13);color:var(--yellow)">${a.difficulty}</span></td><td style="font-weight:800;color:#22c55e">${a.done}</td><td><span class="tag" style="background:${clr}20;color:${clr}">${a.status}</span></td><td><button class="act-btn" onclick="showToast('✅ Assignment details coming soon!')">View</button></td></tr>`;
+  }).join('');
+}
+function submitAssign(){
+  const t=document.getElementById('aTitle').value.trim();
+  if(!t){showToast('❌ Please enter a title');return;}
+  const a={title:t,game:document.getElementById('aGame').value,to:document.getElementById('aGroup').value,due:document.getElementById('aDue').value||'TBD',difficulty:document.getElementById('aDiff').value,coins:Number(document.getElementById('aCoins').value)||50,instructions:document.getElementById('aInstr').value};
+  const ta=JSON.parse(localStorage.getItem('teacher-assignments')||'[]');
+  ta.unshift(a);
+  localStorage.setItem('teacher-assignments',JSON.stringify(ta));
+  renderAssignments();
+  document.getElementById('aTitle').value='';document.getElementById('aInstr').value='';
+  showToast('✅ Assignment created and sent to students!');
+}
+function saveDraft(){ showToast('💾 Draft saved!'); }
+function previewAssign(){ showToast('👁️ Preview feature coming soon!'); }
+
+// ALERTS
+function renderAlerts(){
+  const al=[];
+  STUDENTS.forEach(s=>{
+    if(s.status==='low')al.push({type:'warn',ic:'🔴',title:`${s.name} – Low Performance`,sub:`Accuracy: ${s.avg_accuracy}% • ${s.sessions} sessions`,time:'Today'});
+    if(s.status==='high'&&s.avg_accuracy>=90)al.push({type:'good',ic:'🏆',title:`${s.name} – Outstanding!`,sub:`${s.avg_accuracy}% accuracy — Excellent progress!`,time:'Today'});
+  });
+  const doubts=JSON.parse(localStorage.getItem('student-doubts')||'[]');
+  doubts.filter(d=>!d.reply).forEach(d=>al.unshift({type:'doubt',ic:'💡',title:'Doubt from '+d.from,sub:d.assignment+': '+d.message.substring(0,60)+'...',time:'Recent'}));
+  al.push({type:'info',ic:'📅',title:'Assignment Due Soon',sub:'Letter Confusion Practice due today.',time:'8h ago'});
+  const cr=al.filter(a=>a.type==='warn').length,gd=al.filter(a=>a.type==='good').length;
+  document.getElementById('alCrit').textContent=cr;document.getElementById('alWarn').textContent=doubts.filter(d=>!d.reply).length;document.getElementById('alGood').textContent=gd;document.getElementById('alTotal').textContent=al.length;
+  document.getElementById('alertList').innerHTML=al.map(a=>`<div class="alert ${a.type}"><div class="alert-ic">${a.ic}</div><div class="alert-text"><b>${a.title}</b><span>${a.sub}</span></div><div class="alert-time">${a.time}</div></div>`).join('');
+}
+
+// MESSAGES
+let msgTab='all', currentMsgId=null;
+function getTeacherInbox(){
+  const base=[
+    {id:'base-001',from:"Mrs. Anita (Arjun's Parent)",studentId:'ESLD2026ST001',subject:'Thank You!',body:'Thank you! Arjun loved the Word Builder game. He has been practicing every evening.',time:'2026-05-16T09:30:00',read:false,type:'parent'},
+    {id:'base-002',from:"Mr. Kumar (Ravi's Parent)",studentId:'ESLD2026ST003',subject:'Progress Report Request',body:"Can you send this week's progress report for Ravi? We want to help him practice at home.",time:'2026-05-15T14:00:00',read:true,type:'parent'},
+  ];
+  const live=JSON.parse(localStorage.getItem('teacher-inbox')||'[]');
+  return [...live,...base];
+}
+function getSentByTeacher(){
+  return JSON.parse(localStorage.getItem('teacher-sent')||'[]');
+}
+function switchMsgTab(tab,btn){
+  msgTab=tab;
+  document.querySelectorAll('.mtab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMessages();
+}
+function renderMessages(){
+  let msgs=[];
+  const inbox=getTeacherInbox(),sent=getSentByTeacher();
+  if(msgTab==='all') msgs=[...inbox];
+  else if(msgTab==='student') msgs=inbox.filter(m=>m.type==='student'||m.type==='doubt');
+  else if(msgTab==='sent') msgs=sent;
+  msgs.sort((a,b)=>new Date(b.time)-new Date(a.time));
+
+  const unread=inbox.filter(m=>!m.read).length;
+  const stuUnread=inbox.filter(m=>!m.read&&(m.type==='student'||m.type==='doubt')).length;
+  document.getElementById('allCount').textContent=unread;
+  document.getElementById('allCount').style.display=unread?'inline':'none';
+  document.getElementById('stuMsgCount').textContent=stuUnread;
+  document.getElementById('stuMsgCount').style.display=stuUnread?'inline':'none';
+  updateBadges();
+
+  if(!msgs.length){
+    document.getElementById('tInboxList').innerHTML=`<div style="text-align:center;padding:30px;color:#475569;font-size:.8rem">📭 No messages</div>`;
+    return;
+  }
+  document.getElementById('tInboxList').innerHTML=msgs.map((m,i)=>{
+    const t=new Date(m.time);
+    const timeStr=isToday(t)?t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}):t.toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+    const isDoubt=m.type==='doubt';
+    return`<div class="msg-item-t ${!m.read?'unread':''} ${isDoubt?'doubt-msg':''}" onclick="openTeacherMsg('${m.id}',${i},'${msgTab}')">
+      <div class="msg-sender-row">
+        <div class="msg-av-sm">${(m.from||'S')[0]}</div>
+        <span class="msg-from">${m.from||'Student'}</span>
+        ${isDoubt?`<span style="font-size:.65rem;background:rgba(251,191,36,.15);color:var(--yellow);border-radius:6px;padding:1px 6px">Doubt</span>`:''}
+        <span class="msg-time-s">${timeStr}</span>
+        ${!m.read?'<span style="width:7px;height:7px;background:var(--blue);border-radius:50%;flex-shrink:0"></span>':''}
+      </div>
+      <div class="msg-subject">${m.subject||'(No subject)'}</div>
+      <div class="msg-preview">${m.body||''}</div>
+    </div>`;
+  }).join('');
+}
+function isToday(d){const n=new Date();return d.toDateString()===n.toDateString();}
+
+function openTeacherMsg(msgId, i, tab){
+  let msgs=[];
+  const inbox=getTeacherInbox(),sent=getSentByTeacher();
+  if(tab==='all'||tab==='student') msgs=[...inbox];
+  else msgs=sent;
+  msgs.sort((a,b)=>new Date(b.time)-new Date(a.time));
+  const m=msgs[i]; if(!m)return;
+  currentMsgId=msgId;
+
+  // Mark as read
+  const liveInbox=JSON.parse(localStorage.getItem('teacher-inbox')||'[]');
+  const li=liveInbox.find(x=>x.id===msgId);
+  if(li){li.read=true;localStorage.setItem('teacher-inbox',JSON.stringify(liveInbox));}
+
+  document.getElementById('threadTitle').textContent=m.subject||'(No subject)';
+  document.getElementById('threadMeta').innerHTML=`<span>From: ${m.from}</span><span>${new Date(m.time).toLocaleString('en-IN')}</span>${m.type==='doubt'?`<span style="color:var(--yellow)">💡 Assignment Doubt</span>`:''}`;
+
+  let html=`<div class="bubble recv">
+    <div class="bubble-name">📩 ${m.from}</div>
+    ${m.body}
+    <div class="bubble-time">${new Date(m.time).toLocaleString('en-IN')}</div>
+  </div>`;
+
+  if(m.reply){
+    html+=`<div class="bubble sent">
+      <div class="bubble-name">👩‍🏫 You (Teacher)</div>
+      ${m.reply}
+      <div class="bubble-time">Replied</div>
+    </div>`;
+  }
+
+  document.getElementById('threadBody').innerHTML=html;
+  document.getElementById('replyForm').style.display='block';
+  document.getElementById('replyText').value='';
+  renderMessages();
+}
+
+function sendReply(){
+  const txt=document.getElementById('replyText').value.trim();
+  if(!txt){showToast('❌ Write a reply first!');return;}
+  const liveInbox=JSON.parse(localStorage.getItem('teacher-inbox')||'[]');
+  const msg=liveInbox.find(m=>m.id===currentMsgId);
+  if(msg){
+    msg.reply=txt;msg.read=true;
+    localStorage.setItem('teacher-inbox',JSON.stringify(liveInbox));
+    // Also write to student's inbox if it came from a student
+    if(msg.studentId){
+      const sInbox=JSON.parse(localStorage.getItem('student-inbox-'+msg.studentId)||'[]');
+      sInbox.unshift({id:'reply-'+Date.now(),from:'Ms. Priya Sharma',subject:'Re: '+msg.subject,body:txt,time:new Date().toISOString(),read:false});
+      localStorage.setItem('student-inbox-'+msg.studentId,JSON.stringify(sInbox));
+    }
+  }
+  // For doubts
+  const doubts=JSON.parse(localStorage.getItem('student-doubts')||'[]');
+  const d=doubts.find(x=>x.studentId===msg?.studentId&&x.subject===msg?.subject);
+  if(d)d.reply=txt;
+  localStorage.setItem('student-doubts',JSON.stringify(doubts));
+
+  document.getElementById('replyText').value='';
+  if(msg){ msg.reply=txt; openTeacherMsg(currentMsgId,0,msgTab); }
+  showToast('✅ Reply sent to student!');
+  renderMessages();
+}
+
+function markAllRead(){
+  const liveInbox=JSON.parse(localStorage.getItem('teacher-inbox')||'[]');
+  liveInbox.forEach(m=>m.read=true);
+  localStorage.setItem('teacher-inbox',JSON.stringify(liveInbox));
+  renderMessages();
+  showToast('✅ All marked as read');
+}
+
+function teacherSendMsg(){
+  const subj=document.getElementById('tMsgSubject').value.trim();
+  const body=document.getElementById('tMsgBody').value.trim();
+  if(!subj||!body){showToast('❌ Fill in subject and message');return;}
+  const sent=JSON.parse(localStorage.getItem('teacher-sent')||'[]');
+  sent.unshift({id:'sent-'+Date.now(),from:'Ms. Priya Sharma',to:document.getElementById('tMsgTo').value,subject:subj,body,time:new Date().toISOString(),type:'teacher-sent'});
+  localStorage.setItem('teacher-sent',JSON.stringify(sent));
+  document.getElementById('tMsgSubject').value='';document.getElementById('tMsgBody').value='';
+  showToast('✅ Message sent!');
+}
+
+function messageStudent(){
+  goTab('messages',null);
+  showToast('💬 Compose area open!');
+}
+
+// DOUBTS
+function renderDoubts(){
+  const doubts=JSON.parse(localStorage.getItem('student-doubts')||'[]');
+  const unanswered=doubts.filter(d=>!d.reply).length;
+  const answered=doubts.filter(d=>d.reply).length;
+  const students=[...new Set(doubts.map(d=>d.studentId))].length;
+  document.getElementById('doubtTotal').textContent=doubts.length;
+  document.getElementById('doubtUnread').textContent=unanswered;
+  document.getElementById('doubtReplied').textContent=answered;
+  document.getElementById('doubtStudents').textContent=students;
+
+  if(!doubts.length){
+    document.getElementById('doubtList').innerHTML=`<div class="form-card" style="text-align:center;padding:40px;color:#64748b"><div style="font-size:48px;margin-bottom:10px">💡</div><p>No student doubts yet. When students ask doubts, they appear here.</p></div>`;
+    return;
+  }
+  document.getElementById('doubtList').innerHTML=doubts.map((d,i)=>`
+    <div class="form-card" style="margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="font-size:20px">${d.reply?'✅':'💡'}</div>
+        <div>
+          <div style="font-weight:800">${d.from} <span style="color:#64748b;font-size:.8rem;font-weight:400">— ${d.assignment}</span></div>
+          <div style="color:#64748b;font-size:.75rem">${new Date(d.time).toLocaleString('en-IN')}</div>
+        </div>
+        <span class="tag" style="margin-left:auto;background:${d.reply?'rgba(34,197,94,.13)':'rgba(251,191,36,.13)'};color:${d.reply?'var(--green)':'var(--yellow)'}">${d.reply?'Replied':'Pending'}</span>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border-radius:10px;padding:10px;font-size:.83rem;margin-bottom:10px"><b>Type:</b> ${d.type}<br><b>Message:</b> ${d.message}</div>
+      ${d.reply?`<div style="background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:10px;font-size:.82rem"><b>Your Reply:</b> ${d.reply}</div>`:
+      `<div style="display:flex;gap:8px">
+        <textarea id="dreply-${i}" style="flex:1;padding:8px;border-radius:10px;border:1px solid var(--border);background:rgba(0,0,0,.3);color:#f1f5f9;font-family:'Nunito',sans-serif;font-size:.82rem;outline:none;resize:none" rows="2" placeholder="Write reply..."></textarea>
+        <button class="btn primary" onclick="replyToDoubt(${i})" style="align-self:flex-end">Send</button>
+      </div>`}
+    </div>
+  `).join('');
+}
+
+function replyToDoubt(i){
+  const doubts=JSON.parse(localStorage.getItem('student-doubts')||'[]');
+  const txt=document.getElementById('dreply-'+i)?.value.trim();
+  if(!txt){showToast('❌ Write a reply!');return;}
+  doubts[i].reply=txt;
+  localStorage.setItem('student-doubts',JSON.stringify(doubts));
+  // Notify student
+  if(doubts[i].studentId){
+    const sInbox=JSON.parse(localStorage.getItem('student-inbox-'+doubts[i].studentId)||'[]');
+    sInbox.unshift({id:'dreply-'+Date.now(),from:'Ms. Priya Sharma',subject:'Reply to your doubt: '+doubts[i].assignment,body:txt,time:new Date().toISOString(),read:false});
+    localStorage.setItem('student-inbox-'+doubts[i].studentId,JSON.stringify(sInbox));
+  }
+  showToast('✅ Reply sent to student!');
+  renderDoubts();
+}
+
+function updateBadges(){
+  const inbox=JSON.parse(localStorage.getItem('teacher-inbox')||'[]');
+  const unread=inbox.filter(m=>!m.read).length;
+  const doubts=JSON.parse(localStorage.getItem('student-doubts')||'[]');
+  const doubtUnanswered=doubts.filter(d=>!d.reply).length;
+  const msgBadge=document.getElementById('msgNavBadge');
+  const doubtBadge=document.getElementById('doubtNavBadge');
+  msgBadge.textContent=unread;msgBadge.style.display=unread?'inline':'none';
+  doubtBadge.textContent=doubtUnanswered;doubtBadge.style.display=doubtUnanswered?'inline':'none';
+}
+
+// REPORTS
+function setRF(btn){document.querySelectorAll('#sec-reports .btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+function genReport(type){
+  const titles={class:'📊 Class Performance',individual:'👤 Individual Report',disability:'🏥 Disability Report',trend:'📈 Progress Trend',achievements:'🏆 Achievements',risk:'⚠️ At-Risk Students'};
+  document.getElementById('reportTitle').textContent=titles[type];
+  document.getElementById('reportOut').style.display='block';
+  const acc=STUDENTS.length?Math.round(STUDENTS.reduce((a,s)=>a+s.avg_accuracy,0)/STUDENTS.length):0;
+  const ar=STUDENTS.filter(s=>s.status==='low');
+  let extra='';
+  if(type==='risk')extra=ar.map(s=>`<div style="margin:5px 0;padding:9px;background:rgba(239,68,68,.08);border-radius:9px;border-left:3px solid #ef4444">🔴 <b>${s.name}</b> — ${s.avg_accuracy}% accuracy</div>`).join('')||'<p style="color:#64748b">No at-risk students!</p>';
+  if(type==='achievements')extra=[...STUDENTS].sort((a,b)=>b.total_coins-a.total_coins).map((s,i)=>`<p>🥇 #${i+1} ${s.name} — 🪙 ${s.total_coins} coins</p>`).join('');
+  if(type==='disability'){const dg={dyslexia:[],dysgraphia:[],adhd:[]};STUDENTS.forEach(s=>{if(dg[s.disability])dg[s.disability].push(s.avg_accuracy)});const da=k=>dg[k].length?Math.round(dg[k].reduce((a,v)=>a+v,0)/dg[k].length):0;extra=`<p>📖 Dyslexia (${dg.dyslexia.length}): <b>${da('dyslexia')}%</b></p><p>✍️ Dysgraphia (${dg.dysgraphia.length}): <b>${da('dysgraphia')}%</b></p><p>⚡ ADHD (${dg.adhd.length}): <b>${da('adhd')}%</b></p>`;}
+  document.getElementById('reportBody').innerHTML=`<div style="color:#94a3b8;font-size:.88rem;line-height:2;margin-top:10px"><p>📅 Generated: ${new Date().toLocaleDateString('en-IN')}</p><p>👩‍🎓 Total Students: ${STUDENTS.length}</p><p>📈 Class Avg: <b style="color:var(--green)">${acc}%</b></p><p>✅ On Track: <b>${STUDENTS.filter(s=>s.status==='high').length}</b></p><p>⚡ Average: <b>${STUDENTS.filter(s=>s.status==='medium').length}</b></p><p>🔴 Need Help: <b>${ar.length}</b></p><p>🪙 Total Coins: <b>${STUDENTS.reduce((a,s)=>a+s.total_coins,0)}</b></p>${extra?'<hr style="margin:10px 0;border-color:var(--border)"/>'+extra:''}</div>`;
+  document.getElementById('reportOut').scrollIntoView({behavior:'smooth'});
+}
+function downloadCSV(){
+  const rows=STUDENTS.map(s=>`${s.name},${s.student_id},${s.disability},${s.avg_accuracy}%,${s.sessions},${s.total_coins},${s.status},${s.last_active||'N/A'}`);
+  const csv=['Name,ID,Disability,Accuracy,Sessions,Coins,Status,Last Active',...rows].join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='esld_class_'+new Date().toLocaleDateString('en-IN').replace(/\//g,'-')+'.csv';a.click();
+  showToast('📄 CSV downloaded!');
+}
+function downloadPDF(){showToast('📋 PDF export coming soon!');}
+
+// MODAL
+let MC=null;
+function openModal(sid){
+  const s=STUDENTS.find(x=>x.student_id===sid);if(!s)return;
+  document.getElementById('modalName').textContent=s.name+' — '+s.student_id;
+  const clr=s.status==='high'?'#22c55e':s.status==='medium'?'#fbbf24':'#ef4444';
+  document.getElementById('modalDets').innerHTML=`<div class="det-item"><div class="det-l">Disability</div><div class="det-v">${s.disability.charAt(0).toUpperCase()+s.disability.slice(1)}</div></div><div class="det-item"><div class="det-l">Avg Accuracy</div><div class="det-v" style="color:${clr}">${s.avg_accuracy}%</div></div><div class="det-item"><div class="det-l">Total Sessions</div><div class="det-v">${s.sessions}</div></div><div class="det-item"><div class="det-l">Coins Earned</div><div class="det-v" style="color:var(--yellow)">🪙${s.total_coins}</div></div><div class="det-item"><div class="det-l">Last Active</div><div class="det-v">${s.last_active||'N/A'}</div></div><div class="det-item"><div class="det-l">Status</div><div class="det-v" style="color:${clr}">${s.status==='high'?'✅ On Track':s.status==='medium'?'⚡ Average':'🔴 Needs Help'}</div></div>`;
+  if(MC){try{MC.destroy()}catch{}}
+  MC=new Chart(document.getElementById('modalChart'),{type:'line',data:{labels:['Week 1','Week 2','Week 3','Week 4'],datasets:[{data:[Math.max(0,s.avg_accuracy-16),Math.max(0,s.avg_accuracy-9),Math.max(0,s.avg_accuracy-4),s.avg_accuracy],borderColor:clr,backgroundColor:clr+'25',tension:.4,fill:true,pointBackgroundColor:clr,pointRadius:5}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{min:0,max:100}}}});
+  document.getElementById('stuModal').classList.add('open');
+}
+function closeModal(){document.getElementById('stuModal').classList.remove('open')}
+function doLogout(){if(confirm('Are you sure?')){sessionStorage.clear();location.href='teacher-login.html'}}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.borderColor=msg.includes('❌')?'var(--red)':'var(--green)';
+  t.style.color=msg.includes('❌')?'var(--red)':'var(--green)';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+loadStudents();
+setInterval(updateBadges, 5000); // Poll for new messages every 5s
+</script>
+</body>
+</html>

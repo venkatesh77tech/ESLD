@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Speed Reader – ESLD</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800;900&family=Lexend:wght@400;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0a0e1a;--card:rgba(255,255,255,.07);--border:rgba(255,255,255,.1);
+  --green:#22c55e;--blue:#38bdf8;--yellow:#fbbf24;--red:#ef4444;--purple:#a78bfa;--orange:#fb923c;
+  --radius:20px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:#f1f5f9;min-height:100vh;
+     background-image:radial-gradient(ellipse at 20% 30%, rgba(56,189,248,.07) 0%,transparent 60%),
+                      radial-gradient(ellipse at 80% 70%, rgba(167,139,250,.07) 0%,transparent 60%)}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;
+        background:rgba(0,0,0,.3);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);position:sticky;top:0;z-index:50}
+.logo{font-family:'Fredoka One';font-size:1.3rem;background:linear-gradient(90deg,var(--green),var(--blue));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.xp-bar{display:flex;align-items:center;gap:12px}
+.xp-item{display:flex;align-items:center;gap:5px;font-weight:800;font-size:.88rem}
+.btn{padding:8px 18px;border-radius:999px;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:.84rem;transition:.18s}
+.btn-back{background:rgba(255,255,255,.1);color:#f1f5f9}
+.btn-back:hover{background:rgba(255,255,255,.18)}
+.btn-primary{background:linear-gradient(135deg,var(--green),#16a34a);color:#052e16}
+.btn-primary:hover{transform:scale(1.04)}
+
+/* SCREENS */
+.screen{display:none;padding:28px 20px;max-width:760px;margin:0 auto}
+.screen.active{display:block}
+
+/* MENU */
+.menu-title{text-align:center;margin:30px 0 10px}
+.menu-title h1{font-family:'Fredoka One';font-size:2.4rem;margin-bottom:8px;
+  background:linear-gradient(90deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.menu-title p{color:#94a3b8;font-size:.93rem;max-width:480px;margin:0 auto;line-height:1.6}
+.level-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin:28px 0}
+.level-card{background:var(--card);border:2px solid var(--border);border-radius:var(--radius);padding:22px 14px;text-align:center;cursor:pointer;transition:.22s}
+.level-card:hover{transform:translateY(-5px);border-color:var(--green);background:rgba(34,197,94,.1)}
+.level-card.selected{border-color:var(--green);background:rgba(34,197,94,.14)}
+.lc-icon{font-size:36px;margin-bottom:10px}
+.lc-name{font-family:'Fredoka One';font-size:1.1rem;margin-bottom:4px}
+.lc-sub{font-size:.75rem;color:#64748b}
+.lc-speed{font-size:.7rem;margin-top:5px;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.08);display:inline-block;font-weight:800}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px}
+.mode-card{background:var(--card);border:2px solid var(--border);border-radius:var(--radius);padding:18px;cursor:pointer;transition:.22s}
+.mode-card:hover{border-color:var(--blue);background:rgba(56,189,248,.08)}
+.mode-card.selected{border-color:var(--blue);background:rgba(56,189,248,.11)}
+.mc-name{font-family:'Fredoka One';font-size:1rem;margin-bottom:4px}
+.mc-sub{font-size:.78rem;color:#64748b;line-height:1.5}
+.start-row{text-align:center;padding:10px 0 30px}
+.start-row .btn{padding:14px 44px;font-size:1rem}
+
+/* GAME */
+.game-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;flex-wrap:wrap;gap:10px}
+.gh-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 18px;text-align:center}
+.gh-val{font-family:'Fredoka One';font-size:1.5rem}
+.gh-lbl{font-size:.68rem;color:#64748b;text-transform:uppercase;letter-spacing:.5px}
+.timer-ring{position:relative;width:70px;height:70px}
+.timer-ring svg{transform:rotate(-90deg)}
+.timer-ring .t-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One';font-size:1.3rem}
+
+/* RSVP display */
+.rsvp-box{background:var(--card);border:2px solid var(--border);border-radius:var(--radius);
+  padding:50px 28px;text-align:center;margin-bottom:20px;min-height:180px;
+  display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.rsvp-box::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at center,rgba(56,189,248,.05),transparent 70%)}
+.rsvp-word{font-family:'Lexend';font-size:3.5rem;font-weight:800;letter-spacing:3px;
+  transition:all .12s;color:#f1f5f9;position:relative}
+.rsvp-word.flash{color:var(--green);text-shadow:0 0 30px rgba(34,197,94,.5)}
+.rsvp-word.blink-out{opacity:0;transform:scale(0.85)}
+.rsvp-progress{background:rgba(255,255,255,.07);border-radius:999px;height:8px;margin-bottom:16px;overflow:hidden}
+.rsvp-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--blue));transition:width .2s}
+.controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.ctrl-btn{padding:10px 20px;border-radius:14px;border:1px solid var(--border);background:var(--card);
+  color:#f1f5f9;font-family:'Nunito',sans-serif;font-weight:800;font-size:.85rem;cursor:pointer;transition:.18s}
+.ctrl-btn:hover{background:rgba(255,255,255,.12)}
+.ctrl-btn.active{background:rgba(56,189,248,.18);border-color:var(--blue);color:var(--blue)}
+
+/* QUESTION */
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px}
+.q-card h3{font-family:'Fredoka One';font-size:1.05rem;margin-bottom:16px;color:var(--blue)}
+.q-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.q-opt{padding:14px;border-radius:14px;border:2px solid var(--border);background:rgba(255,255,255,.05);
+  cursor:pointer;font-weight:700;font-size:.9rem;text-align:center;transition:.2s;font-family:'Lexend'}
+.q-opt:hover{border-color:var(--blue);background:rgba(56,189,248,.1)}
+.q-opt.correct{background:rgba(34,197,94,.2);border-color:var(--green);color:var(--green)}
+.q-opt.wrong{background:rgba(239,68,68,.2);border-color:var(--red);color:var(--red)}
+
+/* RESULTS */
+.result-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:30px;text-align:center;margin-bottom:18px}
+.result-icon{font-size:60px;margin-bottom:14px;display:block}
+.result-title{font-family:'Fredoka One';font-size:2rem;margin-bottom:8px}
+.result-sub{color:#94a3b8;font-size:.9rem;margin-bottom:20px}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px}
+.rs{background:rgba(255,255,255,.06);border-radius:14px;padding:14px}
+.rs .rv{font-family:'Fredoka One';font-size:1.7rem;margin-bottom:3px}
+.rs .rl{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:.5px}
+.coins-pop{font-family:'Fredoka One';font-size:1.6rem;color:var(--yellow);margin-bottom:16px;
+  animation:pop .5s ease}
+@keyframes pop{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
+.results-row{display:flex;gap:10px;justify-content:center}
+
+/* PASSAGE mode */
+.passage-box{background:var(--card);border:2px solid var(--border);border-radius:var(--radius);
+  padding:28px;margin-bottom:18px;font-family:'Lexend';font-size:1.2rem;line-height:2.1;
+  letter-spacing:1px;position:relative}
+.passage-box .word-span{cursor:default;padding:1px 3px;border-radius:5px;transition:.2s}
+.passage-box .word-span.hl{background:rgba(56,189,248,.25);color:var(--blue)}
+.passage-box .word-span.done{color:#475569}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  .level-grid{grid-template-columns:1fr 1fr}
+  .rsvp-word{font-size:2.4rem}
+  .result-stats{grid-template-columns:1fr 1fr}
+  .q-opts{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">⚡ Speed Reader</div>
+  <div class="xp-bar">
+    <div class="xp-item">🪙 <span id="topCoins">0</span></div>
+    <div class="xp-item">⭐ <span id="topScore">0</span></div>
+  </div>
+  <button class="btn btn-back" onclick="goBack('dyslexia-games.html')">← Back</button>
+</div>
+
+<!-- ── MENU ── -->
+<div class="screen active" id="screen-menu">
+  <div class="menu-title">
+    <h1>⚡ Speed Reader</h1>
+    <p>Race the clock! Read words fast and prove you understood. Beat your best time!</p>
+  </div>
+
+  <h3 style="font-family:'Fredoka One';margin-bottom:12px;color:#94a3b8;font-size:.85rem;text-transform:uppercase;letter-spacing:1px">Choose Difficulty</h3>
+  <div class="level-grid">
+    <div class="level-card selected" onclick="selectLevel('easy',this)">
+      <div class="lc-icon">🐢</div>
+      <div class="lc-name">Easy</div>
+      <div class="lc-sub">Short words, slow pace</div>
+      <div class="lc-speed" style="color:var(--green)">150 WPM</div>
+    </div>
+    <div class="level-card" onclick="selectLevel('medium',this)">
+      <div class="lc-icon">🐇</div>
+      <div class="lc-name">Medium</div>
+      <div class="lc-sub">Sentences, moderate speed</div>
+      <div class="lc-speed" style="color:var(--yellow)">220 WPM</div>
+    </div>
+    <div class="level-card" onclick="selectLevel('hard',this)">
+      <div class="lc-icon">🚀</div>
+      <div class="lc-name">Hard</div>
+      <div class="lc-sub">Paragraphs, fast pace</div>
+      <div class="lc-speed" style="color:var(--red)">320 WPM</div>
+    </div>
+  </div>
+
+  <h3 style="font-family:'Fredoka One';margin-bottom:12px;color:#94a3b8;font-size:.85rem;text-transform:uppercase;letter-spacing:1px">Choose Mode</h3>
+  <div class="mode-grid">
+    <div class="mode-card selected" onclick="selectMode('rsvp',this)">
+      <div class="mc-name">⚡ RSVP Flash</div>
+      <div class="mc-sub">One word at a time, flash speed. Best for focus training.</div>
+    </div>
+    <div class="mode-card" onclick="selectMode('passage',this)">
+      <div class="mc-name">📖 Guided Read</div>
+      <div class="mc-sub">Full passage with word highlighting. Great for tracking.</div>
+    </div>
+  </div>
+
+  <div class="start-row">
+    <button class="btn btn-primary" onclick="startGame()">🚀 Start Challenge!</button>
+  </div>
+</div>
+
+<!-- ── GAME ── -->
+<div class="screen" id="screen-game">
+  <div class="game-header">
+    <div class="gh-item">
+      <div class="gh-val" id="ghWord" style="color:var(--blue)">0</div>
+      <div class="gh-lbl">Word</div>
+    </div>
+    <div class="gh-item">
+      <div class="gh-val" id="ghTotal">0</div>
+      <div class="gh-lbl">Total</div>
+    </div>
+    <div class="gh-item timer-ring">
+      <svg width="70" height="70" viewBox="0 0 70 70">
+        <circle cx="35" cy="35" r="28" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="6"/>
+        <circle id="timerArc" cx="35" cy="35" r="28" fill="none" stroke="var(--green)" stroke-width="6"
+          stroke-dasharray="176" stroke-dashoffset="0" stroke-linecap="round" style="transition:stroke-dashoffset .5s,stroke .5s"/>
+      </svg>
+      <div class="t-val" id="timerVal">--</div>
+    </div>
+    <div class="gh-item">
+      <div class="gh-val" id="ghWpm" style="color:var(--yellow)">--</div>
+      <div class="gh-lbl">WPM</div>
+    </div>
+    <div class="gh-item">
+      <div class="gh-val" id="ghCoins" style="color:var(--yellow)">🪙0</div>
+      <div class="gh-lbl">Coins</div>
+    </div>
+  </div>
+
+  <!-- RSVP mode display -->
+  <div id="rsvpPanel">
+    <div class="rsvp-progress"><div class="rsvp-fill" id="rsvpFill" style="width:0%"></div></div>
+    <div class="rsvp-box"><div class="rsvp-word" id="rsvpWord">Ready?</div></div>
+    <div class="controls">
+      <button class="ctrl-btn" id="pauseBtn" onclick="togglePause()">⏸ Pause</button>
+      <button class="ctrl-btn" onclick="slowerSpeed()">🐢 Slower</button>
+      <button class="ctrl-btn" onclick="fasterSpeed()">🚀 Faster</button>
+    </div>
+  </div>
+
+  <!-- Passage mode display -->
+  <div id="passagePanel" style="display:none">
+    <div class="rsvp-progress"><div class="rsvp-fill" id="passageFill" style="width:0%"></div></div>
+    <div class="passage-box" id="passageBox"></div>
+    <div class="controls">
+      <button class="ctrl-btn" id="pauseBtn2" onclick="togglePause()">⏸ Pause</button>
+      <button class="ctrl-btn" onclick="slowerSpeed()">🐢 Slower</button>
+      <button class="ctrl-btn" onclick="fasterSpeed()">🚀 Faster</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── QUESTION ── -->
+<div class="screen" id="screen-question">
+  <div style="text-align:center;margin-bottom:24px">
+    <div style="font-family:'Fredoka One';font-size:1.5rem;color:var(--blue)">🧠 Comprehension Check</div>
+    <div style="font-size:.85rem;color:#64748b;margin-top:4px">Did you catch that?</div>
+  </div>
+  <div class="q-card">
+    <h3 id="qText">Question…</h3>
+    <div class="q-opts" id="qOpts"></div>
+  </div>
+  <div style="text-align:center;margin-top:8px;display:none" id="qNext">
+    <button class="btn btn-primary" onclick="nextQuestion()">Next ➜</button>
+  </div>
+</div>
+
+<!-- ── RESULTS ── -->
+<div class="screen" id="screen-result">
+  <div class="result-box">
+    <span class="result-icon" id="resIcon">🏆</span>
+    <div class="result-title" id="resTitle">Amazing!</div>
+    <div class="result-sub" id="resSub">Here's how you did:</div>
+    <div class="coins-pop" id="resCoins">+🪙0</div>
+    <div class="result-stats">
+      <div class="rs"><div class="rv" id="rsWpm" style="color:var(--blue)">--</div><div class="rl">WPM</div></div>
+      <div class="rs"><div class="rv" id="rsAcc" style="color:var(--green)">--%</div><div class="rl">Accuracy</div></div>
+      <div class="rs"><div class="rv" id="rsWords" style="color:var(--yellow)">--</div><div class="rl">Words Read</div></div>
+    </div>
+    <div class="results-row">
+      <button class="btn btn-primary" onclick="playAgain()">🔄 Play Again</button>
+      <button class="btn btn-back" onclick="goBack('dyslexia-games.html')">🏠 Menu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──
+const PASSAGES = {
+  easy: [
+    { text:"The cat sat on the mat. It was a big fat cat. The cat had a nap. It was a good day.", questions:[{q:"Where did the cat sit?",opts:["On a mat","On a chair","On a bed","On a table"],ans:0},{q:"What did the cat do?",opts:["Ate food","Had a nap","Ran away","Played"],ans:1}] },
+    { text:"The sun is bright. Birds fly in the sky. Flowers grow in the garden. It is a nice day.", questions:[{q:"Where do flowers grow?",opts:["In the sky","In the garden","In the house","In the pond"],ans:1},{q:"What is bright?",opts:["Moon","Stars","Sun","Lamp"],ans:2}] },
+    { text:"Dogs like to run and jump. My dog has a red ball. We play in the park every day.", questions:[{q:"What colour is the ball?",opts:["Blue","Green","Red","Yellow"],ans:2},{q:"Where do they play?",opts:["School","Home","Park","Pool"],ans:2}] },
+  ],
+  medium: [
+    { text:"Reading is an important skill for every student. When we read, we discover new words and ideas. Practice a little each day and you will see great improvement.", questions:[{q:"Why is reading important?",opts:["It is easy","We discover new words and ideas","It is fast","It costs nothing"],ans:1},{q:"How much should you practise?",opts:["Once a week","A little each day","Only on weekends","Never"],ans:1}] },
+    { text:"Animals live in many habitats. Fish live in the ocean, birds nest in trees, and lions roam the grasslands. Every animal has special features that help it survive.", questions:[{q:"Where do fish live?",opts:["Trees","Grasslands","Ocean","Desert"],ans:2},{q:"What helps animals survive?",opts:["Special features","Good food","Friends","Money"],ans:0}] },
+  ],
+  hard: [
+    { text:"Scientists believe that regular exercise improves brain function and memory. When we move our bodies, blood flows to the brain, bringing oxygen and nutrients. Students who exercise regularly tend to have better concentration and perform well in school.", questions:[{q:"What does exercise bring to the brain?",opts:["Water and food","Oxygen and nutrients","Stress and tension","Salt and sugar"],ans:1},{q:"What improves with regular exercise?",opts:["Height and weight","Speed and strength","Concentration and school performance","Eyesight and hearing"],ans:2}] },
+    { text:"The Amazon rainforest is home to millions of plant and animal species. It produces twenty percent of the world's oxygen and plays a vital role in regulating the global climate. Deforestation threatens this precious ecosystem and the indigenous communities who live there.", questions:[{q:"What percentage of world's oxygen does the Amazon produce?",opts:["10%","20%","30%","50%"],ans:1},{q:"Who is threatened by deforestation?",opts:["Scientists","Tourists","Indigenous communities","Fishermen"],ans:2}] },
+  ]
+};
+
+const SPEEDS = { easy:400, medium:270, hard:190 }; // ms per word
+
+// ── STATE ──
+let level='easy', mode='rsvp';
+let words=[], wordIdx=0, interval=null, paused=false;
+let timeLimit=30, timeLeft=30, timerInterval=null;
+let passage=null, questions=[], qIdx=0, correctAns=0;
+let coinsEarned=0, totalCoins=parseInt(localStorage.getItem('esld_coins')||'0');
+let wpmSpeed=150, startTime=0;
+
+// ── UI HELPERS ──
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function selectLevel(l,el){level=l;document.querySelectorAll('.level-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');wpmSpeed={easy:150,medium:220,hard:320}[l]}
+function selectMode(m,el){mode=m;document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected')}
+function updateTopCoins(){document.getElementById('topCoins').textContent=totalCoins;document.getElementById('topScore').textContent=parseInt(localStorage.getItem('esld_score')||'0')}
+function goBack(page){
+    clearAll();
+    window.location.href = page;
+}
+function playAgain(){clearAll();startGame()}
+
+function clearAll(){
+  clearInterval(interval);clearInterval(timerInterval);
+  paused=false;wordIdx=0;words=[];qIdx=0;correctAns=0;coinsEarned=0;
+}
+
+// ── GAME START ──
+function startGame(){
+  clearAll();
+  const pool = PASSAGES[level];
+  passage = pool[Math.floor(Math.random()*pool.length)];
+  questions = passage.questions;
+  words = passage.text.split(/\s+/);
+  timeLimit = {easy:40,medium:35,hard:30}[level];
+  timeLeft = timeLimit;
+  startTime = Date.now();
+
+  if(mode==='rsvp') startRSVP();
+  else startPassage();
+}
+
+// ── RSVP ──
+function startRSVP(){
+  show('screen-game');
+  document.getElementById('rsvpPanel').style.display='';
+  document.getElementById('passagePanel').style.display='none';
+  document.getElementById('ghTotal').textContent = words.length;
+  const ms = Math.round(60000/wpmSpeed);
+  runTimer();
+  interval = setInterval(()=>{
+    if(paused||wordIdx>=words.length){if(wordIdx>=words.length)endReading();return}
+    showWord(words[wordIdx], wordIdx);
+    wordIdx++;
+    document.getElementById('ghWord').textContent = wordIdx;
+    const pct = (wordIdx/words.length)*100;
+    document.getElementById('rsvpFill').style.width = pct+'%';
+    const elapsed=(Date.now()-startTime)/60000;
+    document.getElementById('ghWpm').textContent = Math.round(wordIdx/elapsed)||0;
+  }, ms);
+}
+
+function showWord(w, i){
+  const el = document.getElementById('rsvpWord');
+  el.classList.remove('flash');
+  el.textContent = w;
+  void el.offsetWidth;
+  el.classList.add('flash');
+}
+
+// ── PASSAGE ──
+function startPassage(){
+  show('screen-game');
+  document.getElementById('rsvpPanel').style.display='none';
+  document.getElementById('passagePanel').style.display='';
+  const box = document.getElementById('passageBox');
+  box.innerHTML = words.map((w,i)=>`<span class="word-span" id="pw${i}">${w} </span>`).join('');
+  document.getElementById('ghTotal').textContent = words.length;
+  const ms = Math.round(60000/wpmSpeed);
+  runTimer();
+  interval = setInterval(()=>{
+    if(paused||wordIdx>=words.length){if(wordIdx>=words.length)endReading();return}
+    if(wordIdx>0){const prev=document.getElementById('pw'+(wordIdx-1));if(prev)prev.className='word-span done'}
+    const cur=document.getElementById('pw'+wordIdx);if(cur)cur.className='word-span hl';
+    document.getElementById('ghWord').textContent = wordIdx+1;
+    const pct=((wordIdx+1)/words.length)*100;
+    document.getElementById('passageFill').style.width=pct+'%';
+    const elapsed=(Date.now()-startTime)/60000;
+    document.getElementById('ghWpm').textContent=Math.round((wordIdx+1)/elapsed)||0;
+    wordIdx++;
+  }, ms);
+}
+
+// ── TIMER ──
+function runTimer(){
+  updateTimerUI();
+  timerInterval = setInterval(()=>{
+    if(paused)return;
+    timeLeft--;
+    updateTimerUI();
+    if(timeLeft<=0){clearInterval(timerInterval);clearInterval(interval);endReading();}
+  },1000);
+}
+
+function updateTimerUI(){
+  const pct = timeLeft/timeLimit;
+  const arc = document.getElementById('timerArc');
+  if(arc){ arc.style.strokeDashoffset = 176*(1-pct); arc.style.stroke = pct>.6?'var(--green)':pct>.3?'var(--yellow)':'var(--red)'; }
+  document.getElementById('timerVal').textContent = timeLeft;
+  const coinsSoFar = Math.floor((wordIdx/words.length)*20);
+  document.getElementById('ghCoins').textContent = '🪙'+(coinsSoFar||0);
+}
+
+function togglePause(){
+  paused=!paused;
+  const btns=[document.getElementById('pauseBtn'),document.getElementById('pauseBtn2')];
+  btns.forEach(b=>{if(b){b.textContent=paused?'▶ Resume':'⏸ Pause';b.classList.toggle('active',paused)}});
+}
+
+function slowerSpeed(){wpmSpeed=Math.max(80,wpmSpeed-40);restartInterval()}
+function fasterSpeed(){wpmSpeed=Math.min(500,wpmSpeed+40);restartInterval()}
+function restartInterval(){
+  clearInterval(interval);
+  const ms=Math.round(60000/wpmSpeed);
+  if(mode==='rsvp') interval=setInterval(()=>{if(paused||wordIdx>=words.length){if(wordIdx>=words.length)endReading();return}showWord(words[wordIdx],wordIdx);wordIdx++;document.getElementById('ghWord').textContent=wordIdx;document.getElementById('rsvpFill').style.width=(wordIdx/words.length)*100+'%';},ms);
+  else interval=setInterval(()=>{if(paused||wordIdx>=words.length){if(wordIdx>=words.length)endReading();return}if(wordIdx>0){const p=document.getElementById('pw'+(wordIdx-1));if(p)p.className='word-span done'}const c=document.getElementById('pw'+wordIdx);if(c)c.className='word-span hl';wordIdx++;document.getElementById('ghWord').textContent=wordIdx;document.getElementById('passageFill').style.width=(wordIdx/words.length)*100+'%';},ms);
+}
+
+// ── END READING → QUESTIONS ──
+function endReading(){
+  clearInterval(interval);clearInterval(timerInterval);
+  if(questions.length) showQuestion();
+  else showResults();
+}
+
+function showQuestion(){
+  if(qIdx>=questions.length){showResults();return}
+  const q=questions[qIdx];
+  show('screen-question');
+  document.getElementById('qText').textContent = `Q${qIdx+1}: ${q.q}`;
+  document.getElementById('qNext').style.display='none';
+  const opts=document.getElementById('qOpts');
+  opts.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const d=document.createElement('div');
+    d.className='q-opt';d.textContent=o;
+    d.onclick=()=>answerQ(i,q.ans,q.opts.length);
+    opts.appendChild(d);
+  });
+}
+
+function answerQ(chosen, correct, total){
+  document.querySelectorAll('.q-opt').forEach((el,i)=>{
+    el.style.pointerEvents='none';
+    if(i===correct)el.classList.add('correct');
+    else if(i===chosen)el.classList.add('wrong');
+  });
+  if(chosen===correct)correctAns++;
+  document.getElementById('qNext').style.display='block';
+}
+
+function nextQuestion(){
+  qIdx++;
+  showQuestion();
+}
+
+// ── RESULTS ──
+function showResults(){
+  const wordsRead=wordIdx;
+  const elapsed=(Date.now()-startTime)/60000;
+  const wpm=Math.round(wordsRead/elapsed)||0;
+  const acc=questions.length?Math.round((correctAns/questions.length)*100):100;
+  coinsEarned = Math.floor((wordsRead/words.length)*15) + (acc>=80?10:acc>=50?5:0);
+  totalCoins+=coinsEarned;
+  localStorage.setItem('esld_coins',totalCoins);
+  const score=parseInt(localStorage.getItem('esld_score')||'0')+Math.round(wpm*acc/100);
+  localStorage.setItem('esld_score',score);
+
+  // resolve the real logged-in student (same key every other page uses)
+  const sid = sessionStorage.getItem('studentId') || 'guest';
+
+  // save locally so it shows up on My Progress / parent / teacher reports
+  const hist = JSON.parse(localStorage.getItem('ml-history-'+sid) || '[]');
+  hist.unshift({date:new Date().toISOString().split('T')[0],game:'Speed Reader',module:'dyslexia',mode:level,accuracy:acc,correct:correctAns,wrong:questions.length-correctAns,coins:coinsEarned,wpm});
+  localStorage.setItem('ml-history-'+sid, JSON.stringify(hist.slice(0,60)));
+  localStorage.setItem('coins-'+sid, (Number(localStorage.getItem('coins-'+sid))||0)+coinsEarned);
+  localStorage.setItem('gamesPlayed-'+sid, (Number(localStorage.getItem('gamesPlayed-'+sid))||0)+1);
+
+  // save to backend (best effort)
+  const token=localStorage.getItem('esld_token');
+  if(token) fetch('http://localhost:5000/save-progress',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({student_id:sid,game:'Speed Reader',module:'dyslexia',mode:level,accuracy:acc,correct:correctAns,wrong:questions.length-correctAns,coins:coinsEarned,wpm})}).catch(()=>{});
+
+  show('screen-result');
+  document.getElementById('resIcon').textContent = acc>=80?'🏆':acc>=50?'⭐':'💪';
+  document.getElementById('resTitle').textContent = acc>=80?'Excellent!':acc>=50?'Good Job!':'Keep Practising!';
+  document.getElementById('resSub').textContent = `You read at ${wpm} WPM with ${acc}% comprehension`;
+  document.getElementById('resCoins').textContent = `+🪙${coinsEarned} coins earned!`;
+  document.getElementById('rsWpm').textContent = wpm;
+  document.getElementById('rsAcc').textContent = acc+'%';
+  document.getElementById('rsWords').textContent = wordsRead;
+  updateTopCoins();
+}
+
+updateTopCoins();
+</script>
+</body>
+</html>

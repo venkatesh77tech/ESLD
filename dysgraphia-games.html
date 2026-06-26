@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ESLD – Dysgraphia Games</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0b1120;--card:rgba(255,255,255,.07);--border:rgba(255,255,255,.12);
+  --green:#22c55e;--blue:#38bdf8;--purple:#a78bfa;--yellow:#fbbf24;
+  --orange:#fb923c;--pink:#f472b6;--teal:#2dd4bf;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:#f1f5f9;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse 70% 50% at 20% 10%,rgba(167,139,250,.1),transparent),
+             radial-gradient(ellipse 60% 40% at 80% 80%,rgba(56,189,248,.08),transparent);
+  z-index:0;pointer-events:none}
+
+/* STARS */
+.stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+.star{position:absolute;background:#fff;border-radius:50%;animation:twinkle 3s infinite alternate}
+@keyframes twinkle{0%{opacity:.15}100%{opacity:.8}}
+
+/* NAV */
+nav{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;
+  padding:16px 32px;background:rgba(11,17,32,.9);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border)}
+.logo{font-family:'Fredoka One';font-size:1.6rem;
+  background:linear-gradient(135deg,var(--purple),var(--blue));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  display:flex;align-items:center;gap:8px}
+.nav-right{display:flex;align-items:center;gap:12px}
+.xp-pill{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:999px;
+  background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.25);
+  font-weight:800;color:var(--yellow);font-size:.88rem}
+.streak-pill{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:999px;
+  background:rgba(251,146,60,.12);border:1px solid rgba(251,146,60,.25);
+  font-weight:800;color:var(--orange);font-size:.88rem}
+.back-btn{padding:8px 18px;border-radius:999px;border:1px solid var(--border);
+  background:transparent;color:#94a3b8;font-weight:800;cursor:pointer;
+  font-family:'Nunito',sans-serif;font-size:.85rem;transition:.2s}
+.back-btn:hover{color:#f1f5f9;background:rgba(255,255,255,.08)}
+
+/* HERO */
+.hero{position:relative;z-index:5;text-align:center;padding:52px 20px 36px}
+.hero-emoji{font-size:72px;display:block;animation:float 3s ease-in-out infinite;margin-bottom:16px}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.hero h1{font-family:'Fredoka One';font-size:clamp(1.8rem,5vw,3rem);margin-bottom:12px;
+  background:linear-gradient(135deg,var(--purple),var(--blue),var(--teal));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:#64748b;font-size:1rem;max-width:540px;margin:0 auto 24px;line-height:1.6}
+.hero-pills{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.pill{padding:7px 16px;border-radius:999px;border:1px solid rgba(167,139,250,.3);
+  background:rgba(167,139,250,.08);font-size:.82rem;font-weight:700;
+  display:flex;align-items:center;gap:5px}
+
+/* GAMES GRID */
+.section{position:relative;z-index:5;padding:10px 32px 60px}
+.section-title{font-family:'Fredoka One';font-size:1.4rem;margin-bottom:22px;
+  display:flex;align-items:center;gap:10px}
+.games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:20px}
+
+.game-card{background:var(--card);border-radius:24px;overflow:hidden;
+  border:2px solid var(--border);cursor:pointer;
+  transition:transform .28s cubic-bezier(.34,1.56,.64,1),box-shadow .28s,border-color .28s;
+  position:relative;text-decoration:none;display:block}
+.game-card:hover{transform:translateY(-8px) scale(1.02);box-shadow:0 20px 50px rgba(0,0,0,.4)}
+.game-card.locked{opacity:.55;cursor:not-allowed;pointer-events:none}
+
+.gc-header{height:120px;display:flex;align-items:center;justify-content:center;font-size:60px;position:relative}
+.gc-body{padding:18px 20px 20px}
+.gc-body h3{font-family:'Fredoka One';font-size:1.2rem;margin-bottom:6px}
+.gc-body p{color:#64748b;font-size:.85rem;line-height:1.5;margin-bottom:14px}
+.gc-footer{display:flex;align-items:center;justify-content:space-between}
+.diff{display:flex;gap:4px}
+.dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.12)}
+.dot.on{background:var(--gc-accent)}
+.play-btn{padding:9px 22px;border-radius:999px;border:none;
+  background:var(--gc-accent);color:#fff;font-family:'Nunito',sans-serif;
+  font-weight:800;font-size:.85rem;cursor:pointer;
+  transition:transform .15s,box-shadow .15s;display:flex;align-items:center;gap:6px}
+.play-btn:hover{transform:scale(1.06)}
+.play-btn.dark{color:#000}
+
+.new-tag{position:absolute;top:12px;left:12px;background:var(--green);
+  border-radius:8px;padding:4px 10px;font-size:.7rem;font-weight:800;letter-spacing:.5px;
+  color:#fff;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.lock-tag{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.55);
+  border-radius:8px;padding:4px 10px;font-size:.72rem;font-weight:700}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:40px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;text-align:center}
+.stat-icon{font-size:28px;margin-bottom:6px;display:block}
+.stat-num{font-family:'Fredoka One';font-size:1.8rem}
+.stat-lbl{color:#64748b;font-size:.75rem;margin-top:3px}
+
+@media(max-width:640px){
+  nav{padding:14px 16px}.section{padding:10px 16px 40px}
+  .hero{padding:36px 14px 24px}
+}
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">✍️ Dysgraphia Hub</div>
+  <div class="nav-right">
+    <div class="xp-pill">⚡ <span id="navXp">0</span> XP</div>
+    <div class="streak-pill">🔥 <span id="navStreak">1</span> Day</div>
+    <button class="back-btn" onclick="location.href='../student-games.html'">← Dashboard</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <span class="hero-emoji">✍️</span>
+  <h1>Dysgraphia Learning Games</h1>
+  <p>Fun, interactive games to help you write, trace, spell, and speak with confidence!</p>
+  <div class="hero-pills">
+    <div class="pill">✏️ Letter Tracing</div>
+    <div class="pill">🧩 Word Builder</div>
+    <div class="pill">✋ Air Writing</div>
+    <div class="pill">🎤 Speech to Write</div>
+    <div class="pill">❓ Letter Quiz</div>
+  </div>
+</div>
+
+<!-- PROGRESS STATS -->
+<div class="section">
+  <div class="section-title">📊 Your Stats</div>
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-icon">⚡</span>
+      <div class="stat-num" style="color:var(--yellow)" id="statXp">0</div>
+      <div class="stat-lbl">Total XP</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">🎮</span>
+      <div class="stat-num" style="color:var(--green)" id="statGames">0</div>
+      <div class="stat-lbl">Games Played</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">🎯</span>
+      <div class="stat-num" style="color:var(--blue)" id="statAcc">0%</div>
+      <div class="stat-lbl">Avg Accuracy</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">🪙</span>
+      <div class="stat-num" style="color:var(--orange)" id="statCoins">0</div>
+      <div class="stat-lbl">Coins</div>
+    </div>
+  </div>
+
+  <!-- GAMES GRID -->
+  <div class="section-title">🎮 Choose a Game</div>
+  <div class="games-grid">
+
+    <!-- 1. Letter Tracing -->
+    <a class="game-card" href="dysgraphia-letter-tracing.html"
+       style="--gc-accent:#fbbf24;border-color:rgba(251,191,36,.2)">
+      <div class="new-tag">⭐ POPULAR</div>
+      <div class="gc-header" style="background:linear-gradient(135deg,rgba(251,191,36,.15),rgba(11,17,32,.8))">✏️</div>
+      <div class="gc-body">
+        <h3>Smart Letter Tracing</h3>
+        <p>Trace alphabets on screen and get instant AI feedback on accuracy, stroke direction and smoothness.</p>
+        <div class="gc-footer">
+          <div class="diff"><div class="dot on"></div><div class="dot on"></div><div class="dot"></div></div>
+          <button class="play-btn dark">▶ Play Now</button>
+        </div>
+      </div>
+    </a>
+
+    <!-- 2. Word Builder -->
+    <a class="game-card" href="dysgraphia-word-builder.html"
+       style="--gc-accent:#fb923c;border-color:rgba(251,146,60,.2)">
+      <div class="gc-header" style="background:linear-gradient(135deg,rgba(251,146,60,.15),rgba(11,17,32,.8))">🧩</div>
+      <div class="gc-body">
+        <h3>Word Builder</h3>
+        <p>Drag and drop letters to form words! Multiple difficulty levels with colorful rewards.</p>
+        <div class="gc-footer">
+          <div class="diff"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div>
+          <button class="play-btn">▶ Play Now</button>
+        </div>
+      </div>
+    </a>
+
+    <!-- 3. Air Writing -->
+    <a class="game-card" href="dysgraphia-air-writing.html"
+       style="--gc-accent:#a78bfa;border-color:rgba(167,139,250,.2)">
+      <div class="gc-header" style="background:linear-gradient(135deg,rgba(167,139,250,.15),rgba(11,17,32,.8))">✋</div>
+      <div class="gc-body">
+        <h3>Air Writing</h3>
+        <p>Use your webcam to write letters in the air with your finger. AI recognizes your gesture!</p>
+        <div class="gc-footer">
+          <div class="diff"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div>
+          <button class="play-btn">▶ Play Now</button>
+        </div>
+      </div>
+    </a>
+
+    <!-- 4. Speech to Write -->
+    <a class="game-card" href="dysgraphia-speech-write.html"
+       style="--gc-accent:#f472b6;border-color:rgba(244,114,182,.2)">
+      <div class="gc-header" style="background:linear-gradient(135deg,rgba(244,114,182,.15),rgba(11,17,32,.8))">🎤</div>
+      <div class="gc-body">
+        <h3>Speech to Write</h3>
+        <p>Speak a word, then trace or type it. Build pronunciation and spelling at the same time!</p>
+        <div class="gc-footer">
+          <div class="diff"><div class="dot on"></div><div class="dot"></div><div class="dot"></div></div>
+          <button class="play-btn">▶ Play Now</button>
+        </div>
+      </div>
+    </a>
+
+    <!-- 5. Letter Quiz -->
+    <a class="game-card" href="dysgraphia-letter-quiz.html"
+       style="--gc-accent:#38bdf8;border-color:rgba(56,189,248,.2)">
+      <div class="gc-header" style="background:linear-gradient(135deg,rgba(56,189,248,.15),rgba(11,17,32,.8))">❓</div>
+      <div class="gc-body">
+        <h3>Letter Quiz</h3>
+        <p>Match letters to sounds and pictures! Adaptive AI difficulty that grows with you.</p>
+        <div class="gc-footer">
+          <div class="diff"><div class="dot on"></div><div class="dot on"></div><div class="dot"></div></div>
+          <button class="play-btn">▶ Play Now</button>
+        </div>
+      </div>
+    </a>
+
+    <!-- 6. Story Mode Locked -->
+    <div class="game-card locked" style="--gc-accent:#2dd4bf;border-color:rgba(45,212,191,.15)">
+      <div class="lock-tag">🔒 Level 5</div>
+      <div class="gc-header" style="background:linear-gradient(135deg,rgba(45,212,191,.1),rgba(11,17,32,.8))">📖</div>
+      <div class="gc-body">
+        <h3>Story Adventure</h3>
+        <p>Complete adventures by writing words to unlock chapters of an epic story!</p>
+        <div class="gc-footer">
+          <div class="diff"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div>
+          <button class="play-btn" disabled>🔒 Locked</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Stars
+(function(){
+  const w=document.getElementById('stars');
+  for(let i=0;i<70;i++){
+    const s=document.createElement('div');s.className='star';
+    const sz=Math.random()*2.5+.8;
+    s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;width:${sz}px;height:${sz}px;animation-delay:${Math.random()*3}s;animation-duration:${2+Math.random()*3}s`;
+    w.appendChild(s);
+  }
+})();
+
+// Load stats from localStorage
+const sid = sessionStorage.getItem('studentId') || 'guest';
+const coins  = Number(localStorage.getItem('coins-'+sid)) || 0;
+const hist   = JSON.parse(localStorage.getItem('ml-history-'+sid)||'[]');
+const dgHist = hist.filter(h=>h.game&&h.game.toLowerCase().includes('dysgraph')||
+  ['Letter Tracing','Word Builder','Air Writing','Speech Write','Letter Quiz'].includes(h.game));
+const games  = dgHist.length;
+const xp     = Number(localStorage.getItem('dysgraphia-xp-'+sid)) || games*15;
+const streak = Number(localStorage.getItem('streak-'+sid)) || 1;
+const acc    = dgHist.length ? Math.round(dgHist.reduce((a,h)=>a+(parseFloat(h.accuracy)||0),0)/dgHist.length) : 0;
+
+document.getElementById('navXp').textContent    = xp;
+document.getElementById('navStreak').textContent = streak;
+document.getElementById('statXp').textContent   = xp;
+document.getElementById('statGames').textContent = games;
+document.getElementById('statAcc').textContent  = acc+'%';
+document.getElementById('statCoins').textContent= coins;
+</script>
+</body>
+</html>

@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ESLD – Student Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0b1120;--sidebar:#0f172a;--card:rgba(255,255,255,.07);
+  --border:rgba(255,255,255,.12);--radius:20px;
+  --green:#22c55e;--blue:#38bdf8;--purple:#a78bfa;--pink:#f472b6;--yellow:#fbbf24;--orange:#fb923c;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:#f1f5f9;min-height:100vh;display:grid;grid-template-columns:260px 1fr;grid-template-rows:auto 1fr}
+
+/* SIDEBAR */
+.sidebar{
+  grid-row:1/-1;background:var(--sidebar);border-right:1px solid var(--border);
+  padding:20px 16px;display:flex;flex-direction:column;gap:8px;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+.sidebar-logo{font-family:'Fredoka One';font-size:1.5rem;padding:10px 8px 18px;border-bottom:1px solid var(--border);margin-bottom:8px;
+  background:linear-gradient(90deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;cursor:pointer;transition:.2s;font-weight:700;font-size:.9rem;color:#64748b;}
+.nav-item:hover,.nav-item.active{background:rgba(255,255,255,.08);color:#f1f5f9}
+.nav-item.active{background:rgba(34,197,94,.12);color:var(--green)}
+.nav-item span:first-child{font-size:20px}
+
+/* STUDENT ID CHIP IN SIDEBAR */
+.sidebar-id-chip{
+  background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);
+  border-radius:14px;padding:12px;text-align:center;margin-bottom:4px;
+}
+.sid-label{font-size:.7rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.sid-value{font-family:'Fredoka One';font-size:1.05rem;color:var(--blue);letter-spacing:1px}
+
+.sidebar-coins{
+  margin-top:auto;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.2);
+  border-radius:14px;padding:14px;text-align:center;position:relative;
+}
+.coins-num{font-family:'Fredoka One';font-size:2rem;color:var(--yellow);transition:transform .3s}
+.coins-num.bump{transform:scale(1.25)}
+.coins-label{font-size:.8rem;color:#64748b}
+
+/* LIVE INDICATOR */
+.live-dot{
+  display:inline-block;width:7px;height:7px;border-radius:50%;
+  background:var(--green);margin-right:5px;
+  animation:livePulse 1.6s ease infinite;
+}
+@keyframes livePulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(34,197,94,.5)}50%{opacity:.6;box-shadow:0 0 0 4px rgba(34,197,94,0)}}
+.live-badge{
+  display:flex;align-items:center;gap:4px;font-size:.68rem;color:var(--green);
+  font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+  position:absolute;top:8px;right:10px;
+}
+
+/* TOPBAR */
+.topbar{
+  grid-column:2;padding:16px 28px;display:flex;align-items:center;
+  justify-content:space-between;border-bottom:1px solid var(--border);
+  background:rgba(15,23,42,.6);backdrop-filter:blur(12px);position:sticky;top:0;z-index:10;
+}
+.topbar-left h2{font-family:'Fredoka One';font-size:1.4rem}
+.topbar-left p{color:#64748b;font-size:.85rem;margin-top:2px}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.avatar{
+  width:42px;height:42px;border-radius:50%;
+  background:linear-gradient(135deg,var(--green),var(--blue));
+  display:grid;place-items:center;font-size:18px;font-weight:900;
+  cursor:pointer;border:2px solid rgba(34,197,94,.4);
+}
+.streak-badge{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:rgba(251,146,60,.15);border:1px solid rgba(251,146,60,.3);font-size:.8rem;font-weight:800;color:var(--orange);}
+.voice-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:rgba(167,139,250,.12);cursor:pointer;font-size:18px;transition:.2s;}
+.voice-btn:hover{background:rgba(167,139,250,.25)}
+.logout-btn{padding:6px 14px;border-radius:999px;border:1px solid var(--border);background:transparent;color:#64748b;cursor:pointer;font-weight:700;font-size:.8rem;font-family:'Nunito',sans-serif;transition:.2s}
+.logout-btn:hover{color:#f1f5f9}
+
+/* STUDENT ID TOPBAR BADGE */
+.topbar-id{
+  display:flex;align-items:center;gap:6px;padding:5px 12px;
+  border-radius:999px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25);
+  font-size:.78rem;font-weight:800;color:var(--blue);cursor:pointer;transition:.2s;
+}
+.topbar-id:hover{background:rgba(56,189,248,.2)}
+
+/* MAIN */
+main{grid-column:2;padding:24px 28px;overflow-y:auto}
+
+/* WELCOME BANNER */
+.welcome-banner{
+  background:linear-gradient(135deg,rgba(34,197,94,.15),rgba(56,189,248,.1));
+  border:1px solid rgba(34,197,94,.2);border-radius:22px;padding:24px 28px;
+  display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;
+}
+.welcome-banner h2{font-family:'Fredoka One';font-size:1.7rem;margin-bottom:4px}
+.welcome-banner p{color:#64748b;font-size:.9rem}
+.welcome-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.welcome-emoji{font-size:72px;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+/* STUDENT ID CARD IN BANNER */
+.banner-id-card{
+  background:rgba(0,0,0,.3);border:1px solid rgba(56,189,248,.3);
+  border-radius:14px;padding:10px 18px;text-align:right;
+}
+.bid-label{font-size:.68rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.5px}
+.bid-value{font-family:'Fredoka One';font-size:1.2rem;color:var(--blue);letter-spacing:1px}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;position:relative;overflow:hidden;transition:box-shadow .3s}
+.stat-card::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:.15}
+.stat-card.green::before{background:var(--green)}.stat-card.blue::before{background:var(--blue)}.stat-card.purple::before{background:var(--purple)}.stat-card.orange::before{background:var(--orange)}
+.stat-card.flash{box-shadow:0 0 0 2px rgba(34,197,94,.5)}
+.stat-icon{font-size:28px;margin-bottom:8px}
+.stat-num{font-family:'Fredoka One';font-size:2rem;transition:transform .3s}
+.stat-num.bump{transform:scale(1.2)}
+.stat-label{color:#64748b;font-size:.8rem;margin-top:2px}
+
+.section-title{font-family:'Fredoka One';font-size:1.3rem;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-title .live-badge{position:static;margin-left:auto;font-size:.65rem}
+
+/* DISABILITY CARDS */
+.disability-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.dis-card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:22px;cursor:pointer;transition:.3s cubic-bezier(.34,1.56,.64,1);text-align:center;}
+.dis-card:hover{transform:translateY(-8px) scale(1.02)}
+.dis-card.dyslexia{border-color:rgba(34,197,94,.25);background:rgba(34,197,94,.05)}.dis-card.dyslexia:hover{border-color:rgba(34,197,94,.5);box-shadow:0 20px 40px rgba(34,197,94,.15)}
+.dis-card.dysgraphia{border-color:rgba(56,189,248,.25);background:rgba(56,189,248,.05)}.dis-card.dysgraphia:hover{border-color:rgba(56,189,248,.5);box-shadow:0 20px 40px rgba(56,189,248,.15)}
+.dis-card.adhd{border-color:rgba(251,146,60,.25);background:rgba(251,146,60,.05)}.dis-card.adhd:hover{border-color:rgba(251,146,60,.5);box-shadow:0 20px 40px rgba(251,146,60,.15)}
+.dis-icon{font-size:52px;display:block;margin-bottom:10px;animation:float 3s ease-in-out infinite}
+.dis-card h3{font-family:'Fredoka One';font-size:1.3rem;margin-bottom:6px}
+.dyslexia h3{color:var(--green)}.dysgraphia h3{color:var(--blue)}.adhd h3{color:var(--orange)}
+.dis-card p{color:#64748b;font-size:.83rem;line-height:1.5;margin-bottom:12px}
+.dis-progress{height:6px;background:rgba(255,255,255,.08);border-radius:3px;margin-bottom:8px}
+.dis-progress-bar{height:100%;border-radius:3px;transition:width .8s ease}
+.dyslexia .dis-progress-bar{background:var(--green)}.dysgraphia .dis-progress-bar{background:var(--blue)}.adhd .dis-progress-bar{background:var(--orange)}
+.dis-pct{font-size:.75rem;color:#64748b}
+
+/* BADGES */
+.badges-grid{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px}
+.badge{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 14px;text-align:center;min-width:80px;transition:.2s;cursor:default;}
+.badge:hover{transform:scale(1.1)}
+.badge.earned{border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.08)}
+.badge.locked{opacity:.4;filter:grayscale(1)}
+.badge.justEarned{animation:badgePop .6s cubic-bezier(.34,1.56,.64,1)}
+@keyframes badgePop{0%{transform:scale(.5) rotate(-10deg)}60%{transform:scale(1.3) rotate(5deg)}100%{transform:scale(1) rotate(0)}}
+.badge-icon{font-size:28px;display:block;margin-bottom:4px}
+.badge-name{font-size:.7rem;color:#64748b;font-weight:700}
+
+/* CHALLENGES */
+.challenge-list{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.challenge{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:14px;transition:.3s}
+.challenge.complete{border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.06)}
+.challenge-icon{font-size:28px;flex-shrink:0}
+.challenge-info{flex:1}
+.challenge-title{font-weight:800;font-size:.92rem}
+.challenge-sub{color:#64748b;font-size:.8rem;margin-top:2px}
+.challenge-bar{height:6px;background:rgba(255,255,255,.08);border-radius:3px;margin-top:6px}
+.challenge-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--purple),var(--blue));transition:width .6s ease}
+.challenge-coins{font-family:'Fredoka One';color:var(--yellow);font-size:1.1rem}
+
+/* AI REC */
+.rec-card{background:linear-gradient(135deg,rgba(167,139,250,.12),rgba(56,189,248,.08));border:1px solid rgba(167,139,250,.2);border-radius:22px;padding:20px;display:flex;align-items:flex-start;gap:16px;}
+.rec-card .ai-icon{font-size:40px;flex-shrink:0}
+.rec-card h4{font-family:'Fredoka One';font-size:1.1rem;margin-bottom:6px;color:var(--purple)}
+.rec-card p{color:#64748b;font-size:.88rem;line-height:1.5}
+.rec-btn{margin-top:10px;padding:8px 18px;border-radius:999px;border:none;background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.85rem;transition:.2s;}
+.rec-btn:hover{transform:translateY(-2px)}
+
+/* LEADERBOARD */
+.leaderboard{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:18px;margin-bottom:24px;position:relative}
+.lb-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.lb-item:last-child{border:none}
+.lb-item.you{background:rgba(56,189,248,.06);border-radius:10px;padding:10px 8px;margin:0 -8px}
+.lb-rank{font-family:'Fredoka One';font-size:1.3rem;width:32px;text-align:center}
+.lb-rank.gold{color:var(--yellow)}.lb-rank.silver{color:#94a3b8}.lb-rank.bronze{color:var(--orange)}
+.lb-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));display:grid;place-items:center;font-size:16px}
+.lb-name{flex:1;font-weight:800;font-size:.9rem}
+.lb-score{font-family:'Fredoka One';color:var(--yellow)}
+.lb-empty{text-align:center;padding:30px 10px;color:#64748b;font-size:.88rem}
+
+/* COPY TOAST */
+.copy-toast{
+  position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:rgba(34,197,94,.9);color:#052e16;padding:10px 22px;border-radius:999px;
+  font-weight:800;font-size:.85rem;transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+  z-index:200;pointer-events:none;
+}
+.copy-toast.show{transform:translateX(-50%) translateY(0)}
+
+/* SYNC TOAST */
+.sync-toast{
+  position:fixed;top:20px;right:20px;
+  background:rgba(34,197,94,.95);color:#052e16;padding:10px 20px;border-radius:14px;
+  font-weight:800;font-size:.82rem;transform:translateX(120%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  z-index:200;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.3);
+}
+.sync-toast.show{transform:translateX(0)}
+
+@media(max-width:900px){
+  body{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .topbar{grid-column:1}
+  main{grid-column:1;padding:16px}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .disability-grid{grid-template-columns:1fr}
+  .welcome-right{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">🦋 ESLD</div>
+
+  <!-- Student ID chip -->
+  <div class="sidebar-id-chip">
+    <div class="sid-label">Student ID</div>
+    <div class="sid-value" id="sidebarStudentId">—</div>
+  </div>
+
+  <div class="nav-item active" onclick="location.href='student-dashboard.html'"><span>🏠</span><span>Dashboard</span></div>
+  <div class="nav-item" onclick="location.href='student-games.html'"><span>🎮</span><span>Games</span></div>
+  <div class="nav-item" onclick="location.href='student-progress.html'"><span>📊</span><span>My Progress</span></div>
+  <div class="nav-item" onclick="location.href='student-assignments.html'"><span>📝</span><span>Assignments</span></div>
+  <div class="nav-item" onclick="location.href='student-profile.html'"><span>👤</span><span>My Profile</span></div>
+  <div class="nav-item" onclick="location.href='student-leaderboard.html'"><span>🏆</span><span>Leaderboard</span></div>
+  <div class="nav-item" onclick="location.href='student-messages.html'"><span>💬</span><span>Messages</span></div>
+  <div class="nav-item" onclick="location.href='student-audio-stories.html'"><span>📖</span><span>Audio Stories</span></div>
+  <div class="nav-item" onclick="location.href='student-meditation.html'"><span>🧘</span><span>Mindfulness</span></div>
+  <div class="nav-item" onclick="logout()"><span>🚪</span><span>Logout</span></div>
+
+  <div class="sidebar-coins">
+    <div class="live-badge"><span class="live-dot"></span>LIVE</div>
+    <div class="coins-num" id="sideCoins">0</div>
+    <div class="coins-label">🪙 Coins Earned</div>
+  </div>
+</aside>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <h2 id="greetMsg">Good Morning! 👋</h2>
+    <p id="dateStr">Loading...</p>
+  </div>
+  <div class="topbar-right">
+    <div class="streak-badge">🔥 <span id="streakNum">1</span> Day Streak</div>
+    <!-- Clickable Student ID badge -->
+    <div class="topbar-id" onclick="copyId()" title="Click to copy your Student ID" id="topbarIdBadge">
+      🪪 <span id="topbarStudentId">—</span>
+    </div>
+    <button class="voice-btn" onclick="voiceGreet()" title="Voice Assistant">🎤</button>
+    <div class="avatar" id="avatarEl" onclick="location.href='student-profile.html'" title="View Profile">S</div>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main>
+  <!-- WELCOME BANNER -->
+  <div class="welcome-banner">
+    <div>
+      <h2>Welcome back, <span id="studentName">Student</span>! 🌟</h2>
+      <p>You're doing amazing! Keep up the great work.</p>
+      <p style="margin-top:8px;font-size:.85rem;color:#22c55e;font-weight:700" id="motiveLine">💡 Today's tip: Practice makes perfect!</p>
+    </div>
+    <div class="welcome-right">
+      <div class="banner-id-card">
+        <div class="bid-label">Student ID</div>
+        <div class="bid-value" id="bannerStudentId">—</div>
+      </div>
+      <div class="welcome-emoji" id="welcomeEmoji">🦋</div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card green" id="cardGames"><div class="stat-icon">🎮</div><div class="stat-num" id="gamesPlayed">0</div><div class="stat-label">Games Played</div></div>
+    <div class="stat-card blue" id="cardStars"><div class="stat-icon">⭐</div><div class="stat-num" id="totalStars">0</div><div class="stat-label">Stars Earned</div></div>
+    <div class="stat-card purple" id="cardAcc"><div class="stat-icon">📈</div><div class="stat-num" id="accuracy">0%</div><div class="stat-label">Avg Accuracy</div></div>
+    <div class="stat-card orange" id="cardLevels"><div class="stat-icon">🎯</div><div class="stat-num" id="levelsUp">0</div><div class="stat-label">Levels Completed</div></div>
+  </div>
+
+  <!-- MODULES -->
+  <div class="section-title">🚀 Choose Your Learning Module</div>
+  <div class="disability-grid">
+    <div class="dis-card dyslexia" onclick="location.href='dyslexia-games.html'">
+      <span class="dis-icon">📖</span><h3>Dyslexia</h3>
+      <p>Reading, spelling & letter recognition games</p>
+      <div class="dis-progress"><div class="dis-progress-bar" id="dyslexiaBar" style="width:0%"></div></div>
+      <div class="dis-pct" id="dyslexiaPct">0% complete</div>
+    </div>
+    <div class="dis-card dysgraphia" onclick="location.href='dysgraphia-games.html'">
+      <span class="dis-icon" style="animation-delay:.4s">✍️</span><h3>Dysgraphia</h3>
+      <p>Writing, tracing & sentence building games</p>
+      <div class="dis-progress"><div class="dis-progress-bar" id="dysgraphiaBar" style="width:0%"></div></div>
+      <div class="dis-pct" id="dysgraphiaPct">0% complete</div>
+    </div>
+    <div class="dis-card adhd" onclick="location.href='adhd-games.html'">
+      <span class="dis-icon" style="animation-delay:.8s">⚡</span><h3>ADHD</h3>
+      <p>Focus, memory & attention training games</p>
+      <div class="dis-progress"><div class="dis-progress-bar" id="adhdBar" style="width:0%"></div></div>
+      <div class="dis-pct" id="adhdPct">0% complete</div>
+    </div>
+  </div>
+
+  <!-- BADGES -->
+  <div class="section-title">🏅 My Badges</div>
+  <div class="badges-grid" id="badgesGrid"></div>
+
+  <!-- DAILY CHALLENGES -->
+  <div class="section-title">🎯 Daily Challenges</div>
+  <div class="challenge-list" id="challengeList"></div>
+
+  <!-- AI REC -->
+  <div class="section-title">🤖 AI Recommendation</div>
+  <div class="rec-card">
+    <div class="ai-icon">🤖</div>
+    <div>
+      <h4 id="recTitle">Personalized Suggestion</h4>
+      <p id="recText">Loading your personalized recommendation...</p>
+      <button class="rec-btn" onclick="goToRec()" id="recBtn">Start Activity →</button>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div style="margin-top:24px">
+    <div class="section-title">🏆 This Device's Students <span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+    <div class="leaderboard" id="leaderboard"></div>
+  </div>
+</main>
+
+<!-- COPY TOAST -->
+<div class="copy-toast" id="copyToast">✅ Student ID Copied!</div>
+
+<!-- SYNC TOAST -->
+<div class="sync-toast" id="syncToast">🔄 Progress updated!</div>
+
+<script>
+// ══════════════════════════════════════════════
+// AUTH CHECK
+// ══════════════════════════════════════════════
+const id   = sessionStorage.getItem('studentId');
+const name = sessionStorage.getItem('studentName') || 'Student';
+if (!id) location.href = 'student-login.html';
+
+// ══════════════════════════════════════════════
+// FORMAT STUDENT ID
+// ══════════════════════════════════════════════
+function formatStudentId(rawId) {
+  if (!rawId) return '—';
+  if (String(rawId).startsWith('ESLD')) return rawId;
+  return `ESLD${String(rawId).padStart(4,'0')}ST`;
+}
+const studentId = formatStudentId(id);
+sessionStorage.setItem('studentId', studentId);
+
+document.getElementById('sidebarStudentId').textContent = studentId;
+document.getElementById('topbarStudentId').textContent  = studentId;
+document.getElementById('bannerStudentId').textContent  = studentId;
+
+// Resolve the actual localStorage key used by games (handles raw numeric
+// id vs formatted ESLD#### id transparently, same logic as Progress page)
+function findKey(rawId) {
+  if (localStorage.getItem('coins-' + rawId) !== null) return rawId;
+  const m = String(rawId).match(/ESLD0*(\d+)ST/);
+  if (m) {
+    const n = String(parseInt(m[1], 10));
+    if (localStorage.getItem('coins-' + n) !== null) return n;
+  }
+  return rawId;
+}
+const SKEY = findKey(id);
+
+// ══════════════════════════════════════════════
+// COPY ID
+// ══════════════════════════════════════════════
+function copyId() {
+  navigator.clipboard.writeText(studentId).then(() => {
+    const toast = document.getElementById('copyToast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  });
+}
+
+// ══════════════════════════════════════════════
+// GREETING / DATE (static, set once)
+// ══════════════════════════════════════════════
+const hour  = new Date().getHours();
+const greet = hour<12?'Good Morning':hour<17?'Good Afternoon':'Good Evening';
+document.getElementById('greetMsg').textContent = greet + '! 👋';
+document.getElementById('dateStr').textContent  = new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+document.getElementById('studentName').textContent = name;
+document.getElementById('avatarEl').textContent   = name[0].toUpperCase();
+
+const tips=['💡 Practice makes perfect!','🌟 Every expert was once a beginner!','🚀 You are braver than you believe!','🎯 One step at a time, you\'ve got this!','🦋 Your learning journey is unique and beautiful!'];
+document.getElementById('motiveLine').textContent=tips[Math.floor(Math.random()*tips.length)];
+
+const emojis=['🦋','🌟','⭐','🎉','🚀','🌈','🎓','🏆'];
+let ei=0;
+setInterval(()=>{const el=document.getElementById('welcomeEmoji');el.style.transform='scale(0)';setTimeout(()=>{el.textContent=emojis[ei%emojis.length];el.style.transform='scale(1)';ei++;},200);},3000);
+
+// ══════════════════════════════════════════════
+// VOICE
+// ══════════════════════════════════════════════
+function voiceGreet(){
+  const msgs=['Great job practicing today, '+name+'! Keep it up!','You are doing amazing! Let\'s play some games!','Hi '+name+'! Ready to learn something awesome today?'];
+  const u=new SpeechSynthesisUtterance(msgs[Math.floor(Math.random()*msgs.length)]);
+  u.rate=.9;u.pitch=1.1;speechSynthesis.speak(u);
+}
+
+// ══════════════════════════════════════════════
+// LOGOUT
+// ══════════════════════════════════════════════
+function logout(){sessionStorage.clear();location.href='student-login.html';}
+
+// ══════════════════════════════════════════════
+// STREAK (computed once per calendar day, not live-dependent)
+// ══════════════════════════════════════════════
+const today=new Date().toDateString();
+const lastDate=localStorage.getItem('lastLogin-'+SKEY);
+let streak=Number(localStorage.getItem('streak-'+SKEY)||1);
+if(lastDate!==today){streak++;localStorage.setItem('streak-'+SKEY,streak);localStorage.setItem('lastLogin-'+SKEY,today)}
+document.getElementById('streakNum').textContent=streak;
+
+// ══════════════════════════════════════════════
+// REAL-TIME DATA ENGINE
+// All numbers below are recomputed live from localStorage on every
+// render() call. render() is triggered by:
+//   1. Initial page load
+//   2. The native 'storage' event (fires instantly when ANY other tab/
+//      page on this origin writes to localStorage — e.g. finishing a
+//      game in another tab updates this dashboard immediately)
+//   3. A 3-second polling fallback (covers same-tab navigation-back
+//      cases and browsers that throttle storage events)
+// No demo/fake numbers are injected — every value here is read
+// directly from real saved game data for THIS student's key only.
+// ══════════════════════════════════════════════
+let lastSnapshot = null;
+
+function readState(){
+  const coins   = Number(localStorage.getItem('coins-'+SKEY)) || 0;
+  const mlHist  = JSON.parse(localStorage.getItem('ml-history-'+SKEY)||'[]');
+  const dysProg = Math.min(100, Number(localStorage.getItem('dysgraphia-progress-'+SKEY)||0));
+  const adhdProg= Math.min(100, Number(localStorage.getItem('adhd-progress-'+SKEY)||0));
+  const levels  = Number(localStorage.getItem('levelsCompleted-'+SKEY)||0);
+  return { coins, mlHist, dysProg, adhdProg, levels };
+}
+
+function avg(arr){ return arr.length ? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length) : 0; }
+
+function bumpEl(el){
+  if(!el) return;
+  el.classList.add('bump');
+  setTimeout(()=>el.classList.remove('bump'),350);
+}
+function flashCard(el){
+  if(!el) return;
+  el.classList.add('flash');
+  setTimeout(()=>el.classList.remove('flash'),700);
+}
+
+function render(isLiveUpdate){
+  const state = readState();
+  const games  = state.mlHist.length;
+  const avgAcc = avg(state.mlHist.map(h=>parseFloat(h.accuracy)||0));
+
+  // ── STATS (with bump animation only on genuine change) ──
+  const setStat = (elId, cardId, val) => {
+    const el = document.getElementById(elId);
+    const prev = el.textContent;
+    el.textContent = val;
+    if(isLiveUpdate && String(prev) !== String(val)){
+      bumpEl(el); flashCard(document.getElementById(cardId));
+    }
+  };
+  setStat('gamesPlayed','cardGames', games);
+  setStat('totalStars','cardStars', Math.floor(state.coins/5));
+  setStat('accuracy','cardAcc', avgAcc+'%');
+  setStat('levelsUp','cardLevels', state.levels);
+
+  const coinsEl = document.getElementById('sideCoins');
+  if(isLiveUpdate && Number(coinsEl.textContent) !== state.coins) bumpEl(coinsEl);
+  coinsEl.textContent = state.coins;
+
+  // ── MODULE PROGRESS BARS ──
+  // Dyslexia % derives from dyslexia-tagged session count (capped 100).
+  // Dysgraphia / ADHD use their own explicit progress counters so each
+  // module's bar reflects only that module's real saved progress.
+  const DYSGRAPHIA_GAMES = ['Letter Tracing','Word Builder','Air Writing','Speech Write','Letter Quiz'];
+  const dysgraphiaSessions = state.mlHist.filter(h => DYSGRAPHIA_GAMES.includes(h.game));
+  const dyslexiaSessions   = state.mlHist.filter(h => !DYSGRAPHIA_GAMES.includes(h.game));
+  const dyslexiaPct   = Math.min(100, dyslexiaSessions.length * 12);
+  const dysgraphiaPct = Math.min(100, state.dysProg);
+  const adhdPct       = Math.min(100, state.adhdProg);
+
+  document.getElementById('dyslexiaBar').style.width    = dyslexiaPct+'%';
+  document.getElementById('dysgraphiaBar').style.width  = dysgraphiaPct+'%';
+  document.getElementById('adhdBar').style.width        = adhdPct+'%';
+  document.getElementById('dyslexiaPct').textContent    = dyslexiaPct+'% complete';
+  document.getElementById('dysgraphiaPct').textContent  = dysgraphiaPct+'% complete';
+  document.getElementById('adhdPct').textContent        = adhdPct+'% complete';
+
+  // ── BADGES ──
+  const allBadges=[
+    {icon:'🌟',name:'First Step',earned:games>=1},
+    {icon:'🔥',name:'On Fire',earned:games>=5},
+    {icon:'🏆',name:'Champion',earned:games>=10},
+    {icon:'📚',name:'Bookworm',earned:avgAcc>=80},
+    {icon:'⚡',name:'Speed Star',earned:state.coins>=50},
+    {icon:'💎',name:'Diamond',earned:state.coins>=200},
+    {icon:'🎯',name:'Sharpshooter',earned:avgAcc>=90},
+    {icon:'🌈',name:'Rainbow',earned:games>=3},
+  ];
+  const bg=document.getElementById('badgesGrid');
+  const prevEarned = new Set([...bg.querySelectorAll('.badge.earned')].map(b=>b.dataset.name));
+  bg.innerHTML='';
+  allBadges.forEach(b=>{
+    const justEarned = isLiveUpdate && b.earned && !prevEarned.has(b.name);
+    bg.innerHTML+=`<div class="badge ${b.earned?'earned':'locked'} ${justEarned?'justEarned':''}" data-name="${b.name}" title="${b.name}"><span class="badge-icon">${b.icon}</span><div class="badge-name">${b.name}</div></div>`;
+  });
+
+  // ── DAILY CHALLENGES (progress derived from real today-session counts) ──
+  const todayStr = new Date().toISOString().slice(0,10);
+  const todaySessions = state.mlHist.filter(h => h.date === todayStr);
+  const todayCorrectByGame = {};
+  todaySessions.forEach(h => { todayCorrectByGame[h.game] = (todayCorrectByGame[h.game]||0) + (parseInt(h.correct)||0); });
+
+  const challenges=[
+    {icon:'📖',title:'Read 5 Words Correctly',sub:'Missing Letter Game • Easy',target:5,have:todayCorrectByGame['Missing Letter']||0,coins:20},
+    {icon:'🔤',title:'Fix 3 Letter Confusions',sub:'Letter Confusion Game',target:3,have:todayCorrectByGame['Letter Confusion']||0,coins:15},
+    {icon:'🧩',title:'Build 2 Words',sub:'Word Builder Game',target:2,have:todayCorrectByGame['Word Builder']||0,coins:25},
+  ];
+  const cl=document.getElementById('challengeList');
+  cl.innerHTML='';
+  challenges.forEach(c=>{
+    const pct = Math.min(100, Math.round((c.have/c.target)*100));
+    cl.innerHTML+=`<div class="challenge ${pct>=100?'complete':''}"><div class="challenge-icon">${c.icon}</div><div class="challenge-info"><div class="challenge-title">${c.title}</div><div class="challenge-sub">${c.sub} ${pct>=100?'• ✅ Done!':`• ${c.have}/${c.target}`}</div><div class="challenge-bar"><div class="challenge-fill" style="width:${pct}%"></div></div></div><div class="challenge-coins">🪙${c.coins}</div></div>`;
+  });
+
+  // ── AI RECOMMENDATION (driven by real weakest-area heuristic) ──
+  renderRecommendation(state.mlHist, avgAcc);
+
+  // ── LEADERBOARD (only real students stored on THIS device/browser —
+  //    no fabricated names. Scans localStorage for any coins-* keys) ──
+  renderLeaderboard(state.coins);
+
+  lastSnapshot = JSON.stringify(state);
+}
+
+function renderRecommendation(mlHist, avgAcc){
+  const recs=[
+    {title:'🔤 Letter Confusion Practice',text:"You'd benefit from extra practice on tricky letter pairs like b/d.",btn:'Play Letter Confusion',url:'letter-confusion-dyslexia.html', cond:()=>mlHist.some(h=>h.game==='Letter Confusion' && parseFloat(h.accuracy)<70)},
+    {title:'📚 Missing Letter Challenge',text:'Your reading speed is improving! Try the next level of Missing Letter game.',btn:'Play Missing Letter',url:'dyslexia-missing-letter.html', cond:()=>mlHist.some(h=>h.game==='Missing Letter')},
+    {title:'🧩 Word Building Exercise',text:'Word building games strengthen your vocabulary. Start with Easy level!',btn:'Play Word Builder',url:'word-builder-dyslexia.html', cond:()=>true},
+    {title:'✋ Air Writing Mastery',text:'Sharpen your letter-shape recall with the Air Writing game.',btn:'Play Air Writing',url:'air-writing-game.html', cond:()=>avgAcc<75},
+  ];
+  const matched = recs.find(r=>r.cond()) || recs[recs.length-1];
+  document.getElementById('recTitle').textContent=matched.title;
+  document.getElementById('recText').textContent=matched.text;
+  document.getElementById('recBtn').textContent=matched.btn+' →';
+  window.__recUrl = matched.url;
+}
+function goToRec(){ location.href = window.__recUrl || 'student-games.html'; }
+
+// Leaderboard pulls ONLY real coin totals saved under coins-* keys on
+// this browser (e.g. multiple students who've logged in on this
+// device). No invented names/scores are shown. If only the current
+// student has data, that's reflected honestly rather than padded out.
+function renderLeaderboard(myCoins){
+  const entries = [];
+  for(let i=0;i<localStorage.length;i++){
+    const key = localStorage.key(i);
+    const m = key && key.match(/^coins-(.+)$/);
+    if(m){
+      const studentKey = m[1];
+      const coinVal = Number(localStorage.getItem(key))||0;
+      // Try to find a friendly name if this student previously logged in here
+      const storedName = localStorage.getItem('studentName-'+studentKey) || (studentKey===SKEY ? name : 'Student '+studentKey);
+      entries.push({ key: studentKey, name: storedName, coins: coinVal });
+    }
+  }
+  entries.sort((a,b)=>b.coins-a.coins);
+
+  const lbEl = document.getElementById('leaderboard');
+  if(!entries.length){
+    lbEl.innerHTML = `<div class="lb-empty">No leaderboard data yet on this device.<br>Play a game to appear here!</div>`;
+    return;
+  }
+  const medalRank = ['🥇','🥈','🥉'];
+  const medalCls  = ['gold','silver','bronze'];
+  lbEl.innerHTML = entries.slice(0,8).map((p,i)=>{
+    const isYou = p.key === SKEY;
+    const rank = i<3 ? medalRank[i] : String(i+1);
+    const cls  = i<3 ? medalCls[i] : '';
+    return `<div class="lb-item ${isYou?'you':''}">
+      <div class="lb-rank ${cls}">${rank}</div>
+      <div class="lb-avatar">${(p.name||'S')[0].toUpperCase()}</div>
+      <div class="lb-name">${p.name}${isYou?' (You)':''}</div>
+      <div class="lb-score">🪙${p.coins}</div>
+    </div>`;
+  }).join('');
+}
+
+// Persist this student's display name so the leaderboard can show it
+// even when viewed from a different student's active session later.
+localStorage.setItem('studentName-'+SKEY, name);
+
+// ══════════════════════════════════════════════
+// LIVE SYNC WIRING
+// ══════════════════════════════════════════════
+function showSyncToast(){
+  const t=document.getElementById('syncToast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+function liveRender(){
+  const before = lastSnapshot;
+  render(true);
+  if(before !== null && before !== lastSnapshot) showSyncToast();
+}
+
+// 1) Native storage event — fires instantly in THIS tab when another
+//    tab/page on the same origin writes to localStorage (e.g. finishing
+//    a game in a second tab updates this dashboard with no reload).
+window.addEventListener('storage', (e) => {
+  if(!e.key) return;
+  // Only react to keys relevant to this student's stats to avoid
+  // unnecessary re-renders from unrelated storage writes.
+  if(e.key.includes(SKEY) || e.key === 'esld-sync-ping' || e.key.startsWith('coins-')){
+    liveRender();
+  }
+});
+
+// 2) Polling fallback — some browsers/situations (e.g. same-tab game
+//    finished via back-navigation, or storage events being throttled)
+//    won't fire a 'storage' event, so we also poll every 3s and only
+//    re-render visibly if the underlying data actually changed.
+setInterval(() => {
+  const snap = JSON.stringify(readState());
+  if(snap !== lastSnapshot) liveRender();
+}, 3000);
+
+// Re-sync immediately when the tab regains focus/visibility (covers
+// the case where the student played a game in this same tab via
+// back/forward navigation rather than a separate tab).
+document.addEventListener('visibilitychange', () => { if(!document.hidden) liveRender(); });
+window.addEventListener('focus', liveRender);
+
+// ══════════════════════════════════════════════
+// INITIAL RENDER
+// ══════════════════════════════════════════════
+render(false);
+</script>
+</body>
+</html>

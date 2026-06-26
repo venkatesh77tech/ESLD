@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ESLD – Student Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#06091a;--card:#0d2225;--border:rgba(255,255,255,.1);
+  --green:#22c55e;--blue:#38bdf8;--purple:#a78bfa;
+  --yellow:#fbbf24;--orange:#fb923c;--red:#ef4444;--pink:#f472b6;--teal:#2dd4bf;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Nunito',sans-serif;background:var(--bg);color:#f1f5f9;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:20px;overflow-x:hidden;
+}
+
+/* BG CANVAS */
+#bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* BG GLOW BLOBS */
+.glow-blob{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0}
+.blob1{width:500px;height:500px;top:-150px;left:-150px;background:rgba(34,197,94,.08)}
+.blob2{width:400px;height:400px;bottom:-120px;right:-100px;background:rgba(56,189,248,.08)}
+.blob3{width:300px;height:300px;top:40%;left:60%;background:rgba(167,139,250,.06)}
+
+/* BACK BUTTON */
+.back-btn{
+  position:fixed;top:20px;left:20px;z-index:20;
+  display:flex;align-items:center;gap:6px;
+  padding:8px 18px;border-radius:999px;
+  border:1px solid var(--border);background:rgba(13,18,37,.8);
+  color:#94a3b8;cursor:pointer;font-weight:800;font-family:'Nunito',sans-serif;
+  font-size:.82rem;transition:.2s;backdrop-filter:blur(10px);text-decoration:none;
+}
+.back-btn:hover{color:#f1f5f9;border-color:rgba(255,255,255,.2)}
+
+/* SHELL */
+.shell{
+  position:relative;z-index:10;
+  width:min(1000px,100%);
+  animation:shellIn .6s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes shellIn{from{transform:translateY(40px);opacity:0}}
+
+/* ══ TWO COLUMN LAYOUT ══ */
+.layout{display:grid;grid-template-columns:1fr 1.1fr;gap:0;border-radius:32px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.7);border:1px solid var(--border)}
+
+/* LEFT PANEL */
+.left-panel{
+  background:linear-gradient(160deg,rgba(34,197,94,.12) 0%,rgba(56,189,248,.08) 50%,rgba(167,139,250,.1) 100%);
+  padding:48px 40px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;position:relative;overflow:hidden;
+  border-right:1px solid var(--border);
+}
+.left-panel::before{content:'';position:absolute;inset:0;background:rgba(6,9,26,.3)}
+.lp-content{position:relative;z-index:1}
+.lp-mascot{font-size:90px;display:block;animation:mascotFloat 3s ease-in-out infinite;margin-bottom:20px;filter:drop-shadow(0 12px 24px rgba(0,0,0,.4))}
+@keyframes mascotFloat{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-16px) rotate(3deg)}}
+.lp-title{font-family:'Fredoka One';font-size:2rem;margin-bottom:8px;background:linear-gradient(135deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.lp-sub{color:#64748b;font-size:.9rem;margin-bottom:30px;line-height:1.6;max-width:260px}
+.feature-list{display:flex;flex-direction:column;gap:10px;text-align:left;width:100%;max-width:280px}
+.feat-row{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:10px 14px}
+.feat-icon{font-size:20px;flex-shrink:0}
+.feat-txt{font-size:.82rem;font-weight:700;color:#94a3b8;line-height:1.35}
+.feat-txt strong{color:#f1f5f9;display:block;font-size:.85rem}
+/* Floating badges */
+.float-badge{position:absolute;border-radius:14px;padding:8px 14px;font-size:.72rem;font-weight:800;background:rgba(13,18,37,.9);border:1px solid var(--border);backdrop-filter:blur(8px);animation:badgeFloat 4s ease-in-out infinite;white-space:nowrap}
+.fb1{top:22px;right:16px;color:var(--yellow);border-color:rgba(251,191,36,.25);animation-delay:0s}
+.fb2{bottom:80px;left:14px;color:var(--teal);border-color:rgba(45,212,191,.25);animation-delay:1.2s}
+.fb3{bottom:24px;right:18px;color:var(--pink);border-color:rgba(244,114,182,.25);animation-delay:.6s}
+@keyframes badgeFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+/* RIGHT PANEL */
+.right-panel{background:rgba(10,14,30,.95);padding:44px 40px}
+.form-header{margin-bottom:28px}
+.form-header h2{font-family:'Fredoka One';font-size:1.7rem;margin-bottom:4px}
+.form-header p{color:#475569;font-size:.88rem}
+
+/* TABS */
+.tabs{display:flex;gap:0;margin-bottom:28px;background:rgba(255,255,255,.05);padding:4px;border-radius:14px}
+.tab{flex:1;padding:10px;border-radius:10px;border:none;background:transparent;color:#475569;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.9rem;transition:.25s;position:relative}
+.tab.active{background:rgba(255,255,255,.1);color:#f1f5f9;border:1px solid var(--border)}
+.tab-indicator{width:6px;height:6px;border-radius:50%;background:var(--green);margin:0 auto;margin-top:4px;display:none}
+.tab.active .tab-indicator{display:block}
+
+/* FORM GROUPS */
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:.7rem;font-weight:800;color:#475569;margin-bottom:6px;text-transform:uppercase;letter-spacing:.6px}
+.input-wrap{position:relative}
+.input-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;z-index:1}
+input[type=text],input[type=email],input[type=password],select{
+  width:100%;padding:12px 14px 12px 42px;
+  background:rgba(255,255,255,.04);border:1.5px solid var(--border);
+  border-radius:12px;color:#f1f5f9;font-size:.9rem;
+  font-family:'Nunito',sans-serif;outline:none;transition:.25s;
+}
+input:focus,select:focus{border-color:var(--green);background:rgba(34,197,94,.04);box-shadow:0 0 0 3px rgba(34,197,94,.1)}
+input.err{border-color:var(--red)!important;box-shadow:0 0 0 3px rgba(239,68,68,.1)!important}
+select.err{border-color:var(--red)!important}
+.eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#475569;cursor:pointer;font-size:15px;padding:4px;z-index:1}
+.eye-btn:hover{color:#94a3b8}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer}
+select option{background:#0d1225}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* LINK ROW */
+.link-row{display:flex;justify-content:space-between;align-items:center;margin-top:5px}
+.link-row a,.form-link{color:var(--blue);text-decoration:none;font-size:.78rem;font-weight:800;background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif;padding:0;transition:.2s}
+.link-row a:hover,.form-link:hover{color:#7dd3fc}
+
+/* ID PREVIEW STRIP */
+.id-strip{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(34,197,94,.07);border:1.5px dashed rgba(34,197,94,.3);
+  border-radius:12px;padding:10px 14px;margin-bottom:12px;
+}
+.ids-label{font-size:.68rem;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.ids-value{font-family:'Fredoka One';font-size:1.1rem;color:var(--green);letter-spacing:1px;flex:1}
+
+/* STRENGTH */
+.strength-wrap{margin-top:4px;display:none}
+.strength-bar{height:4px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden;margin-bottom:2px}
+.strength-fill{height:100%;border-radius:2px;transition:.3s;width:0}
+.strength-lbl{font-size:.7rem;font-weight:700}
+
+/* BUTTONS */
+.btn{
+  width:100%;padding:13px;border-radius:12px;border:none;font-weight:900;
+  font-size:.95rem;cursor:pointer;font-family:'Nunito',sans-serif;
+  transition:.3s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:4px;
+}
+.btn:hover:not(:disabled){transform:translateY(-2px)}
+.btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.btn-primary{background:linear-gradient(135deg,var(--green),#16a34a);color:#052e16;box-shadow:0 8px 24px rgba(34,197,94,.25)}
+.btn-primary:hover:not(:disabled){box-shadow:0 14px 32px rgba(34,197,94,.38)}
+.btn-ghost{background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid var(--border)}
+.btn-ghost:hover:not(:disabled){background:rgba(255,255,255,.11);color:#f1f5f9}
+.btn-demo{background:linear-gradient(135deg,rgba(251,191,36,.15),rgba(251,146,60,.1));color:var(--yellow);border:1px solid rgba(251,191,36,.25);font-size:.85rem;padding:10px}
+.btn-demo:hover:not(:disabled){background:rgba(251,191,36,.2)}
+.divider{display:flex;align-items:center;gap:10px;margin:12px 0;color:#334155;font-size:.73rem;font-weight:700}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* MESSAGE */
+.msg{padding:11px 14px;border-radius:11px;margin-top:10px;font-size:.8rem;font-weight:700;display:none;align-items:center;gap:8px;line-height:1.5}
+.msg.show{display:flex}
+.msg.error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.22);color:#fca5a5}
+.msg.success{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86efac}
+.msg.info{background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.22);color:#7dd3fc}
+
+/* LOADER */
+.loader{display:inline-block;width:15px;height:15px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* QUICK LOGIN CHIPS */
+.quick-login{margin-bottom:18px}
+.ql-label{font-size:.7rem;font-weight:800;color:#334155;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.ql-chips{display:flex;gap:8px;flex-wrap:wrap}
+.ql-chip{
+  padding:7px 14px;border-radius:999px;border:1px solid var(--border);
+  background:rgba(255,255,255,.05);color:#64748b;font-size:.78rem;font-weight:800;
+  cursor:pointer;transition:.2s;font-family:'Nunito',sans-serif;display:flex;align-items:center;gap:6px;
+}
+.ql-chip:hover{background:rgba(255,255,255,.1);color:#f1f5f9;border-color:rgba(255,255,255,.2)}
+
+/* POPUP */
+.popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(14px);z-index:100;display:grid;place-items:center;padding:20px;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0}}
+.popup{background:#0a0f24;border:1.5px solid rgba(34,197,94,.3);border-radius:28px;padding:36px 40px;max-width:440px;width:100%;text-align:center;animation:popIn .4s cubic-bezier(.34,1.56,.64,1);position:relative}
+@keyframes popIn{from{transform:scale(.82);opacity:0}}
+.popup-close{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.07);border:none;color:#f1f5f9;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;display:grid;place-items:center}
+.popup-icon{font-size:70px;display:block;margin-bottom:12px;animation:mascotFloat 3s ease-in-out infinite}
+.popup-title{font-family:'Fredoka One';font-size:1.8rem;color:var(--green);margin-bottom:5px}
+.popup-sub{color:#475569;font-size:.88rem;margin-bottom:20px;line-height:1.5}
+.id-card{background:rgba(34,197,94,.07);border:2px dashed rgba(34,197,94,.35);border-radius:18px;padding:20px;margin-bottom:16px}
+.id-card-label{font-size:.7rem;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px}
+.id-card-value{font-family:'Fredoka One';font-size:2.5rem;background:linear-gradient(135deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:3px;margin-bottom:6px}
+.id-card-name{font-size:.82rem;color:#475569;margin-bottom:10px}
+.copy-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 18px;border-radius:999px;border:1px solid rgba(34,197,94,.3);background:transparent;color:var(--green);font-size:.8rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;transition:.2s}
+.copy-btn:hover{background:rgba(34,197,94,.1)}
+.id-note{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2);border-radius:12px;padding:12px 14px;margin-bottom:18px;font-size:.8rem;color:var(--yellow);font-weight:700;text-align:left;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.popup-actions{display:flex;gap:10px}
+.pa-btn{flex:1;padding:12px;border-radius:12px;border:none;font-weight:900;font-size:.9rem;cursor:pointer;font-family:'Nunito',sans-serif;transition:.25s;display:flex;align-items:center;justify-content:center;gap:7px}
+.pa-btn:hover{transform:translateY(-2px)}
+.pa-primary{background:linear-gradient(135deg,var(--green),#16a34a);color:#052e16}
+.pa-sec{background:rgba(255,255,255,.07);color:#94a3b8;border:1px solid var(--border)}
+.pa-sec:hover{color:#f1f5f9}
+
+/* TOAST */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-60px);background:linear-gradient(135deg,var(--green),var(--teal));color:#fff;padding:11px 26px;border-radius:999px;font-weight:800;font-size:.85rem;z-index:200;opacity:0;transition:.35s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.hide{display:none!important}
+
+/* RESPONSIVE */
+@media(max-width:720px){
+  .layout{grid-template-columns:1fr}
+  .left-panel{display:none}
+  .right-panel{padding:32px 24px}
+  .form-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+<div class="glow-blob blob1"></div>
+<div class="glow-blob blob2"></div>
+<div class="glow-blob blob3"></div>
+
+<a class="back-btn" href="index.html">← Home</a>
+
+<div class="shell">
+  <div class="layout">
+
+    <!-- ══ LEFT PANEL ══ -->
+    <div class="left-panel">
+      <!-- Floating badges -->
+      <div class="float-badge fb1">🏆 50+ Games</div>
+    
+      <div class="float-badge fb3">🎓 100 Schools</div>
+
+      <div class="lp-content">
+        <span class="lp-mascot">🦋</span>
+        <div class="lp-title">Student Portal</div>
+        <p class="lp-sub">Start your learning adventure and unlock your superpowers today!</p>
+
+        <div class="feature-list">
+          <div class="feat-row">
+            <span class="feat-icon">🎮</span>
+            <div class="feat-txt"><strong>50+ Learning Games</strong>Dyslexia, Dysgraphia & ADHD</div>
+          </div>
+          <div class="feat-row">
+            <span class="feat-icon">🏆</span>
+            <div class="feat-txt"><strong>Earn Coins & Badges</strong>Level up as you learn</div>
+          </div>
+          <div class="feat-row">
+            <span class="feat-icon">🤖</span>
+            <div class="feat-txt"><strong>AI-Powered Feedback</strong>Smart hints just for you</div>
+          </div>
+          <div class="feat-row">
+            <span class="feat-icon">📊</span>
+            <div class="feat-txt"><strong>Track Your Progress</strong>Charts parents can see</div>
+          </div>
+          <div class="feat-row">
+            <span class="feat-icon">🔊</span>
+            <div class="feat-txt"><strong>Voice Assistant</strong>Luna helps you anytime</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ RIGHT PANEL ══ -->
+    <div class="right-panel">
+      <div class="form-header">
+        <h2>Welcome Back! 👋</h2>
+        <p>Login to continue your learning journey</p>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab active" id="tabLogin" onclick="showTab('login')">
+          🚀 Login
+          <div class="tab-indicator"></div>
+        </button>
+        <button class="tab" id="tabReg" onclick="showTab('reg')">
+          ✨ Sign Up
+          <div class="tab-indicator"></div>
+        </button>
+      </div>
+
+      <!-- ══ LOGIN SECTION ══ -->
+      <div id="loginSection">
+
+        <!-- Quick Login Chips (for demo/returning users) -->
+        <div class="quick-login">
+          <div class="ql-label">⚡ Quick Fill (Demo)</div>
+          <div class="ql-chips">
+            <button class="ql-chip" onclick="quickFill('arjun@esld.app','Student123')">🎓 Arjun (Dyslexia)</button>
+            <button class="ql-chip" onclick="quickFill('priya@esld.app','Student123')">🌟 Priya (ADHD)</button>
+            <button class="ql-chip" onclick="quickFill('ritu@esld.app','Student123')">✍️ Ritu (Dysgraphia)</button>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label>📧 Email Address</label>
+          <div class="input-wrap">
+            <span class="input-icon">📧</span>
+            <input id="lEmail" type="email" placeholder="student@esld.app" autocomplete="email"/>
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label>🔒 Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input id="lPass" type="password" placeholder="Your password" autocomplete="current-password"/>
+            <button class="eye-btn" onclick="toggleEye('lPass',this)" tabindex="-1">👁️</button>
+          </div>
+          <div class="link-row">
+            <span></span>
+            <a href="student-forgot-password.html">Forgot Password?</a>
+          </div>
+        </div>
+
+        <!-- Remember checkbox -->
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <input type="checkbox" id="rememberMe" style="width:auto;padding:0;accent-color:var(--green)"/>
+          <label for="rememberMe" style="font-size:.8rem;color:#475569;text-transform:none;letter-spacing:0;margin:0;cursor:pointer">Remember me on this device</label>
+        </div>
+
+        <div class="msg" id="loginMsg"></div>
+
+        <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">🚀 Login to ESLD</button>
+
+        <div class="divider">or try demo</div>
+
+        <button class="btn btn-demo" onclick="demoLogin()">🎮 Try Demo (No Account Needed)</button>
+
+        <div style="text-align:center;margin-top:16px;font-size:.82rem;color:#334155;font-weight:700">
+          No account yet?
+          <button class="form-link" onclick="showTab('reg')" style="margin-left:4px">Sign up free →</button>
+        </div>
+      </div>
+
+      <!-- ══ REGISTER SECTION ══ -->
+      <div id="regSection" class="hide">
+
+        <!-- Name + School row -->
+        <div class="form-group">
+          <label>👤 Full Name</label>
+          <div class="input-wrap">
+            <span class="input-icon">👤</span>
+            <input id="rName" type="text" placeholder="e.g. Arjun Sharma" autocomplete="name" oninput="updateIdPreview()"/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>🏫 School (Tamil Nadu)</label>
+          <div class="input-wrap">
+            <span class="input-icon">🏫</span>
+            <select id="rSchool">
+              <option value="" disabled selected>-- Select your school --</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>📚 Class / Grade</label>
+            <div class="input-wrap">
+              <span class="input-icon">📚</span>
+              <select id="rStandard">
+                <option value="" disabled selected>Grade</option>
+                <option value="1">Grade 1</option>
+                <option value="2">Grade 2</option>
+                <option value="3">Grade 3</option>
+                <option value="4">Grade 4</option>
+                <option value="5">Grade 5</option>
+                <option value="6">Grade 6</option>
+                <option value="7">Grade 7</option>
+                <option value="8">Grade 8</option>
+                <option value="9">Grade 9</option>
+                <option value="10">Grade 10</option>
+                <option value="11">Grade 11</option>
+                <option value="12">Grade 12</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>🔤 Section</label>
+            <div class="input-wrap">
+              <span class="input-icon">🔤</span>
+              <select id="rSection">
+                <option value="A">Section A</option>
+                <option value="B">Section B</option>
+                <option value="C">Section C</option>
+                <option value="D">Section D</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>🧩 Learning Profile</label>
+          <div class="input-wrap">
+            <span class="input-icon">🧩</span>
+            <select id="rDisability">
+              <option value="dyslexia">📖 Dyslexia</option>
+              <option value="dysgraphia">✍️ Dysgraphia</option>
+              <option value="adhd">⚡ ADHD</option>
+              <option value="dyscalculia">🔢 Dyscalculia</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- ID Preview -->
+        <div class="id-strip" id="idStripWrap">
+          <span class="ids-label">Your ID:</span>
+          <span class="ids-value" id="idPreview">Fill your name above →</span>
+        </div>
+
+        <div class="form-group">
+          <label>📧 Email Address</label>
+          <div class="input-wrap">
+            <span class="input-icon">📧</span>
+            <input id="rEmail" type="email" placeholder="student@esld.app" autocomplete="email"/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>🔒 Password (min 6 chars)</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input id="rPass" type="password" placeholder="Create a strong password" autocomplete="new-password" oninput="checkStrength(this.value)"/>
+            <button class="eye-btn" onclick="toggleEye('rPass',this)" tabindex="-1">👁️</button>
+          </div>
+          <div class="strength-wrap" id="strengthWrap">
+            <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+            <div class="strength-lbl" id="strengthLbl"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>🔒 Confirm Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input id="rConfirm" type="password" placeholder="Repeat password" autocomplete="new-password"/>
+            <button class="eye-btn" onclick="toggleEye('rConfirm',this)" tabindex="-1">👁️</button>
+          </div>
+        </div>
+
+        <div class="msg" id="regMsg"></div>
+
+        <button class="btn btn-primary" id="regBtn" onclick="doRegister()">✨ Create My Account</button>
+
+        <div style="text-align:center;margin-top:14px;font-size:.82rem;color:#334155;font-weight:700">
+          Already have an account?
+          <button class="form-link" onclick="showTab('login')" style="margin-left:4px">Login →</button>
+        </div>
+      </div>
+
+    </div><!-- /right-panel -->
+  </div><!-- /layout -->
+</div><!-- /shell -->
+
+<!-- ══ STUDENT ID POPUP ══ -->
+<div class="popup-overlay hide" id="idPopup">
+  <div class="popup">
+    <button class="popup-close" onclick="closePopup()">✕</button>
+    <span class="popup-icon">🎉</span>
+    <div class="popup-title">You're In!</div>
+    <p class="popup-sub">Your ESLD account is ready. Save your unique Student ID below — you'll need it!</p>
+    <div class="id-card">
+      <div class="id-card-label">Your Student ID</div>
+      <div class="id-card-value" id="popId">ARJ0001ST</div>
+      <div class="id-card-name" id="popNameSub">Generated from your name</div>
+      <button class="copy-btn" onclick="copyId()">📋 Copy ID</button>
+    </div>
+    <div class="id-note">
+      <span>⚠️</span>
+      <span>Save this ID! Share it with your parent and teacher. It is also stored in your Profile page.</span>
+    </div>
+    <div class="popup-actions">
+      <button class="pa-btn pa-primary" onclick="proceedLogin()">🚀 Go to Login →</button>
+      <button class="pa-btn pa-sec" onclick="closePopup()">Note it first</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'http://127.0.0.1:5000';
+
+// ════════════════════════════
+//  SCHOOLS DATA
+// ════════════════════════════
+const TN_SCHOOLS = [
+  "Adyar Government Higher Secondary School, Chennai",
+  "Asan Memorial School, Chennai",
+  "Bala Vidya Mandir, Chennai",
+  "Bhavan's Rajaji Vidyashram, Chennai",
+  "Chettinad Vidyashram, Chennai",
+  "Children's Garden School, Chennai",
+  "DAV Boys Senior Secondary School, Chennai",
+  "DAV Girls Senior Secondary School, Chennai",
+  "Don Bosco Matriculation School, Chennai",
+  "GRT Mahalakshmi Vidya Mandir, Chennai",
+  "Hindu Senior Secondary School, Chennai",
+  "JBAS School, Chennai",
+  "Loyola School, Chennai",
+  "National Public School, Chennai",
+  "P.S. Senior Secondary School, Chennai",
+  "Padma Seshadri Bala Bhavan, Chennai",
+  "SBOA School & Junior College, Chennai",
+  "Sri Sankara Senior Secondary School, Chennai",
+  "St. Bede's Anglo-Indian Higher Secondary School, Chennai",
+  "St. Michael's Academy, Chennai",
+  "The Hindu Senior Secondary School, Adyar",
+  "Vidya Mandir Senior Secondary School, Chennai",
+  "PSG Public School, Coimbatore",
+  "Suguna PIP School, Coimbatore",
+  "Stanes Anglo Indian Higher Secondary School, Coimbatore",
+  "Amrita Vidyalayam, Coimbatore",
+  "Good Shepherd Matriculation School, Ooty",
+  "Breeks Memorial Anglo Indian School, Ooty",
+  "Sacred Heart Higher Secondary School, Trichy",
+  "Bishop Heber Higher Secondary School, Trichy",
+  "Kendriya Vidyalaya NIT, Trichy",
+  "Vivekananda Vidyalaya, Madurai",
+  "St. Mary's Higher Secondary School, Madurai",
+  "Sethupathy Higher Secondary School, Madurai",
+  "Joseph School, Madurai",
+  "SBK Girls Higher Secondary School, Thanjavur",
+  "St. Peter's Higher Secondary School, Thanjavur",
+  "Maharaja's Girls Higher Secondary School, Salem",
+  "Saradha Vidhyalaya Girls Higher Secondary School, Salem",
+  "Yamuna Matric Higher Secondary School, Salem",
+  "Sri Ramakrishna Vidyalayam, Erode",
+  "St. John's Higher Secondary School, Tirunelveli",
+  "Government Model Higher Secondary School, Vellore",
+  "De Britto Academy, Vellore",
+  "Bhavan's Vidhyashram, Puducherry",
+  "Sri Aurobindo International Centre of Education, Puducherry",
+  "Nadar Higher Secondary School, Dindigul",
+  "KSR Matriculation School, Tiruchengode",
+  "Maria Auxiliatrice Higher Secondary School, Kanyakumari",
+  "St. Xavier's Higher Secondary School, Nagercoil"
+].sort();
+
+// Populate schools dropdown
+const sel = document.getElementById('rSchool');
+TN_SCHOOLS.forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; sel.appendChild(o); });
+
+// ════════════════════════════
+//  BG CANVAS
+// ════════════════════════════
+const canvas = document.getElementById('bgCanvas');
+const ctx    = canvas.getContext('2d');
+let W, H, pts = [];
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  pts = [];
+  const cols = ['#22c55e','#38bdf8','#a78bfa','#f472b6','#fbbf24'];
+  for (let i = 0; i < 100; i++) {
+    pts.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.2+.2,
+      dx:(Math.random()-.5)*.3,dy:-(Math.random()*.35+.08),
+      op:Math.random()*.4+.05,c:cols[i%cols.length],p:Math.random()*Math.PI*2});
+  }
+}
+function draw() {
+  ctx.clearRect(0,0,W,H);
+  pts.forEach(p => {
+    p.p+=.012; p.x+=p.dx; p.y+=p.dy;
+    if(p.y<-5){p.y=H+5;p.x=Math.random()*W;}
+    const op = Math.max(.03,Math.min(.5,p.op+Math.sin(p.p)*.08));
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=p.c+Math.floor(op*255).toString(16).padStart(2,'0');ctx.fill();
+  });
+  requestAnimationFrame(draw);
+}
+resize(); draw();
+window.addEventListener('resize',resize);
+
+// ════════════════════════════
+//  TABS
+// ════════════════════════════
+function showTab(t) {
+  document.getElementById('loginSection').classList.toggle('hide', t!=='login');
+  document.getElementById('regSection').classList.toggle('hide', t!=='reg');
+  document.getElementById('tabLogin').classList.toggle('active', t==='login');
+  document.getElementById('tabReg').classList.toggle('active',   t==='reg');
+  document.querySelector('.form-header h2').textContent = t==='login' ? 'Welcome Back! 👋' : 'Create Account ✨';
+  document.querySelector('.form-header p').textContent  = t==='login' ? 'Login to continue your learning journey' : 'Join ESLD and unlock your superpowers!';
+  clearMsgs();
+}
+
+// ════════════════════════════
+//  HELPERS
+// ════════════════════════════
+function clearMsgs() {
+  ['loginMsg','regMsg'].forEach(id=>{const e=document.getElementById(id);e.className='msg';e.innerHTML='';});
+  document.querySelectorAll('input,select').forEach(i=>i.classList.remove('err'));
+}
+function showMsg(id,txt,type){const e=document.getElementById(id);e.innerHTML=txt;e.className='msg '+type+' show';}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
+function toggleEye(id,btn){const el=document.getElementById(id);const pw=el.type==='password';el.type=pw?'text':'password';btn.textContent=pw?'🙈':'👁️';}
+
+// ════════════════════════════
+//  PASSWORD STRENGTH
+// ════════════════════════════
+function checkStrength(pw) {
+  const wrap=document.getElementById('strengthWrap');
+  const fill=document.getElementById('strengthFill');
+  const lbl =document.getElementById('strengthLbl');
+  wrap.style.display='block';
+  let s=0;
+  if(pw.length>=6)s++;if(pw.length>=10)s++;
+  if(/[A-Z]/.test(pw))s++;if(/[0-9]/.test(pw))s++;if(/[^A-Za-z0-9]/.test(pw))s++;
+  const lv=[{p:20,c:'#ef4444',t:'Very Weak'},{p:40,c:'#f97316',t:'Weak'},{p:60,c:'#fbbf24',t:'Fair'},{p:80,c:'#22c55e',t:'Strong'},{p:100,c:'#0ea5e9',t:'Very Strong'}];
+  const v=lv[Math.max(0,s-1)];
+  fill.style.width=v.p+'%';fill.style.background=v.c;lbl.textContent=v.t;lbl.style.color=v.c;
+}
+
+// ════════════════════════════
+//  ID PREVIEW
+// ════════════════════════════
+function generateId(name) {
+  const n = (name||'').trim().toUpperCase().replace(/[^A-Z]/g,'');
+  const pfx = n.length>=3 ? n.substring(0,3) : n.padEnd(3,'X');
+  const k = 'esld_cnt_'+pfx;
+  const cnt = parseInt(localStorage.getItem(k)||'0')+1;
+  return `${pfx}${String(cnt).padStart(4,'0')}ST`;
+}
+function updateIdPreview() {
+  const name = document.getElementById('rName').value.trim();
+  const pv = document.getElementById('idPreview');
+  if(!name){pv.textContent='Fill your name above →';return;}
+  const n = name.toUpperCase().replace(/[^A-Z]/g,'');
+  const pfx = n.substring(0,3).padEnd(3,'X');
+  pv.textContent = pfx+'0001ST (example)';
+  pv.style.color='var(--green)';
+}
+
+// ════════════════════════════
+//  QUICK FILL (DEMO)
+// ════════════════════════════
+function quickFill(email, pass) {
+  document.getElementById('lEmail').value = email;
+  document.getElementById('lPass').value  = pass;
+  showToast('✅ Demo credentials filled!');
+}
+
+// ════════════════════════════
+//  DEMO LOGIN (offline)
+// ════════════════════════════
+function demoLogin() {
+  const demoId = 'DEMO0001ST';
+  sessionStorage.setItem('studentId',   demoId);
+  sessionStorage.setItem('studentName', 'Demo Student');
+  sessionStorage.setItem('disability',  'dyslexia');
+  sessionStorage.setItem('loggedIn',    'true');
+  localStorage.setItem('coins-'+demoId, '120');
+  showToast('🎮 Loading demo mode...');
+  setTimeout(()=>location.href='student-dashboard.html', 1000);
+}
+
+// ════════════════════════════
+//  LOGIN
+// ════════════════════════════
+async function doLogin() {
+  clearMsgs();
+  const email = document.getElementById('lEmail').value.trim();
+  const pass  = document.getElementById('lPass').value;
+  if(!email){document.getElementById('lEmail').classList.add('err');showMsg('loginMsg','❌ Please enter your email','error');return;}
+  if(!pass) {document.getElementById('lPass').classList.add('err'); showMsg('loginMsg','❌ Please enter your password','error');return;}
+
+  const btn=document.getElementById('loginBtn');
+  btn.disabled=true;btn.innerHTML='<span class="loader"></span> Logging in…';
+
+  // Remember me
+  if(document.getElementById('rememberMe').checked) {
+    localStorage.setItem('esld_remember_email', email);
+  }
+
+  try {
+    const res  = await fetch(`${API}/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass}),signal:AbortSignal.timeout(9000)});
+    const data = await res.json();
+    if(res.ok){
+      // Format student ID
+      let sid = data.student_id || '';
+      if(!/^[A-Z]{3}\d{4}ST$/.test(String(sid))){
+        const n=(data.name||email).toUpperCase().replace(/[^A-Z]/g,'').substring(0,3).padEnd(3,'X');
+        sid=`${n}${String(parseInt(sid)||1).padStart(4,'0')}ST`;
+      }
+      sessionStorage.setItem('studentId',   sid);
+      sessionStorage.setItem('studentName', data.name||'Student');
+      sessionStorage.setItem('studentEmail',email);
+      sessionStorage.setItem('disability',  data.disability||'');
+      sessionStorage.setItem('loggedIn',    'true');
+      // Save profile for parent dashboard
+      localStorage.setItem('esld_profile_'+email, JSON.stringify({studentId:sid,name:data.name,email,disability:data.disability||'',joinDate:new Date().toISOString()}));
+      showMsg('loginMsg','🎉 Welcome, '+data.name+'! Loading your dashboard…','success');
+      showToast('🚀 Login successful!');
+      setTimeout(()=>{document.body.style.opacity='0';document.body.style.transition='.4s';setTimeout(()=>location.href='student-dashboard.html',380)},1200);
+    } else {
+      showMsg('loginMsg','❌ '+(data.error||'Wrong email or password. Try again!'),'error');
+    }
+  } catch(err){
+    if(err.name==='TimeoutError'||err.name==='AbortError'){
+      showMsg('loginMsg','⚠️ Server timeout. <b>Using offline demo mode instead.</b><br><button onclick="demoLogin()" class="form-link" style="margin-top:6px;display:block">→ Try Demo Mode</button>','error');
+    } else {
+      showMsg('loginMsg','⚠️ Server not reachable. <button onclick="demoLogin()" class="form-link" style="margin-left:4px">Try Demo Mode →</button>','error');
+    }
+  } finally {
+    btn.disabled=false;btn.innerHTML='🚀 Login to ESLD';
+  }
+}
+
+// ════════════════════════════
+//  REGISTER
+// ════════════════════════════
+let pendingEmail='';
+async function doRegister() {
+  clearMsgs();
+  const name    = document.getElementById('rName').value.trim();
+  const school  = document.getElementById('rSchool').value;
+  const std     = document.getElementById('rStandard').value;
+  const sec     = document.getElementById('rSection').value;
+  const dis     = document.getElementById('rDisability').value;
+  const email   = document.getElementById('rEmail').value.trim();
+  const pass    = document.getElementById('rPass').value;
+  const confirm = document.getElementById('rConfirm').value;
+
+  let ok=true;
+  const markErr=(id)=>{document.getElementById(id).classList.add('err');ok=false;};
+  if(!name)   markErr('rName');
+  if(!school) markErr('rSchool');
+  if(!std)    markErr('rStandard');
+  if(!email)  markErr('rEmail');
+  if(!pass)   markErr('rPass');
+  if(!ok){showMsg('regMsg','❌ Please fill in all required fields','error');return;}
+  if(pass.length<6){showMsg('regMsg','❌ Password must be at least 6 characters','error');return;}
+  if(pass!==confirm){document.getElementById('rConfirm').classList.add('err');showMsg('regMsg','❌ Passwords do not match','error');return;}
+
+  const btn=document.getElementById('regBtn');
+  btn.disabled=true;btn.innerHTML='<span class="loader"></span> Creating account…';
+
+  try {
+    const body={name,email,password:pass,disability:dis,school,standard:std,section:sec};
+    const res =await fetch(`${API}/register`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(9000)});
+    const data=await res.json();
+    if(res.ok){
+      // Build name-based ID
+      let sid=data.student_id||'';
+      if(!/^[A-Z]{3}\d{4}ST$/.test(String(sid))){ sid=generateId(name); }
+      // Save profile
+      localStorage.setItem('esld_profile_'+email,JSON.stringify({studentId:sid,name,email,disability:dis,school,standard:std,section:sec,joinDate:new Date().toISOString()}));
+      pendingEmail=email;
+      showPopup(sid,name);
+    } else {
+      showMsg('regMsg','❌ '+(data.error||'Registration failed. Please try again.'),'error');
+    }
+  } catch(err){
+    if(err.name==='TimeoutError'||err.name==='AbortError'){
+      showMsg('regMsg','⚠️ Server timeout. Trying offline registration…','info');
+      // Offline fallback registration
+      const sid=generateId(name);
+      localStorage.setItem('esld_profile_'+email,JSON.stringify({studentId:sid,name,email,disability:dis,school,standard:std,section:sec,joinDate:new Date().toISOString()}));
+      pendingEmail=email;
+      setTimeout(()=>showPopup(sid,name),600);
+    } else {
+      showMsg('regMsg','⚠️ Server not found. Created account locally. <small>(Data will sync when server is available)</small>','info');
+      const sid=generateId(name);
+      localStorage.setItem('esld_profile_'+email,JSON.stringify({studentId:sid,name,email,disability:dis,school,standard:std,section:sec,joinDate:new Date().toISOString()}));
+      pendingEmail=email;
+      setTimeout(()=>showPopup(sid,name),400);
+    }
+  } finally {
+    btn.disabled=false;btn.innerHTML='✨ Create My Account';
+  }
+}
+
+// ════════════════════════════
+//  POPUP
+// ════════════════════════════
+function showPopup(sid,name){
+  document.getElementById('popId').textContent=sid;
+  document.getElementById('popNameSub').textContent='Generated from name: '+name;
+  document.getElementById('idPopup').classList.remove('hide');
+}
+function closePopup(){document.getElementById('idPopup').classList.add('hide');}
+function copyId(){
+  const txt=document.getElementById('popId').textContent;
+  navigator.clipboard.writeText(txt).then(()=>{
+    const b=document.querySelector('.copy-btn');b.textContent='✅ Copied!';
+    showToast('📋 Student ID copied!');
+    setTimeout(()=>b.textContent='📋 Copy ID',2000);
+  }).catch(()=>{
+    const r=document.createRange();r.selectNode(document.getElementById('popId'));
+    window.getSelection().removeAllRanges();window.getSelection().addRange(r);
+  });
+}
+function proceedLogin(){
+  closePopup();showTab('login');
+  document.getElementById('lEmail').value=pendingEmail;
+  showMsg('loginMsg','✅ Account ready! Enter your password to login.','info');
+}
+
+// ════════════════════════════
+//  ENTER KEY
+// ════════════════════════════
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter') return;
+  if(!document.getElementById('regSection').classList.contains('hide')) doRegister();
+  else doLogin();
+});
+
+// ════════════════════════════
+//  REMEMBER ME AUTO-FILL
+// ════════════════════════════
+const remembered=localStorage.getItem('esld_remember_email');
+if(remembered){
+  document.getElementById('lEmail').value=remembered;
+  document.getElementById('rememberMe').checked=true;
+}
+</script>
+</body>
+</html>

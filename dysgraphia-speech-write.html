@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ESLD – Speech to Write 🎤</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0b1120;--card:rgba(255,255,255,.07);--border:rgba(255,255,255,.12);--pink:#f472b6;--purple:#a78bfa;--green:#22c55e;--blue:#38bdf8;--yellow:#fbbf24;--orange:#fb923c;--red:#ef4444;--teal:#2dd4bf}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:#f1f5f9;min-height:100vh;padding-bottom:60px}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 20% 10%,rgba(244,114,182,.1),transparent),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(167,139,250,.08),transparent);z-index:0;pointer-events:none}
+
+.topbar{position:relative;z-index:10;display:flex;align-items:center;gap:14px;padding:16px 28px;background:rgba(11,17,32,.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.back-btn{padding:8px 16px;border-radius:999px;border:1px solid var(--border);background:transparent;color:#94a3b8;cursor:pointer;font-weight:800;font-family:'Nunito',sans-serif;font-size:.83rem;transition:.2s}
+.back-btn:hover{color:#f1f5f9;background:rgba(255,255,255,.08)}
+.game-title{font-family:'Fredoka One';font-size:1.5rem;background:linear-gradient(135deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.top-right{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.pill{padding:7px 16px;border-radius:999px;font-weight:800;font-size:.85rem;border:1px solid}
+.pill-pink{background:rgba(244,114,182,.12);border-color:rgba(244,114,182,.25);color:var(--pink)}
+.pill-yellow{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.25);color:var(--yellow)}
+
+/* MAIN */
+.game-area{position:relative;z-index:1;max-width:720px;margin:32px auto;padding:0 20px;display:flex;flex-direction:column;align-items:center;gap:22px}
+
+/* PROGRESS */
+.prog-wrap{width:100%}
+.prog-labels{display:flex;justify-content:space-between;font-size:.78rem;font-weight:800;color:#64748b;margin-bottom:6px}
+.prog-bar{height:10px;background:rgba(255,255,255,.07);border-radius:999px;overflow:hidden}
+.prog-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--pink),var(--purple));transition:width .5s ease}
+
+/* WORD CARD */
+.word-card{background:linear-gradient(135deg,rgba(244,114,182,.12),rgba(167,139,250,.08));border:2px solid rgba(244,114,182,.25);border-radius:28px;padding:32px 36px;text-align:center;width:100%;animation:slideIn .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes slideIn{from{transform:scale(.9);opacity:0}}
+.word-emoji{font-size:90px;line-height:1;display:block;margin-bottom:12px;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.word-instruction{font-size:.8rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.word-display{font-family:'Fredoka One';font-size:3.2rem;background:linear-gradient(135deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:4px;margin-bottom:6px}
+.word-phonetic{font-size:.9rem;color:#64748b;font-weight:700}
+
+/* MIC SECTION */
+.mic-section{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%}
+.mic-btn{width:90px;height:90px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--pink),var(--purple));display:flex;align-items:center;justify-content:center;font-size:2.4rem;cursor:pointer;transition:.2s;box-shadow:0 8px 30px rgba(244,114,182,.3)}
+.mic-btn:hover{transform:scale(1.05)}
+.mic-btn.listening{animation:micPulse 1s infinite}
+@keyframes micPulse{0%{box-shadow:0 0 0 0 rgba(244,114,182,.5)}70%{box-shadow:0 0 0 26px rgba(244,114,182,0)}100%{box-shadow:0 0 0 0 rgba(244,114,182,0)}}
+.mic-label{font-size:.85rem;font-weight:800;color:#64748b}
+.heard-box{background:rgba(244,114,182,.08);border:1px solid rgba(244,114,182,.2);border-radius:14px;padding:12px 20px;font-size:1rem;font-weight:700;text-align:center;min-height:46px;width:100%;max-width:420px;color:var(--pink)}
+
+/* TYPING SECTION */
+.type-section{width:100%;max-width:480px}
+.type-label{font-size:.75rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+
+/* LETTER BOXES */
+.letter-boxes{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:14px}
+.lbox{width:52px;height:60px;border-radius:12px;border:2.5px solid rgba(244,114,182,.3);background:rgba(244,114,182,.05);display:flex;align-items:center;justify-content:center;font-family:'Fredoka One';font-size:1.6rem;transition:.2s}
+.lbox.correct{border-color:var(--green);background:rgba(34,197,94,.12);color:var(--green)}
+.lbox.wrong{border-color:var(--red);background:rgba(239,68,68,.1);color:var(--red);animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.lbox.typed{border-color:var(--pink);background:rgba(244,114,182,.1)}
+
+.type-input{width:100%;padding:14px 20px;border-radius:14px;border:2px solid rgba(244,114,182,.3);background:rgba(244,114,182,.05);color:#f1f5f9;font-family:'Nunito',sans-serif;font-size:1.3rem;font-weight:800;text-align:center;letter-spacing:4px;text-transform:uppercase;outline:none;transition:.2s}
+.type-input:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(244,114,182,.12)}
+
+/* CONTROLS */
+.controls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;width:100%}
+.ctrl-btn{padding:11px 22px;border-radius:999px;border:none;font-family:'Nunito',sans-serif;font-weight:800;font-size:.9rem;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:6px}
+.ctrl-btn:hover{transform:translateY(-2px)}
+.btn-speak{background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff}
+.btn-check{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff}
+.btn-skip{background:rgba(255,255,255,.1);color:#f1f5f9}
+.btn-hint{background:rgba(251,191,36,.15);color:var(--yellow);border:1px solid rgba(251,191,36,.3)}
+
+/* FEEDBACK */
+.feedback-box{border-radius:14px;padding:14px 20px;text-align:center;font-weight:700;font-size:.95rem;line-height:1.5;border:2px solid var(--border);transition:.3s;width:100%;max-width:480px}
+.fb-idle{border-color:rgba(255,255,255,.1);color:#64748b}
+.fb-good{border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.07);color:var(--green)}
+.fb-bad{border-color:rgba(251,146,60,.4);background:rgba(251,146,60,.07);color:var(--orange)}
+.fb-info{border-color:rgba(56,189,248,.35);background:rgba(56,189,248,.07);color:var(--blue)}
+
+/* SCORE ROW */
+.score-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;width:100%}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 20px;text-align:center;flex:1;min-width:85px}
+.sn{font-family:'Fredoka One';font-size:1.7rem}
+.sl{font-size:.72rem;color:#64748b;font-weight:700}
+
+/* DIFFICULTY */
+.diff-bar{display:flex;gap:8px;background:rgba(255,255,255,.05);padding:4px;border-radius:999px}
+.diff-btn{padding:8px 20px;border-radius:999px;border:none;background:transparent;color:#64748b;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.85rem;transition:.2s}
+.diff-btn.active{background:var(--pink);color:#fff}
+
+/* RESULT */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:100;display:none;place-items:center}
+.overlay.show{display:grid}
+.result-box{background:rgba(11,17,32,.98);border:2px solid rgba(244,114,182,.3);border-radius:28px;padding:40px;text-align:center;animation:popIn .4s cubic-bezier(.34,1.56,.64,1);max-width:420px;width:90%}
+@keyframes popIn{from{transform:scale(.85);opacity:0}}
+.res-icon{font-size:72px;display:block;margin-bottom:12px;animation:float 2s ease-in-out infinite}
+.res-title{font-family:'Fredoka One';font-size:2rem;margin-bottom:6px}
+.res-sub{color:#64748b;margin-bottom:20px;font-size:.9rem}
+.res-stats{display:flex;gap:12px;justify-content:center;margin-bottom:22px;flex-wrap:wrap}
+.rs{background:rgba(255,255,255,.06);border-radius:12px;padding:10px 16px}
+.rn{font-family:'Fredoka One';font-size:1.6rem}
+.rl{font-size:.7rem;color:#64748b}
+.res-btns{display:flex;gap:10px;justify-content:center}
+.res-btn{padding:12px 26px;border-radius:999px;border:none;font-weight:900;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.9rem;transition:.2s}
+.res-btn:hover{transform:translateY(-2px)}
+.res-primary{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff}
+.res-sec{background:rgba(255,255,255,.08);color:#f1f5f9;border:1px solid var(--border)}
+
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(60px);background:linear-gradient(135deg,var(--green),var(--blue));color:#fff;padding:12px 26px;border-radius:999px;font-weight:800;font-size:.88rem;z-index:200;opacity:0;transition:.35s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.conf{position:fixed;width:9px;height:9px;top:-10px;border-radius:2px;animation:fall linear forwards;pointer-events:none;z-index:300}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:0}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="back-btn" onclick="location.href='dysgraphia-games.html'">← Games</button>
+  <div class="game-title">🎤 Speech to Write</div>
+  <div class="top-right">
+    <div class="pill pill-pink">🎤 <span id="navHeard">0</span> Heard</div>
+    <div class="pill pill-yellow">⚡ <span id="navXp">0</span> XP</div>
+  </div>
+</div>
+
+<div class="game-area">
+
+  <!-- Difficulty -->
+  <div class="diff-bar">
+    <button class="diff-btn active" onclick="setDiff(1,this)">🌱 Easy</button>
+    <button class="diff-btn" onclick="setDiff(2,this)">🌿 Medium</button>
+    <button class="diff-btn" onclick="setDiff(3,this)">🔥 Hard</button>
+  </div>
+
+  <!-- Progress -->
+  <div class="prog-wrap">
+    <div class="prog-labels">
+      <span id="progLabel">Word 1 of 10</span>
+      <span id="progAcc">Accuracy: 0%</span>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  </div>
+
+  <!-- Score row -->
+  <div class="score-row">
+    <div class="sc"><div class="sn" style="color:var(--yellow)" id="scoreVal">0</div><div class="sl">Score</div></div>
+    <div class="sc"><div class="sn" style="color:var(--green)" id="correctVal">0</div><div class="sl">Correct</div></div>
+    <div class="sc"><div class="sn" style="color:var(--pink)" id="totalVal">0</div><div class="sl">Total</div></div>
+    <div class="sc"><div class="sn" style="color:var(--blue)" id="streakVal">0</div><div class="sl">Streak 🔥</div></div>
+  </div>
+
+  <!-- Word card -->
+  <div class="word-card" id="wordCard">
+    <span class="word-emoji" id="wordEmoji">🐱</span>
+    <div class="word-instruction">👂 Say this word out loud:</div>
+    <div class="word-display" id="wordDisplay">CAT</div>
+    <div class="word-phonetic" id="wordPhonetic">Sounds like: /kæt/</div>
+  </div>
+
+  <!-- MIC -->
+  <div class="mic-section">
+    <button class="mic-btn" id="micBtn" onclick="startSpeech()">🎤</button>
+    <div class="mic-label" id="micLabel">Press to speak</div>
+    <div class="heard-box" id="heardBox">🎤 Press the mic and say the word clearly...</div>
+  </div>
+
+  <!-- TYPING -->
+  <div class="type-section">
+    <div class="type-label">✏️ Now type what you heard:</div>
+    <div class="letter-boxes" id="letterBoxes"></div>
+    <input class="type-input" id="typeInput" type="text" placeholder="Type here..." autocomplete="off" autocorrect="off" spellcheck="false" oninput="onType()"/>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <button class="ctrl-btn btn-hint" onclick="showHint()">💡 Hint</button>
+    <button class="ctrl-btn btn-speak" onclick="speakWord()">🔊 Hear Word</button>
+    <button class="ctrl-btn btn-check" onclick="checkAnswer()">✅ Check</button>
+    <button class="ctrl-btn btn-skip" onclick="nextWord()">⏭️ Skip</button>
+  </div>
+
+  <!-- FEEDBACK -->
+  <div class="feedback-box fb-idle" id="feedbackBox">
+    Press 🎤, say the word, then type it below!
+  </div>
+
+</div>
+
+<!-- RESULT -->
+<div class="overlay" id="resultOverlay">
+  <div class="result-box">
+    <span class="res-icon" id="resIcon">🏆</span>
+    <div class="res-title" id="resTitle">Speech Star!</div>
+    <div class="res-sub" id="resSub">Excellent session!</div>
+    <div class="res-stats">
+      <div class="rs"><div class="rn" style="color:var(--yellow)" id="resXp">0</div><div class="rl">XP Earned</div></div>
+      <div class="rs"><div class="rn" style="color:var(--green)" id="resCorrect">0</div><div class="rl">Correct</div></div>
+      <div class="rs"><div class="rn" style="color:var(--blue)" id="resAcc">0%</div><div class="rl">Accuracy</div></div>
+    </div>
+    <div class="res-btns">
+      <button class="res-btn res-primary" onclick="restart()">🔄 Play Again</button>
+      <button class="res-btn res-sec" onclick="location.href='dysgraphia-games.html'">🎮 All Games</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const sid = sessionStorage.getItem('studentId') || 'guest';
+let globalXP = Number(localStorage.getItem('dysgraphia-xp-'+sid)) || 0;
+document.getElementById('navXp').textContent = globalXP;
+
+const WORD_SETS = {
+  1: [
+    {word:'CAT',  emoji:'🐱', phonetic:'/kæt/',  hint:'An animal that says meow'},
+    {word:'DOG',  emoji:'🐶', phonetic:'/dɒɡ/',  hint:'A furry pet that barks'},
+    {word:'SUN',  emoji:'☀️', phonetic:'/sʌn/',  hint:'It shines during the day'},
+    {word:'BUS',  emoji:'🚌', phonetic:'/bʌs/',  hint:'A big vehicle for many people'},
+    {word:'CUP',  emoji:'🥤', phonetic:'/kʌp/',  hint:'You drink from this'},
+    {word:'HAT',  emoji:'🎩', phonetic:'/hæt/',  hint:'You wear this on your head'},
+    {word:'PEN',  emoji:'🖊️', phonetic:'/pɛn/',  hint:'You write with this'},
+    {word:'EGG',  emoji:'🥚', phonetic:'/ɛɡ/',   hint:'Chickens lay these'},
+    {word:'ANT',  emoji:'🐜', phonetic:'/ænt/',  hint:'A tiny insect'},
+    {word:'HEN',  emoji:'🐔', phonetic:'/hɛn/',  hint:'A female chicken'},
+  ],
+  2: [
+    {word:'BIRD',  emoji:'🐦', phonetic:'/bɜːrd/', hint:'It has wings and can fly'},
+    {word:'FISH',  emoji:'🐟', phonetic:'/fɪʃ/',   hint:'It lives in water'},
+    {word:'FROG',  emoji:'🐸', phonetic:'/frɒɡ/',  hint:'It jumps and says ribbit'},
+    {word:'CAKE',  emoji:'🎂', phonetic:'/keɪk/',  hint:'You eat this at a birthday'},
+    {word:'STAR',  emoji:'⭐', phonetic:'/stɑːr/', hint:'It shines in the night sky'},
+    {word:'BOAT',  emoji:'⛵', phonetic:'/bəʊt/',  hint:'It floats on water'},
+    {word:'BOOK',  emoji:'📚', phonetic:'/bʊk/',   hint:'You read this'},
+    {word:'MILK',  emoji:'🥛', phonetic:'/mɪlk/',  hint:'White drink from a cow'},
+    {word:'RAIN',  emoji:'🌧️', phonetic:'/reɪn/',  hint:'Water that falls from clouds'},
+    {word:'TREE',  emoji:'🌳', phonetic:'/triː/',  hint:'Has roots, trunk and leaves'},
+  ],
+  3: [
+    {word:'TIGER',   emoji:'🐯', phonetic:'/ˈtaɪɡər/',  hint:'A striped wild cat'},
+    {word:'APPLE',   emoji:'🍎', phonetic:'/ˈæpəl/',    hint:'A red or green fruit'},
+    {word:'TRAIN',   emoji:'🚂', phonetic:'/treɪn/',    hint:'Runs on railway tracks'},
+    {word:'CLOCK',   emoji:'🕐', phonetic:'/klɒk/',     hint:'It tells you the time'},
+    {word:'BREAD',   emoji:'🍞', phonetic:'/brɛd/',     hint:'Made from flour, we eat it'},
+    {word:'CHAIR',   emoji:'🪑', phonetic:'/tʃɛər/',    hint:'You sit on this'},
+    {word:'GRAPE',   emoji:'🍇', phonetic:'/ɡreɪp/',    hint:'Small purple or green fruit'},
+    {word:'HOUSE',   emoji:'🏠', phonetic:'/haʊs/',     hint:'Where people live'},
+    {word:'BEACH',   emoji:'🏖️', phonetic:'/biːtʃ/',    hint:'Sandy place by the sea'},
+    {word:'CLOUD',   emoji:'☁️', phonetic:'/klaʊd/',   hint:'White fluffy thing in the sky'},
+  ]
+};
+
+let diff = 1;
+let questions = [], qIndex = 0;
+let score = 0, correct = 0, total = 0, spStreak = 0, xpEarned = 0;
+let heardCount = 0;
+let recognition = null;
+let currentQ = null;
+
+function setDiff(d, btn) {
+  diff = d;
+  document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  restart();
+}
+
+function restart() {
+  score = 0; correct = 0; total = 0; spStreak = 0; xpEarned = 0; qIndex = 0; heardCount = 0;
+  questions = [...WORD_SETS[diff]].sort(() => Math.random() - .5);
+  document.getElementById('resultOverlay').classList.remove('show');
+  updateScoreUI(); loadWord();
+}
+
+function loadWord() {
+  if (qIndex >= 10) { endSession(); return; }
+  currentQ = questions[qIndex % questions.length];
+  document.getElementById('wordEmoji').textContent    = currentQ.emoji;
+  document.getElementById('wordDisplay').textContent  = currentQ.word;
+  document.getElementById('wordPhonetic').textContent = 'Sounds like: ' + currentQ.phonetic;
+  document.getElementById('typeInput').value = '';
+  document.getElementById('heardBox').textContent = '🎤 Press the mic and say the word clearly...';
+  document.getElementById('progLabel').textContent = 'Word ' + (qIndex+1) + ' of 10';
+  document.getElementById('progFill').style.width = (qIndex / 10 * 100) + '%';
+  renderLetterBoxes('');
+  setFeedback('idle', '👂 Say the word, then type it below!');
+
+  // Auto-speak on medium/hard
+  if (diff >= 2) setTimeout(() => speakWord(), 400);
+}
+
+function renderLetterBoxes(typed) {
+  const row = document.getElementById('letterBoxes');
+  row.innerHTML = '';
+  const word = currentQ ? currentQ.word : '';
+  [...word].forEach((letter, i) => {
+    const box = document.createElement('div');
+    box.className = 'lbox';
+    if (typed[i]) {
+      box.textContent = typed[i].toUpperCase();
+      box.classList.add(typed[i].toUpperCase() === letter ? 'correct' : 'wrong');
+    }
+    row.appendChild(box);
+  });
+}
+
+function onType() {
+  const val = document.getElementById('typeInput').value.toUpperCase();
+  renderLetterBoxes(val);
+  // Auto-check when length matches
+  if (val.length === currentQ.word.length) {
+    setTimeout(() => checkAnswer(), 300);
+  }
+}
+
+function checkAnswer() {
+  const val = document.getElementById('typeInput').value.toUpperCase().trim();
+  if (!val) { setFeedback('bad', '✏️ Please type the word first!'); return; }
+  total++;
+  const isCorrect = val === currentQ.word;
+  if (isCorrect) {
+    correct++; spStreak++;
+    const earned = (diff * 10) + (spStreak >= 3 ? 5 : 0);
+    score += earned; xpEarned += earned;
+    globalXP += earned;
+    localStorage.setItem('dysgraphia-xp-' + sid, globalXP);
+    document.getElementById('navXp').textContent = globalXP;
+    const msgs = [
+      '🌟 Perfect spelling! "' + currentQ.word + '" is correct!',
+      '🎉 Brilliant! You spelled it right!',
+      '💎 Outstanding! Keep it up!' + (spStreak >= 3 ? ' 🔥 ' + spStreak + ' in a row!' : ''),
+      '✅ Amazing! "' + currentQ.word + '" — spot on!',
+    ];
+    setFeedback('good', msgs[Math.floor(Math.random() * msgs.length)]);
+    renderLetterBoxes(currentQ.word);
+    confetti(); showToast('+' + earned + ' XP ⚡');
+    updateScoreUI();
+    qIndex++;
+    setTimeout(() => loadWord(), 1600);
+  } else {
+    spStreak = 0;
+    renderLetterBoxes(val);
+    const wrong = val.split('').filter((c, i) => c !== (currentQ.word[i] || '')).length;
+    setFeedback('bad', '🔄 ' + wrong + ' letter' + (wrong > 1 ? 's' : '') + ' wrong. The word is "' + currentQ.word + '". Try again!');
+    updateScoreUI();
+    setTimeout(() => {
+      document.getElementById('typeInput').value = '';
+      renderLetterBoxes('');
+    }, 1800);
+  }
+}
+
+function startSpeech() {
+  const btn   = document.getElementById('micBtn');
+  const label = document.getElementById('micLabel');
+  const heard = document.getElementById('heardBox');
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    // Simulate
+    btn.classList.add('listening');
+    label.textContent = '🔴 Listening...';
+    heard.textContent = '🎤 Listening...';
+    setTimeout(() => {
+      btn.classList.remove('listening');
+      label.textContent = 'Press to speak';
+      const sim = currentQ.word;
+      heard.textContent = '🎤 Heard: "' + sim + '"';
+      document.getElementById('typeInput').value = sim;
+      renderLetterBoxes(sim);
+      heardCount++;
+      document.getElementById('navHeard').textContent = heardCount;
+      setFeedback('info', '🎤 Simulated recognition: "' + sim + '" — now check your spelling!');
+    }, 2000);
+    return;
+  }
+
+  recognition = new SR();
+  recognition.lang = 'en-US';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 3;
+  btn.classList.add('listening');
+  label.textContent = '🔴 Listening...';
+  heard.textContent = '🎤 Listening... Say the word now!';
+
+  recognition.onresult = e => {
+    const h = e.results[0][0].transcript.toUpperCase().trim().split(' ')[0];
+    heard.textContent = '🎤 Heard: "' + h + '"';
+    document.getElementById('typeInput').value = h;
+    renderLetterBoxes(h);
+    heardCount++;
+    document.getElementById('navHeard').textContent = heardCount;
+    setFeedback('info', 'Heard "' + h + '" — check if it matches, then press Check!');
+    btn.classList.remove('listening');
+    label.textContent = 'Press to speak';
+  };
+  recognition.onerror = () => {
+    heard.textContent = '⚠️ Could not hear clearly. Try again!';
+    btn.classList.remove('listening');
+    label.textContent = 'Press to speak';
+  };
+  recognition.onend = () => { btn.classList.remove('listening'); label.textContent = 'Press to speak'; };
+  recognition.start();
+}
+
+function speakWord() {
+  if (!('speechSynthesis' in window) || !currentQ) return;
+  const u = new SpeechSynthesisUtterance(currentQ.word.toLowerCase());
+  u.rate = 0.7; u.pitch = 1.1; speechSynthesis.speak(u);
+  // Spell it out letter by letter
+  setTimeout(() => {
+    const letters = currentQ.word.split('').join(', ');
+    const u2 = new SpeechSynthesisUtterance('Spelt: ' + letters);
+    u2.rate = 0.65; u2.pitch = 1.0; speechSynthesis.speak(u2);
+  }, 1200);
+}
+
+function showHint() {
+  if (!currentQ) return;
+  setFeedback('info', '💡 Hint: ' + currentQ.hint + ' — "' + currentQ.word + '" has ' + currentQ.word.length + ' letters.');
+  speakWord();
+}
+
+function setFeedback(type, msg) {
+  const fb = document.getElementById('feedbackBox');
+  fb.textContent = msg;
+  fb.className = 'feedback-box fb-' + type;
+}
+
+function updateScoreUI() {
+  const t = correct + (total - correct);
+  const acc = total > 0 ? Math.round((correct / total) * 100) : 0;
+  document.getElementById('scoreVal').textContent   = score;
+  document.getElementById('correctVal').textContent = correct;
+  document.getElementById('totalVal').textContent   = total;
+  document.getElementById('streakVal').textContent  = spStreak;
+  document.getElementById('progAcc').textContent    = 'Accuracy: ' + acc + '%';
+}
+
+function nextWord() { qIndex++; loadWord(); }
+
+function endSession() {
+  const acc = total > 0 ? Math.round((correct / total) * 100) : 0;
+  document.getElementById('resIcon').textContent    = acc >= 80 ? '🏆' : acc >= 50 ? '🌟' : '💪';
+  document.getElementById('resTitle').textContent   = acc >= 80 ? 'Speech Star!' : acc >= 50 ? 'Good Job!' : 'Keep Practicing!';
+  document.getElementById('resSub').textContent     = 'You completed 10 speech-to-write challenges!';
+  document.getElementById('resXp').textContent      = xpEarned;
+  document.getElementById('resCorrect').textContent = correct;
+  document.getElementById('resAcc').textContent     = acc + '%';
+  document.getElementById('resultOverlay').classList.add('show');
+
+  const hist = JSON.parse(localStorage.getItem('ml-history-' + sid) || '[]');
+  hist.unshift({ date:new Date().toISOString().split('T')[0], game:'Speech Write', mode:diff===1?'easy':diff===2?'medium':'hard', accuracy:acc, correct, wrong:total-correct, coins:xpEarned });
+  localStorage.setItem('ml-history-' + sid, JSON.stringify(hist.slice(0, 50)));
+  const gp = Number(localStorage.getItem('gamesPlayed-' + sid) || 0) + 1;
+  localStorage.setItem('gamesPlayed-' + sid, gp);
+  const tc = Number(localStorage.getItem('coins-' + sid) || 0) + xpEarned;
+  localStorage.setItem('coins-' + sid, tc);
+}
+
+function showToast(msg) { const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500); }
+function confetti() {
+  const cols=['#f472b6','#a78bfa','#fbbf24','#22c55e','#38bdf8'];
+  for(let i=0;i<30;i++){const c=document.createElement('div');c.className='conf';c.style.cssText=`left:${Math.random()*100}vw;background:${cols[i%cols.length]};animation-duration:${1.3+Math.random()*1.5}s;animation-delay:${Math.random()*.35}s;border-radius:${Math.random()>.5?'50%':'2px'}`;document.body.appendChild(c);setTimeout(()=>c.remove(),3000);}
+}
+
+restart();
+</script>
+</body>
+</html>

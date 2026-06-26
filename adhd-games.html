@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ESLD – ADHD Learning Games</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800;900&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0d0f1e;
+  --card:#141728;
+  --border:rgba(255,255,255,.08);
+  --orange:#ff7b2e;--yellow:#ffd93d;--green:#06d6a0;
+  --blue:#4cc9f0;--pink:#f72585;--purple:#7209b7;
+  --teal:#2dd4bf;--red:#ef4444;
+  --r:20px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Nunito',sans-serif;
+  background:var(--bg);color:#f1f5f9;
+  min-height:100vh;overflow-x:hidden;
+}
+
+/* ── ANIMATED BG ── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 10% 20%,rgba(255,123,46,.07),transparent),
+    radial-gradient(ellipse 50% 40% at 90% 80%,rgba(76,201,240,.07),transparent),
+    radial-gradient(ellipse 40% 35% at 55% 10%,rgba(6,214,160,.06),transparent),
+    radial-gradient(ellipse 30% 30% at 20% 85%,rgba(247,37,133,.05),transparent);
+  animation:bgPulse 12s ease-in-out infinite alternate;
+}
+@keyframes bgPulse{to{opacity:.7}}
+
+/* FLOATING SHAPES */
+.shapes{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.shape{position:absolute;border-radius:50%;opacity:.06;animation:floatShape linear infinite}
+@keyframes floatShape{0%{transform:translateY(110vh) rotate(0deg)}100%{transform:translateY(-15vh) rotate(720deg)}}
+
+/* ── TOPBAR ── */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(13,15,30,.85);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:13px 28px;
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+}
+.tb-logo{
+  font-family:'Baloo 2',sans-serif;font-size:1.3rem;font-weight:900;
+  background:linear-gradient(135deg,var(--orange),var(--yellow));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  white-space:nowrap;
+}
+.back-btn{
+  padding:7px 16px;border-radius:999px;border:1px solid var(--border);
+  background:transparent;color:#94a3b8;cursor:pointer;
+  font-weight:700;font-family:'Nunito',sans-serif;font-size:.8rem;
+  transition:.18s;
+}
+.back-btn:hover{background:rgba(255,255,255,.08);color:#f1f5f9}
+.tb-right{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pill{
+  padding:6px 14px;border-radius:999px;font-size:.75rem;font-weight:800;
+  border:1px solid;font-family:'Baloo 2',sans-serif;
+}
+.pill-o{background:rgba(255,123,46,.1);border-color:rgba(255,123,46,.3);color:var(--orange)}
+.pill-y{background:rgba(255,217,61,.1);border-color:rgba(255,217,61,.3);color:var(--yellow)}
+.pill-g{background:rgba(6,214,160,.1);border-color:rgba(6,214,160,.3);color:var(--green)}
+
+/* ── HERO ── */
+.hero{
+  position:relative;z-index:1;
+  text-align:center;padding:48px 24px 36px;
+}
+.hero-badge{
+  display:inline-block;
+  background:rgba(255,123,46,.12);border:1px solid rgba(255,123,46,.3);
+  color:var(--orange);border-radius:999px;
+  padding:5px 16px;font-size:.78rem;font-weight:800;
+  margin-bottom:16px;letter-spacing:.5px;
+  animation:badgePop .6s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes badgePop{from{transform:scale(.6);opacity:0}}
+.hero h1{
+  font-family:'Baloo 2',sans-serif;font-size:clamp(2rem,6vw,3.8rem);font-weight:900;
+  line-height:1.1;margin-bottom:14px;
+  background:linear-gradient(135deg,var(--orange) 0%,var(--yellow) 40%,var(--green) 80%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  animation:heroSlide .8s ease both;
+}
+@keyframes heroSlide{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.hero p{
+  color:#94a3b8;font-size:1rem;max-width:520px;margin:0 auto 28px;
+  line-height:1.65;animation:heroSlide .8s .15s ease both;
+}
+.hero-stats{
+  display:flex;gap:14px;justify-content:center;flex-wrap:wrap;
+  animation:heroSlide .8s .25s ease both;
+}
+.hs{
+  background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:14px;padding:12px 20px;text-align:center;
+}
+.hs-n{font-family:'Baloo 2',sans-serif;font-size:1.5rem;font-weight:800;color:var(--yellow)}
+.hs-l{font-size:.7rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+
+/* ── FILTER TABS ── */
+.filter-row{
+  position:relative;z-index:1;
+  display:flex;gap:8px;justify-content:center;flex-wrap:wrap;
+  padding:0 20px 28px;
+}
+.filter-btn{
+  padding:8px 18px;border-radius:999px;border:1px solid var(--border);
+  background:transparent;color:#64748b;cursor:pointer;
+  font-weight:700;font-size:.82rem;font-family:'Nunito',sans-serif;
+  transition:.18s;
+}
+.filter-btn:hover{color:#f1f5f9;border-color:rgba(255,255,255,.18)}
+.filter-btn.on{border-color:var(--orange);background:rgba(255,123,46,.12);color:var(--orange)}
+
+/* ── GAMES GRID ── */
+.games-section{
+  position:relative;z-index:1;
+  max-width:1200px;margin:0 auto;
+  padding:0 22px 60px;
+}
+.games-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:18px;
+}
+
+/* ── GAME CARD ── */
+.game-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  overflow:hidden;cursor:pointer;
+  transition:transform .22s,box-shadow .22s,border-color .22s;
+  animation:cardFade .5s ease both;
+  text-decoration:none;color:inherit;display:block;
+}
+@keyframes cardFade{from{opacity:0;transform:translateY(20px)}}
+.game-card:hover{
+  transform:translateY(-6px) scale(1.01);
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
+}
+.game-card.hidden{display:none}
+
+/* Card top banner */
+.card-banner{
+  height:130px;position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+.card-banner-emoji{
+  font-size:60px;z-index:1;
+  animation:floatEmoji 3s ease-in-out infinite;
+  filter:drop-shadow(0 0 20px rgba(255,255,255,.15));
+}
+@keyframes floatEmoji{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-8px) scale(1.05)}}
+.card-banner::after{
+  content:'';position:absolute;inset:0;
+  background:inherit;opacity:.15;
+  animation:shimmer 3s ease-in-out infinite alternate;
+}
+@keyframes shimmer{from{opacity:.1}to{opacity:.25}}
+
+/* Card body */
+.card-body{padding:18px 20px 16px}
+.card-diff{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 10px;border-radius:999px;
+  font-size:.65rem;font-weight:900;margin-bottom:9px;
+  text-transform:uppercase;letter-spacing:.6px;
+}
+.diff-easy{background:rgba(6,214,160,.15);color:var(--green)}
+.diff-medium{background:rgba(255,217,61,.15);color:var(--yellow)}
+.diff-hard{background:rgba(247,37,133,.15);color:var(--pink)}
+.card-title{
+  font-family:'Baloo 2',sans-serif;font-size:1.15rem;font-weight:800;
+  margin-bottom:6px;line-height:1.2;
+}
+.card-desc{font-size:.82rem;color:#94a3b8;line-height:1.6;margin-bottom:12px}
+.card-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+.ctag{
+  padding:2px 9px;border-radius:999px;font-size:.68rem;font-weight:800;
+  background:rgba(255,255,255,.06);color:#64748b;border:1px solid var(--border);
+}
+.card-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  border-top:1px solid var(--border);padding-top:12px;
+}
+.card-xp{
+  font-family:'Baloo 2',sans-serif;font-size:.88rem;font-weight:800;color:var(--yellow);
+}
+.card-play-btn{
+  padding:7px 16px;border-radius:999px;border:none;
+  font-family:'Nunito',sans-serif;font-weight:800;font-size:.8rem;cursor:pointer;
+  transition:.18s;display:flex;align-items:center;gap:5px;
+}
+.card-play-btn:hover{transform:scale(1.05)}
+.card-new-badge{
+  position:absolute;top:10px;right:10px;z-index:2;
+  background:var(--orange);color:#fff;
+  padding:2px 8px;border-radius:6px;font-size:.6rem;font-weight:900;
+  letter-spacing:.5px;animation:newPop .6s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes newPop{from{transform:scale(0)rotate(-10deg);opacity:0}}
+
+/* ── MOVEMENT BREAK BANNER ── */
+.break-banner{
+  position:relative;z-index:1;
+  margin:0 22px 28px;max-width:1200px;margin-left:auto;margin-right:auto;
+  background:linear-gradient(135deg,rgba(255,123,46,.12),rgba(255,217,61,.08));
+  border:1px solid rgba(255,123,46,.25);border-radius:18px;
+  padding:16px 22px;display:flex;align-items:center;gap:14px;
+}
+.bb-icon{font-size:32px;flex-shrink:0;animation:bounce .8s ease-in-out infinite alternate}
+@keyframes bounce{to{transform:translateY(-6px)}}
+.bb-text h4{font-family:'Baloo 2',sans-serif;font-size:1rem;font-weight:800;color:var(--orange);margin-bottom:2px}
+.bb-text p{font-size:.8rem;color:#94a3b8;line-height:1.5}
+.bb-btn{
+  margin-left:auto;padding:9px 20px;border-radius:999px;border:none;
+  background:linear-gradient(135deg,var(--orange),var(--yellow));
+  color:#1a0a00;font-weight:900;font-family:'Nunito',sans-serif;
+  font-size:.82rem;cursor:pointer;transition:.18s;white-space:nowrap;flex-shrink:0;
+}
+.bb-btn:hover{transform:scale(1.05)}
+
+/* ── PROGRESS SECTION ── */
+.progress-section{
+  position:relative;z-index:1;
+  max-width:1200px;margin:0 auto 40px;
+  padding:0 22px;
+}
+.ps-title{
+  font-family:'Baloo 2',sans-serif;font-size:1.1rem;font-weight:800;
+  margin-bottom:14px;display:flex;align-items:center;gap:8px;
+}
+.ps-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.ps-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:14px;text-align:center;
+}
+.ps-n{font-family:'Baloo 2',sans-serif;font-size:1.6rem;font-weight:900}
+.ps-l{font-size:.68rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.prog-bar{height:5px;background:rgba(255,255,255,.07);border-radius:3px;margin-top:7px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;transition:width 1s ease}
+
+/* ── MOVEMENT BREAK MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,.8);backdrop-filter:blur(10px);
+  display:none;place-items:center;
+}
+.modal-overlay.show{display:grid}
+.modal-box{
+  background:var(--card);border:1px solid rgba(255,123,46,.3);
+  border-radius:28px;padding:40px;max-width:400px;width:90%;
+  text-align:center;animation:popIn .4s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn{from{transform:scale(.8);opacity:0}}
+.mb-icon{font-size:72px;margin-bottom:12px;display:block;animation:bounce .8s infinite alternate}
+.mb-title{font-family:'Baloo 2',sans-serif;font-size:1.7rem;font-weight:900;color:var(--orange);margin-bottom:6px}
+.mb-activity{
+  font-size:1.1rem;font-weight:700;margin:16px 0;
+  padding:14px;background:rgba(255,123,46,.08);
+  border-radius:14px;border:1px solid rgba(255,123,46,.2);
+  line-height:1.5;
+}
+.mb-timer{
+  font-family:'Baloo 2',sans-serif;font-size:3rem;font-weight:900;
+  color:var(--yellow);margin:10px 0;
+}
+.mb-skip{
+  padding:10px 24px;border-radius:999px;border:1px solid var(--border);
+  background:transparent;color:#94a3b8;cursor:pointer;
+  font-weight:700;font-family:'Nunito',sans-serif;font-size:.85rem;
+  margin-top:8px;transition:.18s;
+}
+.mb-skip:hover{background:rgba(255,255,255,.07);color:#f1f5f9}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(60px);
+  background:linear-gradient(135deg,var(--orange),var(--yellow));
+  color:#1a0a00;padding:12px 24px;border-radius:999px;
+  font-weight:900;font-size:.85rem;z-index:300;opacity:0;transition:.35s;
+  pointer-events:none;font-family:'Baloo 2',sans-serif;
+  box-shadow:0 8px 32px rgba(255,123,46,.4);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── CONFETTI ── */
+.conf{position:fixed;border-radius:2px;animation:confFall linear forwards;pointer-events:none;z-index:400}
+@keyframes confFall{to{transform:translateY(105vh) rotate(720deg);opacity:0}}
+
+@media(max-width:600px){
+  .hero h1{font-size:2rem}
+  .games-grid{grid-template-columns:1fr}
+  .break-banner{flex-direction:column;text-align:center}
+  .bb-btn{margin:0 auto}
+  .topbar{padding:11px 16px}
+}
+</style>
+</head>
+<body>
+
+<!-- Animated background shapes -->
+<div class="shapes" id="shapes"></div>
+
+<!-- ── TOPBAR ── -->
+<div class="topbar">
+  <button class="back-btn" onclick="location.href='student-games.html'">← Dashboard</button>
+  <div class="tb-logo">⚡ ADHD Games Zone</div>
+  <div class="tb-right">
+    <div class="pill pill-o">⚡ <span id="navXP">0</span> XP</div>
+    <div class="pill pill-y">🪙 <span id="navCoins">0</span></div>
+    <div class="pill pill-g">🔥 <span id="navStreak">0</span> streak</div>
+  </div>
+</div>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-badge">🧠 Designed for ADHD Learners</div>
+  <h1>Focus · Play · Grow!</h1>
+  <p>Short, fun, and energising games built to match how your brain works best. Earn XP, collect coins, and beat your streak!</p>
+  <div class="hero-stats">
+    <div class="hs"><div class="hs-n" id="hsSessions">0</div><div class="hs-l">Sessions</div></div>
+    <div class="hs"><div class="hs-n" id="hsCoins">0</div><div class="hs-l">Total Coins</div></div>
+    <div class="hs"><div class="hs-n" id="hsStreak">0</div><div class="hs-l">Day Streak</div></div>
+    <div class="hs"><div class="hs-n" id="hsGames">0</div><div class="hs-l">Games Played</div></div>
+  </div>
+</div>
+
+<!-- ── FILTER ── -->
+<div class="filter-row">
+  <button class="filter-btn on"  onclick="filterGames('all',this)">🎮 All Games</button>
+  <button class="filter-btn"     onclick="filterGames('focus',this)">🎯 Focus</button>
+  <button class="filter-btn"     onclick="filterGames('memory',this)">🧩 Memory</button>
+  <button class="filter-btn"     onclick="filterGames('motor',this)">🏃 Movement</button>
+  <button class="filter-btn"     onclick="filterGames('easy',this)">🟢 Easy</button>
+  <button class="filter-btn"     onclick="filterGames('medium',this)">🟡 Medium</button>
+  <button class="filter-btn"     onclick="filterGames('hard',this)">🔴 Hard</button>
+</div>
+
+<!-- ── MOVEMENT BREAK BANNER ── -->
+<div class="break-banner">
+  <div class="bb-icon">🏃</div>
+  <div class="bb-text">
+    <h4>Time for a Movement Break!</h4>
+    <p>Taking short active breaks helps your brain focus better. Play one whenever you feel restless!</p>
+  </div>
+  <button class="bb-btn" onclick="showBreakModal()">🎲 Random Break!</button>
+</div>
+
+<!-- ── PROGRESS ── -->
+<div class="progress-section">
+  <div class="ps-title">📊 My Progress</div>
+  <div class="ps-grid" id="psGrid"></div>
+</div>
+
+<!-- ── GAMES GRID ── -->
+<div class="games-section">
+  <div class="games-grid" id="gamesGrid"></div>
+</div>
+
+<!-- ── MOVEMENT BREAK MODAL ── -->
+<div class="modal-overlay" id="breakModal">
+  <div class="modal-box">
+    <span class="mb-icon" id="mbIcon">🏃</span>
+    <div class="mb-title">Movement Break!</div>
+    <div class="mb-activity" id="mbActivity">Get ready…</div>
+    <div class="mb-timer" id="mbTimer">30</div>
+    <p style="color:#64748b;font-size:.8rem;margin-bottom:8px">seconds</p>
+    <button class="mb-skip" onclick="closeBreak()">✓ Done! Back to games</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SID = sessionStorage.getItem('studentId') || localStorage.getItem('esld_user') && JSON.parse(localStorage.getItem('esld_user')).student_id || 'guest';
+
+/* ── GAME DATA ── */
+const GAMES = [
+  {
+    id:'focus-timer',
+    emoji:'⏱️',
+    title:'Focus Timer Challenge',
+    desc:'Beat the clock! Short 2–5 min tasks with a visual countdown. Complete goals before time runs out!',
+    diff:'easy', tags:['focus','reward'],
+    color:'linear-gradient(135deg,#ff7b2e,#ffd93d)',
+    bg:'rgba(255,123,46,.15)',
+    xp:'+10–20 XP',
+    file:'adhd-focus-timer.html',
+    isNew:true,
+  },
+  {
+    id:'target-tap',
+    emoji:'🎯',
+    title:'Target Tap',
+    desc:'Tap the right targets before they vanish! Ignore the wrong ones. Fast reactions earn big points!',
+    diff:'easy', tags:['focus','motor'],
+    color:'linear-gradient(135deg,#f72585,#7209b7)',
+    bg:'rgba(247,37,133,.15)',
+    xp:'+15–30 XP',
+    file:'adhd-target-tap.html',
+    isNew:false,
+  },
+  {
+    id:'pattern-memory',
+    emoji:'🧩',
+    title:'Pattern Memory',
+    desc:'Remember the pattern shown for 3 seconds, then recreate it! Each level gets trickier!',
+    diff:'medium', tags:['memory','focus'],
+    color:'linear-gradient(135deg,#4cc9f0,#4361ee)',
+    bg:'rgba(76,201,240,.15)',
+    xp:'+20–35 XP',
+    file:'adhd-pattern-memory.html',
+    isNew:false,
+  },
+  {
+    id:'rhythm-read',
+    emoji:'🎵',
+    title:'Rhythm & Read',
+    desc:'Words flow to the beat! Tap along as you read each word. Reading has never been this groovy!',
+    diff:'medium', tags:['focus','motor'],
+    color:'linear-gradient(135deg,#06d6a0,#1b9aaa)',
+    bg:'rgba(6,214,160,.15)',
+    xp:'+15–25 XP',
+    file:'adhd-rhythm-read.html',
+    isNew:true,
+  },
+  {
+    id:'spelling-jump',
+    emoji:'🏃',
+    title:'Spelling Jumps',
+    desc:'Your character jumps on each correct letter! Spell the word before the timer runs out!',
+    diff:'medium', tags:['motor','focus'],
+    color:'linear-gradient(135deg,#ffd93d,#ff6b6b)',
+    bg:'rgba(255,217,61,.15)',
+    xp:'+20–40 XP',
+    file:'adhd-spelling-jump.html',
+    isNew:false,
+  },
+  {
+    id:'story-quest',
+    emoji:'🗺️',
+    title:'Story Quest',
+    desc:'Go on a quest! Read a mini story and pick the missing word to move to the next chapter!',
+    diff:'easy', tags:['focus','memory'],
+    color:'linear-gradient(135deg,#a78bfa,#ec4899)',
+    bg:'rgba(167,139,250,.15)',
+    xp:'+10–25 XP',
+    file:'adhd-story-quest.html',
+    isNew:false,
+  },
+  {
+    id:'drag-sort',
+    emoji:'🎨',
+    title:'Drag & Sort',
+    desc:'Items fall from the sky! Drag each one into the right bucket before it hits the bottom!',
+    diff:'hard', tags:['focus','motor'],
+    color:'linear-gradient(135deg,#2dd4bf,#06b6d4)',
+    bg:'rgba(45,212,191,.15)',
+    xp:'+25–50 XP',
+    file:'adhd-drag-sort.html',
+    isNew:false,
+  },
+  {
+    id:'listen-choose',
+    emoji:'🔊',
+    title:'Listen & Choose',
+    desc:'Hear a word and pick the matching picture! No reading needed. Just listen and tap!',
+    diff:'easy', tags:['memory','focus'],
+    color:'linear-gradient(135deg,#06d6a0,#0582ca)',
+    bg:'rgba(6,214,160,.15)',
+    xp:'+10–20 XP',
+    file:'adhd-listen-choose.html',
+    isNew:true,
+  },
+];
+
+const DIFF_COLORS = {
+  easy:{cls:'diff-easy',label:'🟢 Easy'},
+  medium:{cls:'diff-medium',label:'🟡 Medium'},
+  hard:{cls:'diff-hard',label:'🔴 Hard'},
+};
+
+const BREAK_ACTIVITIES = [
+  {icon:'🌟',text:'Stand up and do 10 jumping jacks! Jump high and count out loud!'},
+  {icon:'🦋',text:'Stretch both arms wide like butterfly wings. Hold for 10 seconds, then flap!'},
+  {icon:'🐸',text:'Do 5 frog jumps around your chair! Jump as far as you can!'},
+  {icon:'💃',text:'Dance to your favourite song for 30 seconds. Move every part of your body!'},
+  {icon:'🦁',text:'Take 5 deep lion breaths. Breathe in slowly, then roar it all out!'},
+  {icon:'⭐',text:'Spin around 3 times, then freeze like a statue. Can you balance on one foot?'},
+  {icon:'🏋️',text:'Do 10 wall push-ups! Put your hands on the wall and push!'},
+  {icon:'🚶',text:'Walk around the room 3 times as fast as you can, swinging your arms!'},
+];
+
+/* ── RENDER GAMES ── */
+function renderGames(){
+  const grid = document.getElementById('gamesGrid');
+  grid.innerHTML = '';
+  GAMES.forEach((g, i) => {
+    const dc = DIFF_COLORS[g.diff];
+    const card = document.createElement('a');
+    card.className = 'game-card';
+    card.href = g.file;
+    card.dataset.tags = g.tags.join(' ');
+    card.dataset.diff = g.diff;
+    card.style.animationDelay = (i * 0.07) + 's';
+    card.innerHTML = `
+      <div class="card-banner" style="background:${g.bg}">
+        ${g.isNew ? '<div class="card-new-badge">NEW</div>' : ''}
+        <div class="card-banner-emoji">${g.emoji}</div>
+      </div>
+      <div class="card-body">
+        <div class="card-diff ${dc.cls}">${dc.label}</div>
+        <div class="card-title">${g.title}</div>
+        <div class="card-desc">${g.desc}</div>
+        <div class="card-tags">${g.tags.map(t=>`<span class="ctag">${t}</span>`).join('')}</div>
+        <div class="card-footer">
+          <div class="card-xp">⚡ ${g.xp}</div>
+          <button class="card-play-btn" style="background:${g.color};color:#fff">▶ Play!</button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+/* ── FILTER ── */
+function filterGames(type, btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.game-card').forEach(card=>{
+    const show = type==='all' ||
+      card.dataset.tags?.includes(type) ||
+      card.dataset.diff===type;
+    card.classList.toggle('hidden', !show);
+  });
+}
+
+/* ── PROGRESS CARDS ── */
+const PROGRESS_ITEMS = [
+  {key:'xp',      label:'Total XP',     color:'var(--yellow)',  max:500},
+  {key:'coins',   label:'Coins',        color:'var(--orange)',  max:300},
+  {key:'sessions',label:'Sessions',     color:'var(--green)',   max:30},
+  {key:'streak',  label:'Day Streak',   color:'var(--blue)',    max:14},
+];
+function renderProgress(){
+  const grid = document.getElementById('psGrid');
+  grid.innerHTML = '';
+  const xp      = Number(localStorage.getItem('adhd_xp_'+SID)    || localStorage.getItem('dysgraphia-xp-'+SID) || 0);
+  const coins   = Number(localStorage.getItem('coins-'+SID)      || 0);
+  const sessions= Number(localStorage.getItem('gamesPlayed-'+SID)|| 0);
+  const streak  = Number(localStorage.getItem('streak-'+SID)     || 0);
+  const vals    = {xp,coins,sessions,streak};
+
+  document.getElementById('navXP').textContent = xp;
+  document.getElementById('navCoins').textContent = coins;
+  document.getElementById('navStreak').textContent = streak;
+  document.getElementById('hsSessions').textContent = sessions;
+  document.getElementById('hsCoins').textContent = coins;
+  document.getElementById('hsStreak').textContent = streak;
+  document.getElementById('hsGames').textContent = sessions;
+
+  PROGRESS_ITEMS.forEach(p=>{
+    const v = vals[p.key] || 0;
+    const pct = Math.min(100, Math.round(v/p.max*100));
+    const div = document.createElement('div');
+    div.className='ps-card';
+    div.innerHTML=`<div class="ps-n" style="color:${p.color}">${v}</div>
+      <div class="ps-l">${p.label}</div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${p.color}"></div></div>`;
+    grid.appendChild(div);
+  });
+}
+
+/* ── MOVEMENT BREAK ── */
+let breakInterval = null;
+function showBreakModal(){
+  const a = BREAK_ACTIVITIES[Math.floor(Math.random()*BREAK_ACTIVITIES.length)];
+  document.getElementById('mbIcon').textContent = a.icon;
+  document.getElementById('mbActivity').textContent = a.text;
+  let t = 30;
+  document.getElementById('mbTimer').textContent = t;
+  document.getElementById('breakModal').classList.add('show');
+  clearInterval(breakInterval);
+  breakInterval = setInterval(()=>{
+    t--;
+    document.getElementById('mbTimer').textContent = t;
+    if(t<=0){ clearInterval(breakInterval); closeBreak(); showToast('🎉 Break done! Ready to focus again!'); }
+  },1000);
+}
+function closeBreak(){
+  clearInterval(breakInterval);
+  document.getElementById('breakModal').classList.remove('show');
+}
+
+/* ── ANIMATED BG SHAPES ── */
+function buildShapes(){
+  const colors = ['#ff7b2e','#ffd93d','#06d6a0','#4cc9f0','#f72585','#a78bfa'];
+  const wrap = document.getElementById('shapes');
+  for(let i=0;i<18;i++){
+    const s = document.createElement('div');
+    s.className='shape';
+    const sz = 20 + Math.random()*60;
+    Object.assign(s.style,{
+      width:sz+'px',height:sz+'px',left:Math.random()*100+'%',
+      background:colors[i%colors.length],
+      animationDuration:(14+Math.random()*12)+'s',
+      animationDelay:(Math.random()*12)+'s',
+    });
+    wrap.appendChild(s);
+  }
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+/* ── INIT ── */
+buildShapes();
+renderGames();
+renderProgress();
+</script>
+</body>
+</html>

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ESLD – My Progress</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{
+  --bg:#0b1120;--sidebar:#0f172a;--card:rgba(255,255,255,.07);--border:rgba(255,255,255,.12);
+  --radius:20px;--green:#22c55e;--blue:#38bdf8;--purple:#a78bfa;
+  --yellow:#fbbf24;--orange:#fb923c;--pink:#f472b6;--teal:#2dd4bf;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:#f1f5f9;min-height:100vh;
+  display:grid;grid-template-columns:260px 1fr;grid-template-rows:auto 1fr}
+
+/* SIDEBAR */
+.sidebar{grid-row:1/-1;background:var(--sidebar);border-right:1px solid var(--border);
+  padding:20px 16px;display:flex;flex-direction:column;gap:8px;
+  position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidebar-logo{font-family:'Fredoka One';font-size:1.5rem;padding:10px 8px 18px;
+  border-bottom:1px solid var(--border);margin-bottom:8px;
+  background:linear-gradient(90deg,var(--green),var(--blue));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;
+  cursor:pointer;transition:.2s;font-weight:700;font-size:.9rem;color:#64748b;
+  border:none;background:none;width:100%;text-align:left;font-family:'Nunito',sans-serif}
+.nav-item:hover{background:rgba(255,255,255,.08);color:#f1f5f9}
+.nav-item.active{background:rgba(34,197,94,.1);color:var(--green)}
+.sidebar-coins{margin-top:auto;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.2);
+  border-radius:14px;padding:14px;text-align:center}
+.coins-num{font-family:'Fredoka One';font-size:2rem;color:var(--yellow)}
+.coins-label{font-size:.8rem;color:#64748b}
+
+/* TOPBAR */
+.topbar{grid-column:2;padding:16px 28px;display:flex;align-items:center;
+  justify-content:space-between;flex-wrap:wrap;gap:10px;
+  border-bottom:1px solid var(--border);background:rgba(15,23,42,.6);
+  backdrop-filter:blur(12px);position:sticky;top:0;z-index:10}
+.topbar h2{font-family:'Fredoka One';font-size:1.4rem}
+.filter-btns{display:flex;gap:8px;flex-wrap:wrap}
+.filter-btn{padding:7px 16px;border-radius:999px;border:1px solid var(--border);
+  background:var(--card);color:#f1f5f9;font-weight:700;cursor:pointer;
+  font-family:'Nunito',sans-serif;font-size:.82rem;transition:.2s}
+.filter-btn:hover{background:rgba(255,255,255,.14)}
+.filter-btn.active{background:rgba(56,189,248,.2);border-color:var(--blue);color:var(--blue)}
+.pdf-btn{padding:8px 18px;border-radius:999px;border:none;
+  background:linear-gradient(135deg,var(--green),#16a34a);
+  color:#052e16;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.83rem;transition:.2s}
+.pdf-btn:hover{transform:translateY(-1px)}
+
+/* MAIN */
+main{grid-column:2;padding:24px 28px;overflow-y:auto}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center;position:relative;overflow:hidden;transition:.2s}
+.stat-card:hover{transform:translateY(-3px)}
+.stat-card::before{content:'';position:absolute;top:-18px;right:-18px;width:65px;height:65px;border-radius:50%;opacity:.1}
+.sc-green::before{background:var(--green)}.sc-blue::before{background:var(--blue)}.sc-purple::before{background:var(--purple)}.sc-yellow::before{background:var(--yellow)}.sc-orange::before{background:var(--orange)}.sc-pink::before{background:var(--pink)}
+.stat-emoji{font-size:28px;margin-bottom:8px;display:block}
+.stat-num{font-family:'Fredoka One';font-size:2rem;line-height:1}
+.sc-green .stat-num{color:var(--green)}.sc-blue .stat-num{color:var(--blue)}.sc-purple .stat-num{color:var(--purple)}.sc-yellow .stat-num{color:var(--yellow)}.sc-orange .stat-num{color:var(--orange)}.sc-pink .stat-num{color:var(--pink)}
+.stat-label{color:#64748b;font-size:.78rem;margin-top:4px}
+
+/* AI ANALYSIS */
+.ai-card{background:linear-gradient(135deg,rgba(167,139,250,.1),rgba(56,189,248,.07));
+  border:1px solid rgba(167,139,250,.2);border-radius:22px;padding:22px;margin-bottom:24px}
+.ai-card h3{font-family:'Fredoka One';font-size:1.1rem;color:var(--purple);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.ai-items{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:14px}
+.ai-item{background:rgba(255,255,255,.05);border-radius:14px;padding:14px}
+.ai-label{font-size:.75rem;color:#64748b;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.ai-value{font-family:'Fredoka One';font-size:1.3rem;margin-bottom:6px}
+.bar-wrap{height:7px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width 1s ease}
+
+/* CHARTS */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.chart-card h3{font-family:'Fredoka One';font-size:.95rem;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+canvas{max-height:200px}
+.full{grid-column:1/-1}
+
+/* MODULE PROGRESS */
+.module-section{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:22px;margin-bottom:24px}
+.module-section h3{font-family:'Fredoka One';font-size:1.05rem;margin-bottom:16px}
+.mod-item{margin-bottom:14px}
+.mod-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.mod-name{font-weight:800;font-size:.9rem;display:flex;align-items:center;gap:8px}
+.mod-pct{font-family:'Fredoka One';font-size:.95rem}
+.mod-bar{height:10px;background:rgba(255,255,255,.07);border-radius:5px;overflow:hidden}
+.mod-fill{height:100%;border-radius:5px;transition:width .8s ease}
+
+/* SESSIONS TABLE */
+.table-card{background:var(--card);border:1px solid var(--border);border-radius:22px;overflow:hidden;margin-bottom:24px}
+.table-head{display:grid;grid-template-columns:1.5fr 80px 80px 80px 80px 80px;padding:10px 16px;
+  background:rgba(255,255,255,.04);font-size:.72rem;color:#64748b;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.table-row{display:grid;grid-template-columns:1.5fr 80px 80px 80px 80px 80px;padding:12px 16px;
+  border-top:1px solid rgba(255,255,255,.04);font-size:.84rem;align-items:center;transition:.15s}
+.table-row:hover{background:rgba(255,255,255,.04)}
+.game-name{font-weight:800;font-size:.88rem}
+.game-date{color:#64748b;font-size:.72rem;margin-top:2px}
+.acc-pill{padding:3px 10px;border-radius:999px;font-weight:800;font-size:.73rem;display:inline-block}
+.acc-h{background:rgba(34,197,94,.14);color:var(--green)}
+.acc-m{background:rgba(251,191,36,.14);color:var(--yellow)}
+.acc-l{background:rgba(239,68,68,.14);color:#ef4444}
+
+/* MILESTONES */
+.milestones-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-bottom:24px}
+.milestone{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:center;transition:.2s}
+.milestone.achieved{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06)}
+.milestone:hover{transform:translateY(-3px)}
+.ms-icon{font-size:32px;margin-bottom:8px;display:block}
+.ms-title{font-weight:800;font-size:.85rem;margin-bottom:3px}
+.ms-sub{color:#64748b;font-size:.72rem;margin-bottom:8px}
+.ms-status{font-size:.75rem;font-weight:800}
+.milestone.achieved .ms-status{color:var(--green)}
+.milestone:not(.achieved) .ms-status{color:#475569}
+
+/* MOTIVATE */
+.motivate{background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(56,189,248,.08));
+  border:1px solid rgba(34,197,94,.2);border-radius:18px;padding:14px 20px;
+  display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.motivate .mi{font-size:32px}
+.motivate p{font-weight:700;color:var(--green);font-size:.92rem}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:60px 20px;color:#475569}
+.empty-state .ei{font-size:64px;display:block;margin-bottom:16px}
+.play-link{display:inline-flex;align-items:center;gap:8px;margin-top:18px;padding:12px 28px;
+  border-radius:999px;background:linear-gradient(135deg,var(--green),#16a34a);
+  color:#052e16;font-weight:900;font-family:'Nunito',sans-serif;font-size:.95rem;
+  text-decoration:none;transition:.2s}
+.play-link:hover{transform:translateY(-2px)}
+
+.sec-title{font-family:'Fredoka One';font-size:1.05rem;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+
+@media(max-width:900px){
+  body{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .topbar,.main{grid-column:1}
+  main{grid-column:1;padding:16px}
+  .charts-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .table-head,.table-row{grid-template-columns:1.5fr 70px 70px 70px 70px}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">🦋 ESLD</div>
+  <button class="nav-item" onclick="location.href='student-dashboard.html'"><span>🏠</span><span>Dashboard</span></button>
+  <button class="nav-item" onclick="location.href='student-games.html'"><span>🎮</span><span>Games</span></button>
+  <button class="nav-item" onclick="location.href='dysgraphia-games.html'"><span>✍️</span><span>Dysgraphia</span></button>
+  <button class="nav-item" onclick="location.href='student-assignments.html'"><span>📝</span><span>Assignments</span></button>
+  <button class="nav-item" onclick="location.href='student-messages.html'"><span>💬</span><span>Messages</span></button>
+  <button class="nav-item active"><span>📊</span><span>My Progress</span></button>
+  <button class="nav-item" onclick="location.href='student-leaderboard.html'"><span>🏆</span><span>Leaderboard</span></button>
+  <button class="nav-item" onclick="logout()"><span>🚪</span><span>Logout</span></button>
+  <div class="sidebar-coins">
+    <div class="coins-num" id="sideCoins">0</div>
+    <div class="coins-label">🪙 Total Coins</div>
+  </div>
+</aside>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <h2>📊 My Progress Report</h2>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <div class="filter-btns">
+      <button class="filter-btn active" id="fAll"   onclick="setFilter('all',this)">All Time</button>
+      <button class="filter-btn" id="fMonth" onclick="setFilter('month',this)">This Month</button>
+      <button class="filter-btn" id="fWeek"  onclick="setFilter('week',this)">This Week</button>
+      <button class="filter-btn" id="fToday" onclick="setFilter('today',this)">Today</button>
+    </div>
+    <button class="pdf-btn" onclick="window.print()">📄 Print</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main id="mainContent">
+  <div style="text-align:center;padding:60px;color:#64748b">
+    <span style="font-size:48px;display:block;margin-bottom:12px;animation:spin 1s linear infinite">📊</span>
+    Loading your progress...
+  </div>
+</main>
+
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+<script>
+// ══════════════════════════════════
+// AUTH
+// ══════════════════════════════════
+const sid  = sessionStorage.getItem('studentId');
+const sName = sessionStorage.getItem('studentName') || 'Student';
+if (!sid) { location.href = 'student-login.html'; }
+
+function logout() { sessionStorage.clear(); location.href = 'student-login.html'; }
+
+// ══════════════════════════════════
+// LOAD DATA FROM localStorage
+// ══════════════════════════════════
+function findKey(id) {
+  if (localStorage.getItem('coins-' + id) !== null) return id;
+  const m = String(id).match(/ESLD0*(\d+)ST/);
+  if (m) {
+    const n = String(parseInt(m[1], 10));
+    if (localStorage.getItem('coins-' + n) !== null) return n;
+  }
+  return id;
+}
+const SKEY = findKey(sid);
+
+const ALL_HIST = JSON.parse(localStorage.getItem('ml-history-' + SKEY) || '[]');
+const COINS    = Number(localStorage.getItem('coins-' + SKEY)) || 0;
+const STREAK   = Number(localStorage.getItem('streak-' + SKEY)) || 1;
+const DYS_PROG = Number(localStorage.getItem('dysgraphia-progress-' + SKEY)) || 0;
+const ADHD_PROG= Number(localStorage.getItem('adhd-progress-' + SKEY)) || 0;
+const DYS_XP   = Number(localStorage.getItem('dysgraphia-xp-' + SKEY)) || 0;
+
+document.getElementById('sideCoins').textContent = COINS;
+
+// ══════════════════════════════════
+// FILTER
+// ══════════════════════════════════
+let currentFilter = 'all';
+let filtered = [];
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilter();
+}
+
+function applyFilter() {
+  const now = new Date();
+  if (currentFilter === 'today') {
+    const t = now.toISOString().slice(0,10);
+    filtered = ALL_HIST.filter(h => h.date === t);
+  } else if (currentFilter === 'week') {
+    const cut = new Date(now - 7*86400000).toISOString().slice(0,10);
+    filtered = ALL_HIST.filter(h => h.date >= cut);
+  } else if (currentFilter === 'month') {
+    const cut = new Date(now - 30*86400000).toISOString().slice(0,10);
+    filtered = ALL_HIST.filter(h => h.date >= cut);
+  } else {
+    filtered = [...ALL_HIST];
+  }
+  render();
+}
+
+// ══════════════════════════════════
+// CHARTS REGISTRY
+// ══════════════════════════════════
+const CHARTS = {};
+function mkChart(id, cfg) {
+  if (CHARTS[id]) CHARTS[id].destroy();
+  const el = document.getElementById(id);
+  if (el) CHARTS[id] = new Chart(el, cfg);
+}
+Chart.defaults.color       = '#94a3b8';
+Chart.defaults.borderColor = 'rgba(255,255,255,.07)';
+
+// ══════════════════════════════════
+// RENDER
+// ══════════════════════════════════
+function avg(arr) { return arr.length ? Math.round(arr.reduce((a,b) => a+b, 0) / arr.length) : 0; }
+
+// Canonical map: every real game name -> {icon, module}.
+// This is the single source of truth for categorization — it replaces the old
+// "anything not in this hardcoded dysgraphia list counts as dyslexia" logic,
+// which was silently swallowing ALL adhd sessions into the dyslexia bucket.
+const GAME_META = {
+  'Missing Letter':   { icon:'🔤', module:'dyslexia'   },
+  'Letter Confusion':  { icon:'🔄', module:'dyslexia'   },
+  'Read & Match':      { icon:'📖', module:'dyslexia'   },
+  'Sound & Match':     { icon:'🔊', module:'dyslexia'   },
+  'Speed Reader':      { icon:'⏱️', module:'dyslexia'   },
+  'Letter Tracing':    { icon:'✏️', module:'dysgraphia' },
+  'Air Write Pro':     { icon:'✋', module:'dysgraphia' },
+  'Speech Write':      { icon:'🎤', module:'dysgraphia' },
+  'Letter Quiz':       { icon:'❓', module:'dysgraphia' },
+  'Target Tap':        { icon:'🎯', module:'adhd'       },
+  'Focus Timer':       { icon:'⏳', module:'adhd'       },
+  'Pattern Memory':    { icon:'🧩', module:'adhd'       },
+  'Rhythm Read':       { icon:'🎶', module:'adhd'       },
+  // 'Word Builder' exists in BOTH dyslexia and dysgraphia games and is only
+  // disambiguated by the session's own h.module field (set at save-time).
+  // This entry is just the last-resort fallback for old sessions saved
+  // before that fix, so they don't crash the report.
+  'Word Builder':      { icon:'🧩', module:'dysgraphia' },
+};
+const VALID_MODULES = ['dyslexia','dysgraphia','adhd'];
+
+function getModule(h) {
+  if (h.module && VALID_MODULES.includes(h.module)) return h.module;
+  const meta = GAME_META[h.game];
+  return meta ? meta.module : 'dyslexia';
+}
+
+function gameIcon(g) {
+  const meta = GAME_META[g];
+  return meta ? meta.icon : '🎮';
+}
+
+function render() {
+  Object.values(CHARTS).forEach(c => c.destroy());
+
+  if (!filtered.length) {
+    document.getElementById('mainContent').innerHTML = `
+      <div class="empty-state">
+        <span class="ei">😴</span>
+        <p style="font-size:1rem;font-weight:800">No sessions found for this period</p>
+        <p style="margin-top:8px;font-size:.88rem">Play some games and your progress will appear here!</p>
+        <a class="play-link" href="student-games.html">🎮 Play Games Now</a>
+      </div>`;
+    return;
+  }
+
+  const totalAcc   = avg(filtered.map(h => parseFloat(h.accuracy) || 0));
+  const best       = Math.max(...filtered.map(h => parseFloat(h.accuracy) || 0));
+  const totalCoins = filtered.reduce((a, h) => a + (parseInt(h.coins) || 0), 0);
+  const totalCorrect=filtered.reduce((a, h) => a + (parseInt(h.correct) || 0), 0);
+  const totalWrong = filtered.reduce((a, h) => a + (parseInt(h.wrong) || 0), 0);
+  const sessions   = filtered.length;
+  const acClr      = totalAcc >= 75 ? '#22c55e' : totalAcc >= 50 ? '#fbbf24' : '#ef4444';
+  const improving  = filtered.length >= 2 && parseFloat(filtered[0].accuracy) > parseFloat(filtered[1].accuracy);
+
+  // Date map for charts
+  const dateMap = {};
+  [...filtered].reverse().forEach(h => {
+    if (!dateMap[h.date]) dateMap[h.date] = { acc:[], coins:0 };
+    dateMap[h.date].acc.push(parseFloat(h.accuracy) || 0);
+    dateMap[h.date].coins += parseInt(h.coins) || 0;
+  });
+  const days   = Object.keys(dateMap).sort();
+  const dayAcc = days.map(d => avg(dateMap[d].acc));
+  const dayCoins = days.map(d => dateMap[d].coins);
+
+  // Game breakdown
+  const gameMap = {};
+  filtered.forEach(h => {
+    const g = h.game || 'Game';
+    if (!gameMap[g]) gameMap[g] = { sessions:0, totalAcc:0, coins:0 };
+    gameMap[g].sessions++;
+    gameMap[g].totalAcc += parseFloat(h.accuracy) || 0;
+    gameMap[g].coins += parseInt(h.coins) || 0;
+  });
+  const gameStats = Object.entries(gameMap).map(([g, v]) => ({ game:g, sessions:v.sessions, avg:Math.round(v.totalAcc/v.sessions), coins:v.coins })).sort((a,b)=>b.sessions-a.sessions);
+
+  // Score distribution
+  const dist = [0,0,0,0,0];
+  filtered.forEach(h => { const i=Math.min(4,Math.floor((parseFloat(h.accuracy)||0)/20)); dist[i]++; });
+
+  // Module progress — every session is classified exactly once, by its own
+  // module field (or the GAME_META fallback), so dyslexia/dysgraphia/adhd
+  // always add up to the real total instead of overlapping or missing ADHD.
+  const dyslexiaSessions   = filtered.filter(h => getModule(h) === 'dyslexia');
+  const dysgraphiaSessions = filtered.filter(h => getModule(h) === 'dysgraphia');
+  const adhdSessions       = filtered.filter(h => getModule(h) === 'adhd');
+  const dyslexiaPct   = Math.min(100, dyslexiaSessions.length * 10);
+  const dysgraphiaPct = Math.min(100, dysgraphiaSessions.length * 10);
+  const adhdPct       = Math.min(100, adhdSessions.length * 10);
+  const overallPct    = Math.round((dyslexiaPct + dysgraphiaPct + adhdPct) / 3);
+
+  // Milestones
+  const allSessions = ALL_HIST.length;
+  const milestones = [
+    { icon:'🌟', title:'First Game',       sub:'Your journey began!',        achieved: allSessions >= 1 },
+    { icon:'🔥', title:'5 Sessions',       sub:'Building a habit!',          achieved: allSessions >= 5 },
+    { icon:'💪', title:'10 Sessions',      sub:'On a roll!',                 achieved: allSessions >= 10 },
+    { icon:'🎯', title:'80% Accuracy',     sub:'Sharp focus!',               achieved: best >= 80 },
+    { icon:'💎', title:'90% Accuracy',     sub:'Exceptional!',               achieved: best >= 90 },
+    { icon:'🏆', title:'Perfect 100%',     sub:'Legendary!',                 achieved: best >= 100 },
+    { icon:'🪙', title:'100 Coins',        sub:'Coin collector!',            achieved: COINS >= 100 },
+    { icon:'🔥', title:'3-Day Streak',     sub:'Consistency pays!',          achieved: STREAK >= 3 },
+    { icon:'✏️', title:'Traced 5 Letters', sub:'Tracing champion!',          achieved: dysgraphiaSessions.filter(h=>h.game==='Letter Tracing').length >= 5 },
+    { icon:'🧩', title:'Built 5 Words',    sub:'Word wizard!',               achieved: dysgraphiaSessions.filter(h=>h.game==='Word Builder').length >= 5 },
+    { icon:'🎤', title:'Spoke 5 Words',    sub:'Speech superstar!',          achieved: dysgraphiaSessions.filter(h=>h.game==='Speech Write').length >= 5 },
+    { icon:'📚', title:'50 Questions',     sub:'Knowledge seeker!',          achieved: filtered.reduce((a,h)=>a+(parseInt(h.correct)||0)+(parseInt(h.wrong)||0),0) >= 50 },
+  ];
+
+  document.getElementById('mainContent').innerHTML = `
+    ${improving ? `<div class="motivate"><div class="mi">🎉</div><p>Amazing! Your accuracy is improving! Keep it up, ${sName.split(' ')[0]}!</p></div>` : ''}
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card sc-green"><span class="stat-emoji">📈</span><div class="stat-num">${totalAcc}%</div><div class="stat-label">Avg Accuracy</div></div>
+      <div class="stat-card sc-blue"><span class="stat-emoji">🏅</span><div class="stat-num">${best}%</div><div class="stat-label">Best Score</div></div>
+      <div class="stat-card sc-green"><span class="stat-emoji">✅</span><div class="stat-num">${totalCorrect}</div><div class="stat-label">Correct</div></div>
+      <div class="stat-card sc-orange"><span class="stat-emoji">❌</span><div class="stat-num">${totalWrong}</div><div class="stat-label">Wrong</div></div>
+      <div class="stat-card sc-yellow"><span class="stat-emoji">🪙</span><div class="stat-num">${COINS}</div><div class="stat-label">Total Coins</div></div>
+      <div class="stat-card sc-purple"><span class="stat-emoji">🎮</span><div class="stat-num">${sessions}</div><div class="stat-label">Sessions</div></div>
+      <div class="stat-card sc-pink"><span class="stat-emoji">🔥</span><div class="stat-num">${STREAK}</div><div class="stat-label">Day Streak</div></div>
+      <div class="stat-card sc-blue"><span class="stat-emoji">⚡</span><div class="stat-num">${DYS_XP}</div><div class="stat-label">Dysgraphia XP</div></div>
+    </div>
+
+    <!-- AI ANALYSIS -->
+    <div class="ai-card">
+      <h3>🤖 AI Performance Analysis</h3>
+      <div class="ai-items">
+        <div class="ai-item">
+          <div class="ai-label">Reading Accuracy</div>
+          <div class="ai-value" style="color:${acClr}">${totalAcc}%</div>
+          <div class="bar-wrap"><div class="bar-fill" style="width:${totalAcc}%;background:${acClr}"></div></div>
+        </div>
+        <div class="ai-item">
+          <div class="ai-label">Writing Skill</div>
+          <div class="ai-value" style="color:var(--purple)">${Math.min(100,Math.round(dysgraphiaPct))}%</div>
+          <div class="bar-wrap"><div class="bar-fill" style="width:${Math.min(100,dysgraphiaPct)}%;background:var(--purple)"></div></div>
+        </div>
+        <div class="ai-item">
+          <div class="ai-label">Spelling Accuracy</div>
+          <div class="ai-value" style="color:var(--blue)">${totalCorrect+totalWrong>0?Math.round(totalCorrect/(totalCorrect+totalWrong)*100):0}%</div>
+          <div class="bar-wrap"><div class="bar-fill" style="width:${totalCorrect+totalWrong>0?Math.round(totalCorrect/(totalCorrect+totalWrong)*100):0}%;background:var(--blue)"></div></div>
+        </div>
+        <div class="ai-item">
+          <div class="ai-label">Consistency</div>
+          <div class="ai-value" style="color:var(--orange)">${Math.min(100,STREAK*15)}%</div>
+          <div class="bar-wrap"><div class="bar-fill" style="width:${Math.min(100,STREAK*15)}%;background:var(--orange)"></div></div>
+        </div>
+      </div>
+      <p style="color:#64748b;font-size:.85rem;margin-top:4px">
+        💡 <strong>AI Suggestion:</strong>
+        ${totalAcc < 60 ? 'Focus on easy levels to build confidence! Try Letter Tracing.' :
+          totalAcc < 80 ? 'You\'re progressing well! Try medium difficulty Word Builder.' :
+          'Outstanding! Challenge yourself with Hard mode games and Air Writing!'}
+      </p>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3>📈 Daily Accuracy Trend</h3>
+        <canvas id="dayAccChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>🪙 Daily Coins Earned</h3>
+        <canvas id="dayCoinsChart"></canvas>
+      </div>
+      <div class="chart-card full">
+        <h3>📊 Score Distribution</h3>
+        <canvas id="distChart"></canvas>
+      </div>
+    </div>
+
+    <!-- MODULE PROGRESS -->
+    <div class="module-section">
+      <h3>🧩 Module Progress</h3>
+      ${[
+        {name:'📖 Dyslexia',   pct:dyslexiaPct,   clr:'var(--green)'},
+        {name:'✍️ Dysgraphia', pct:dysgraphiaPct, clr:'var(--purple)'},
+        {name:'⚡ ADHD',        pct:adhdPct,       clr:'var(--orange)'},
+        {name:'🏆 Overall',    pct:overallPct,    clr:'var(--blue)'},
+      ].map(m => `
+        <div class="mod-item">
+          <div class="mod-head">
+            <span class="mod-name">${m.name}</span>
+            <span class="mod-pct" style="color:${m.clr}">${m.pct}%</span>
+          </div>
+          <div class="mod-bar"><div class="mod-fill" style="width:${m.pct}%;background:${m.clr}"></div></div>
+        </div>`).join('')}
+    </div>
+
+    <!-- SESSIONS TABLE -->
+    <div class="sec-title">🕹️ Recent Sessions</div>
+    <div class="table-card">
+      <div class="table-head"><span>Game</span><span>Mode</span><span>Accuracy</span><span>Correct</span><span>Coins</span><span>Date</span></div>
+      ${filtered.slice(0,20).map(h => {
+        const acc = parseFloat(h.accuracy) || 0;
+        return `<div class="table-row">
+          <div><div class="game-name">${gameIcon(h.game)} ${h.game || '—'}</div></div>
+          <div style="color:#64748b;font-size:.78rem;text-transform:capitalize">${h.mode || '—'}</div>
+          <div><span class="acc-pill ${acc>=75?'acc-h':acc>=50?'acc-m':'acc-l'}">${acc}%</span></div>
+          <div style="color:var(--green);font-weight:800">${h.correct || 0}</div>
+          <div style="color:var(--yellow);font-weight:800">🪙${h.coins || 0}</div>
+          <div style="color:#64748b;font-size:.75rem">${h.date || '—'}</div>
+        </div>`;
+      }).join('')}
+      ${filtered.length === 0 ? '<div style="padding:20px;text-align:center;color:#64748b">No sessions yet</div>' : ''}
+    </div>
+
+    <!-- MILESTONES -->
+    <div class="sec-title">🏅 Milestones</div>
+    <div class="milestones-grid">
+      ${milestones.map(m => `
+        <div class="milestone ${m.achieved ? 'achieved' : ''}">
+          <span class="ms-icon">${m.icon}</span>
+          <div class="ms-title">${m.title}</div>
+          <div class="ms-sub">${m.sub}</div>
+          <div class="ms-status">${m.achieved ? '✅ Achieved' : '🔒 Locked'}</div>
+        </div>`).join('')}
+    </div>
+  `;
+
+  // Build charts
+  const clr = acClr;
+  const CLRS = ['#22c55e','#38bdf8','#a78bfa','#fbbf24','#fb923c','#f472b6','#2dd4bf'];
+
+  mkChart('dayAccChart', {
+    type:'line',
+    data:{ labels:days.map(d=>d.slice(5)), datasets:[{ label:'Accuracy %', data:dayAcc, borderColor:clr, backgroundColor:clr+'22', tension:.4, fill:true, pointBackgroundColor:clr, pointRadius:4 }] },
+    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true,max:100}} }
+  });
+
+  mkChart('dayCoinsChart', {
+    type:'bar',
+    data:{ labels:days.map(d=>d.slice(5)), datasets:[{ label:'Coins', data:dayCoins, backgroundColor:'#fbbf2440', borderColor:'#fbbf24', borderWidth:2, borderRadius:6 }] },
+    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+  });
+
+  mkChart('distChart', {
+    type:'bar',
+    data:{
+      labels:['0–19%','20–39%','40–59%','60–79%','80–100%'],
+      datasets:[{ label:'Sessions', data:dist,
+        backgroundColor:['#ef444440','#f9731640','#fbbf2440','#38bdf840','#22c55e40'],
+        borderColor:['#ef4444','#f97316','#fbbf24','#38bdf8','#22c55e'],
+        borderWidth:2, borderRadius:8 }]
+    },
+    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true,ticks:{stepSize:1}}} }
+  });
+
+  // Animate bars
+  setTimeout(() => {
+    document.querySelectorAll('.bar-fill, .mod-fill').forEach(el => {
+      const w = el.style.width; el.style.width='0';
+      setTimeout(() => el.style.width=w, 50);
+    });
+  }, 100);
+}
+
+// Init
+applyFilter();
+</script>
+</body>
+</html>

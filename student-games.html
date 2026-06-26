@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ESLD – Games Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0b1120;--sidebar:#0f172a;--card:rgba(255,255,255,.07);--border:rgba(255,255,255,.12);--radius:20px;--green:#22c55e;--blue:#38bdf8;--purple:#a78bfa;--yellow:#fbbf24;--orange:#fb923c;--pink:#f472b6;--teal:#2dd4bf}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:#f1f5f9;min-height:100vh;display:grid;grid-template-columns:260px 1fr;grid-template-rows:auto 1fr}
+.sidebar{grid-row:1/-1;background:var(--sidebar);border-right:1px solid var(--border);padding:20px 16px;display:flex;flex-direction:column;gap:8px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidebar-logo{font-family:'Fredoka One';font-size:1.5rem;padding:10px 8px 18px;border-bottom:1px solid var(--border);margin-bottom:8px;background:linear-gradient(90deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;cursor:pointer;transition:.2s;font-weight:700;font-size:.9rem;color:#64748b;border:none;background:none;width:100%;text-align:left;font-family:'Nunito',sans-serif}
+.nav-item:hover{background:rgba(255,255,255,.08);color:#f1f5f9}
+.nav-item.active{background:rgba(34,197,94,.1);color:var(--green)}
+.sidebar-coins{margin-top:auto;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.2);border-radius:14px;padding:14px;text-align:center}
+.coins-num{font-family:'Fredoka One';font-size:2rem;color:var(--yellow)}
+.coins-label{font-size:.8rem;color:#64748b}
+.topbar{grid-column:2;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(15,23,42,.6);backdrop-filter:blur(12px);position:sticky;top:0;z-index:10;flex-wrap:wrap;gap:10px}
+.topbar h2{font-family:'Fredoka One';font-size:1.4rem}
+.xp-pill{padding:7px 16px;border-radius:999px;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.25);font-weight:800;color:var(--yellow);font-size:.88rem}
+main{grid-column:2;padding:24px 28px;overflow-y:auto}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(56,189,248,.08));border:1px solid rgba(34,197,94,.2);border-radius:24px;padding:28px 32px;display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:16px}
+.hero-emoji{font-size:72px;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.hero h2{font-family:'Fredoka One';font-size:1.8rem;margin-bottom:6px}
+.hero p{color:#64748b;font-size:.9rem}
+
+/* SECTION */
+.sec-title{font-family:'Fredoka One';font-size:1.3rem;margin-bottom:18px;display:flex;align-items:center;gap:10px}
+
+/* CATEGORY CARDS */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-bottom:36px}
+.cat-card{border-radius:24px;overflow:hidden;border:2px solid var(--border);cursor:pointer;transition:.3s cubic-bezier(.34,1.56,.64,1);text-decoration:none;display:block;position:relative}
+.cat-card:hover{transform:translateY(-8px) scale(1.02);box-shadow:0 20px 50px rgba(0,0,0,.4);border-color:var(--cc-clr)}
+.cat-header{height:130px;display:flex;align-items:center;justify-content:center;font-size:64px;position:relative}
+.cat-header::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(11,17,32,.9))}
+.cat-body{padding:18px 20px 20px}
+.cat-body h3{font-family:'Fredoka One';font-size:1.25rem;margin-bottom:6px;color:var(--cc-clr)}
+.cat-body p{color:#64748b;font-size:.85rem;line-height:1.5;margin-bottom:14px}
+.cat-footer{display:flex;align-items:center;justify-content:space-between}
+.cat-games{font-size:.8rem;color:#64748b;font-weight:700}
+.play-btn{padding:9px 22px;border-radius:999px;border:none;background:var(--cc-clr);color:#fff;font-family:'Nunito',sans-serif;font-weight:800;font-size:.85rem;cursor:pointer;transition:.15s}
+.play-btn.dark{color:#000}
+.new-tag{position:absolute;top:12px;left:12px;background:var(--green);border-radius:8px;padding:4px 10px;font-size:.7rem;font-weight:800;color:#fff;letter-spacing:.5px;z-index:1;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+
+/* QUICK GAMES */
+.quick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:36px}
+.quick-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;text-align:center;cursor:pointer;transition:.25s;text-decoration:none;display:block}
+.quick-card:hover{transform:translateY(-5px);border-color:var(--qc-clr);background:rgba(255,255,255,.1)}
+.qc-emoji{font-size:40px;display:block;margin-bottom:8px}
+.qc-name{font-weight:800;font-size:.9rem;color:var(--qc-clr);margin-bottom:4px}
+.qc-sub{font-size:.75rem;color:#64748b}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:28px}
+.stat-mini{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:center}
+.sm-num{font-family:'Fredoka One';font-size:1.8rem}
+.sm-lbl{font-size:.72rem;color:#64748b;font-weight:700}
+
+@media(max-width:900px){body{grid-template-columns:1fr}.sidebar{display:none}.topbar{grid-column:1}main{grid-column:1;padding:16px}.cat-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">🦋 ESLD</div>
+  <button class="nav-item" onclick="location.href='student-dashboard.html'"><span>🏠</span><span>Dashboard</span></button>
+  <button class="nav-item active"><span>🎮</span><span>Games</span></button>
+  <button class="nav-item" onclick="location.href='student-progress.html'"><span>📊</span><span>My Progress</span></button>
+  <button class="nav-item" onclick="location.href='student-assignments.html'"><span>📝</span><span>Assignments</span></button>
+  <button class="nav-item" onclick="location.href='student-profile.html'"><span>👤</span><span>My Profile</span></button>
+  <button class="nav-item" onclick="location.href='student-leaderboard.html'"><span>🏆</span><span>Leaderboard</span></button>
+  <button class="nav-item" onclick="location.href='student-messages.html'"><span>💬</span><span>Messages</span></button>
+  <button class="nav-item" onclick="location.href='audio-stories.html'"><span>📖</span><span>Audio Stories</span></button>
+  <button class="nav-item" onclick="location.href='meditation.html'"><span>🧘</span><span>Mindfulness</span></button>
+  <button class="nav-item" onclick="logout()"><span>🚪</span><span>Logout</span></button>
+  <div class="sidebar-coins"><div class="coins-num" id="sideCoins">0</div><div class="coins-label">🪙 Coins Earned</div></div>
+</aside>
+
+<div class="topbar">
+  <h2>🎮 Games Hub</h2>
+  <div class="xp-pill">🪙 <span id="topCoins">0</span> Coins</div>
+</div>
+
+<main>
+  <!-- HERO -->
+  <div class="hero">
+    <div>
+      <h2>Choose Your Adventure! 🚀</h2>
+      <p>Pick a learning module and start playing. Every game earns you coins and XP!</p>
+    </div>
+    <div class="hero-emoji">🎮</div>
+  </div>
+
+  <!-- STATS -->
+  <div class="sec-title">📊 Your Stats</div>
+  <div class="stats-row">
+    <div class="stat-mini"><div class="sm-num" style="color:var(--green)" id="statGames">0</div><div class="sm-lbl">Games Played</div></div>
+    <div class="stat-mini"><div class="sm-num" style="color:var(--yellow)" id="statCoins">0</div><div class="sm-lbl">Coins</div></div>
+    <div class="stat-mini"><div class="sm-num" style="color:var(--blue)" id="statAcc">0%</div><div class="sm-lbl">Avg Accuracy</div></div>
+    <div class="stat-mini"><div class="sm-num" style="color:var(--orange)" id="statStreak">1</div><div class="sm-lbl">Day Streak 🔥</div></div>
+  </div>
+
+  <!-- LEARNING MODULES -->
+  <div class="sec-title">🧠 Learning Modules</div>
+  <div class="cat-grid">
+
+    <a class="cat-card" href="dyslexia-games.html" style="--cc-clr:var(--green);background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(11,17,32,.9))">
+      <div class="new-tag">⭐ POPULAR</div>
+      <div class="cat-header" style="background:linear-gradient(135deg,rgba(34,197,94,.2),rgba(11,17,32,.5))">📖</div>
+      <div class="cat-body">
+        <h3>Dyslexia</h3>
+        <p>Reading, letter recognition, word matching and phonics games designed for dyslexia support.</p>
+        <div class="cat-footer">
+          <span class="cat-games">5 Games Inside</span>
+          <button class="play-btn dark">▶ Play</button>
+        </div>
+      </div>
+    </a>
+
+    <a class="cat-card" href=" dysgraphia-games.html" style="--cc-clr:var(--purple);background:linear-gradient(135deg,rgba(167,139,250,.08),rgba(11,17,32,.9))">
+      <div class="cat-header" style="background:linear-gradient(135deg,rgba(167,139,250,.2),rgba(11,17,32,.5))">✍️</div>
+      <div class="cat-body">
+        <h3>Dysgraphia</h3>
+        <p>Letter tracing, air writing, word building and speech-to-write games for handwriting improvement.</p>
+        <div class="cat-footer">
+          <span class="cat-games">5 Games Inside</span>
+          <button class="play-btn">▶ Play</button>
+        </div>
+      </div>
+    </a>
+
+    <a class="cat-card" href="adhd-games.html" style="--cc-clr:var(--orange);background:linear-gradient(135deg,rgba(251,146,60,.08),rgba(11,17,32,.9))">
+      <div class="cat-header" style="background:linear-gradient(135deg,rgba(251,146,60,.2),rgba(11,17,32,.5))">⚡</div>
+      <div class="cat-body">
+        <h3>ADHD</h3>
+        <p>Focus training, memory challenges, attention games and short burst activities for ADHD support.</p>
+        <div class="cat-footer">
+          <span class="cat-games">4 Games Inside</span>
+          <button class="play-btn">▶ Play</button>
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- QUICK PLAY -->
+  <div class="sec-title">⚡ Quick Play</div>
+  <div class="quick-grid">
+    <a class="quick-card" href="dysgraphia-letter-tracing.html" style="--qc-clr:var(--yellow)">
+      <span class="qc-emoji">✏️</span>
+      <div class="qc-name">Letter Tracing</div>
+      <div class="qc-sub">Trace & earn XP</div>
+    </a>
+    <a class="quick-card" href="dysgraphia-word-builder.html" style="--qc-clr:var(--orange)">
+      <span class="qc-emoji">🧩</span>
+      <div class="qc-name">Word Builder</div>
+      <div class="qc-sub">Drag & drop letters</div>
+    </a>
+    <a class="quick-card" href="dyslexia-read-match.html" style="--qc-clr:var(--green)">
+      <span class="qc-emoji">📖</span>
+      <div class="qc-name">Read & Match</div>
+      <div class="qc-sub">Word-picture match</div>
+    </a>
+    <a class="quick-card" href="dysgraphia-letter-quiz.html" style="--qc-clr:var(--blue)">
+      <span class="qc-emoji">❓</span>
+      <div class="qc-name">Letter Quiz</div>
+      <div class="qc-sub">Adaptive difficulty</div>
+    </a>
+    <a class="quick-card" href="dysgraphia-speech-write.html" style="--qc-clr:var(--pink)">
+      <span class="qc-emoji">🎤</span>
+      <div class="qc-name">Speech to Write</div>
+      <div class="qc-sub">Speak then spell</div>
+    </a>
+    <a class="quick-card" href="dysgraphia-air-writing.html" style="--qc-clr:var(--purple)">
+      <span class="qc-emoji">✋</span>
+      <div class="qc-name">Air Writing</div>
+      <div class="qc-sub">Webcam gesture</div>
+    </a>
+    <a class="quick-card" href="audio-stories.html" style="--qc-clr:var(--teal)">
+      <span class="qc-emoji">📚</span>
+      <div class="qc-name">Audio Stories</div>
+      <div class="qc-sub">Listen & learn</div>
+    </a>
+    <a class="quick-card" href="meditation.html" style="--qc-clr:var(--blue)">
+      <span class="qc-emoji">🧘</span>
+      <div class="qc-name">Mindfulness</div>
+      <div class="qc-sub">Focus & calm</div>
+    </a>
+  </div>
+</main>
+
+<script>
+const sid = sessionStorage.getItem('studentId');
+if (!sid) location.href = 'student-login.html';
+function logout(){sessionStorage.clear();location.href='student-login.html';}
+const coins = Number(localStorage.getItem('coins-'+sid))||0;
+const hist  = JSON.parse(localStorage.getItem('ml-history-'+sid)||'[]');
+const games = hist.length||Number(localStorage.getItem('gamesPlayed-'+sid)||0);
+const acc   = hist.length?Math.round(hist.reduce((a,h)=>a+(parseFloat(h.accuracy)||0),0)/hist.length):0;
+const streak= Number(localStorage.getItem('streak-'+sid)||1);
+document.getElementById('sideCoins').textContent=coins;
+document.getElementById('topCoins').textContent=coins;
+document.getElementById('statGames').textContent=games;
+document.getElementById('statCoins').textContent=coins;
+document.getElementById('statAcc').textContent=acc+'%';
+document.getElementById('statStreak').textContent=streak;
+</script>
+</body>
+</html>

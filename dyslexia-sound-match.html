@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Sound & Match – ESLD</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800;900&family=Lexend:wght@500;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#090c18;--card:rgba(255,255,255,.07);--border:rgba(255,255,255,.1);
+  --green:#22c55e;--blue:#38bdf8;--yellow:#fbbf24;--red:#ef4444;--purple:#a78bfa;--teal:#2dd4bf;--orange:#fb923c;
+  --radius:20px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:#f1f5f9;min-height:100vh;
+  background-image:radial-gradient(ellipse at 10% 20%,rgba(45,212,191,.08) 0%,transparent 55%),
+                   radial-gradient(ellipse at 90% 80%,rgba(167,139,250,.08) 0%,transparent 55%)}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 26px;
+  background:rgba(0,0,0,.35);border-bottom:1px solid var(--border);backdrop-filter:blur(14px);
+  position:sticky;top:0;z-index:50}
+.logo{font-family:'Fredoka One';font-size:1.3rem;background:linear-gradient(90deg,var(--teal),var(--blue));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.xp-bar{display:flex;gap:12px;align-items:center}
+.xp-item{display:flex;align-items:center;gap:5px;font-weight:800;font-size:.88rem}
+.btn{padding:8px 18px;border-radius:999px;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:.84rem;transition:.18s}
+.btn-back{background:rgba(255,255,255,.1);color:#f1f5f9}
+.btn-back:hover{background:rgba(255,255,255,.18)}
+.btn-primary{background:linear-gradient(135deg,var(--teal),#0d9488);color:#022c22}
+.btn-primary:hover{transform:scale(1.04)}
+.btn-danger{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+
+/* SCREENS */
+.screen{display:none;padding:24px 18px;max-width:740px;margin:0 auto}
+.screen.active{display:block}
+
+/* MENU */
+.menu-hero{text-align:center;padding:30px 10px 20px}
+.menu-hero h1{font-family:'Fredoka One';font-size:2.5rem;margin-bottom:8px;
+  background:linear-gradient(135deg,var(--teal),var(--blue),var(--purple));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.menu-hero p{color:#94a3b8;font-size:.93rem;max-width:460px;margin:0 auto;line-height:1.65}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:26px 0}
+.mode-card{background:var(--card);border:2px solid var(--border);border-radius:var(--radius);
+  padding:22px 16px;text-align:center;cursor:pointer;transition:.22s}
+.mode-card:hover{transform:translateY(-5px);border-color:var(--teal);background:rgba(45,212,191,.1)}
+.mode-card.selected{border-color:var(--teal);background:rgba(45,212,191,.12)}
+.mc-icon{font-size:38px;margin-bottom:10px}
+.mc-name{font-family:'Fredoka One';font-size:1.1rem;margin-bottom:5px}
+.mc-sub{font-size:.77rem;color:#64748b;line-height:1.55}
+.diff-row{display:flex;gap:10px;justify-content:center;margin-bottom:26px;flex-wrap:wrap}
+.diff-btn{padding:9px 20px;border-radius:14px;border:2px solid var(--border);background:var(--card);
+  color:#94a3b8;cursor:pointer;font-weight:800;font-size:.82rem;font-family:'Nunito',sans-serif;transition:.2s}
+.diff-btn:hover{border-color:var(--teal)}
+.diff-btn.selected{border-color:var(--teal);background:rgba(45,212,191,.14);color:var(--teal)}
+.start-row{text-align:center;margin-bottom:30px}
+.start-row .btn{padding:14px 46px;font-size:1rem}
+
+/* GAME HEADER */
+.game-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;flex-wrap:wrap;gap:10px}
+.gh-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 18px;text-align:center}
+.gh-val{font-family:'Fredoka One';font-size:1.5rem}
+.gh-lbl{font-size:.67rem;color:#64748b;text-transform:uppercase;letter-spacing:.5px}
+.timer-wrap{position:relative;width:68px;height:68px}
+.timer-wrap svg{transform:rotate(-90deg)}
+.timer-t{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One';font-size:1.3rem}
+
+/* PROGRESS */
+.q-progress{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.q-dots{display:flex;gap:6px;flex:1}
+.q-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.12);transition:.3s}
+.q-dot.done-c{background:var(--green)}
+.q-dot.done-w{background:var(--red)}
+.q-dot.cur{background:var(--teal);box-shadow:0 0 10px var(--teal)}
+
+/* SOUND BUTTON */
+.sound-zone{text-align:center;margin:10px 0 24px}
+.sound-btn{width:110px;height:110px;border-radius:50%;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--teal),var(--blue));
+  font-size:44px;display:inline-flex;align-items:center;justify-content:center;
+  box-shadow:0 0 40px rgba(45,212,191,.35);transition:.2s;position:relative;overflow:hidden}
+.sound-btn:hover{transform:scale(1.08);box-shadow:0 0 60px rgba(45,212,191,.5)}
+.sound-btn.playing{animation:pulse-ring 1s ease infinite}
+.sound-btn.playing::after{content:'';position:absolute;inset:-10px;border-radius:50%;border:3px solid var(--teal);
+  animation:ring-out 1s ease infinite}
+@keyframes pulse-ring{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes ring-out{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.5)}}
+.sound-label{margin-top:10px;font-size:.8rem;color:#64748b;font-weight:700}
+.replay-btn{margin-top:10px;padding:6px 16px;border-radius:999px;border:1px solid var(--border);
+  background:rgba(255,255,255,.06);color:#94a3b8;cursor:pointer;font-size:.78rem;font-weight:700;
+  font-family:'Nunito',sans-serif;transition:.18s}
+.replay-btn:hover{background:rgba(255,255,255,.12);color:#f1f5f9}
+
+/* LETTER OPTIONS */
+.opts-title{text-align:center;font-size:.78rem;color:#64748b;font-weight:800;text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px}
+.letter-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.letter-opt{padding:18px 10px;border-radius:16px;border:2px solid var(--border);background:rgba(255,255,255,.05);
+  text-align:center;cursor:pointer;transition:.22s;font-family:'Lexend';font-size:1.5rem;font-weight:800;
+  letter-spacing:2px}
+.letter-opt:hover{border-color:var(--teal);background:rgba(45,212,191,.1);transform:translateY(-3px)}
+.letter-opt.selected{border-color:var(--blue);background:rgba(56,189,248,.12)}
+.letter-opt.correct{border-color:var(--green);background:rgba(34,197,94,.2);color:var(--green);
+  box-shadow:0 0 20px rgba(34,197,94,.3)}
+.letter-opt.wrong{border-color:var(--red);background:rgba(239,68,68,.15);color:var(--red)}
+.letter-opt.reveal{border-color:var(--green);background:rgba(34,197,94,.1);color:var(--green)}
+
+/* WORD OPTIONS */
+.word-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.word-opt{padding:20px 14px;border-radius:16px;border:2px solid var(--border);background:rgba(255,255,255,.05);
+  text-align:center;cursor:pointer;transition:.22s;font-family:'Lexend';font-size:1.15rem;font-weight:700}
+.word-opt:hover{border-color:var(--teal);background:rgba(45,212,191,.09);transform:translateY(-2px)}
+.word-opt.correct{border-color:var(--green);background:rgba(34,197,94,.18);color:var(--green);box-shadow:0 0 18px rgba(34,197,94,.25)}
+.word-opt.wrong{border-color:var(--red);background:rgba(239,68,68,.13);color:var(--red)}
+.word-opt.reveal{border-color:var(--green);background:rgba(34,197,94,.09);color:var(--green)}
+
+/* SENTENCE mode */
+.sent-display{background:var(--card);border:2px solid var(--border);border-radius:var(--radius);
+  padding:22px;text-align:center;margin-bottom:18px;font-family:'Lexend';font-size:1.1rem;
+  font-weight:600;line-height:1.8;letter-spacing:1px}
+.blank-slot{display:inline-block;border-bottom:3px solid var(--teal);min-width:80px;margin:0 5px;color:var(--teal);font-weight:800}
+.sent-opts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.sent-opt{padding:14px 10px;border-radius:14px;border:2px solid var(--border);background:rgba(255,255,255,.05);
+  text-align:center;cursor:pointer;transition:.2s;font-family:'Lexend';font-size:1rem;font-weight:700}
+.sent-opt:hover{border-color:var(--teal);background:rgba(45,212,191,.09)}
+.sent-opt.correct{border-color:var(--green);background:rgba(34,197,94,.18);color:var(--green)}
+.sent-opt.wrong{border-color:var(--red);background:rgba(239,68,68,.13);color:var(--red)}
+.sent-opt.reveal{border-color:var(--green);background:rgba(34,197,94,.09);color:var(--green)}
+
+/* FEEDBACK */
+.feedback{text-align:center;padding:14px;border-radius:16px;font-family:'Fredoka One';font-size:1.25rem;
+  margin-bottom:16px;display:none}
+.feedback.show{display:block}
+.feedback.correct{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:var(--green)}
+.feedback.wrong{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.28);color:var(--red)}
+.next-row{text-align:center}
+.next-row .btn{padding:12px 36px;font-size:.95rem}
+
+/* RESULTS */
+.result-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:32px;text-align:center;margin-bottom:18px}
+.result-icon{font-size:64px;margin-bottom:14px;display:block;animation:drop-in .5s ease}
+@keyframes drop-in{0%{transform:translateY(-30px) scale(.6);opacity:0}70%{transform:translateY(4px) scale(1.1)}100%{transform:translateY(0) scale(1);opacity:1}}
+.result-title{font-family:'Fredoka One';font-size:2.1rem;margin-bottom:8px}
+.result-sub{color:#94a3b8;font-size:.9rem;margin-bottom:18px}
+.coins-anim{font-family:'Fredoka One';font-size:1.7rem;color:var(--yellow);margin-bottom:20px;
+  animation:pop .6s ease}
+@keyframes pop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.25)}100%{transform:scale(1);opacity:1}}
+.res-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+.rs{background:rgba(255,255,255,.06);border-radius:14px;padding:14px}
+.rv{font-family:'Fredoka One';font-size:1.6rem;margin-bottom:2px}
+.rl{font-size:.68rem;color:#64748b;text-transform:uppercase;letter-spacing:.5px}
+.res-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+/* RESPONSIVE */
+@media(max-width:560px){
+  .letter-grid{grid-template-columns:repeat(3,1fr)}
+  .res-stats{grid-template-columns:1fr 1fr}
+  .mode-grid{grid-template-columns:1fr}
+  .sent-opts{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">🔊 Sound &amp; Match</div>
+  <div class="xp-bar">
+    <div class="xp-item">🪙 <span id="topCoins">0</span></div>
+    <div class="xp-item">✅ <span id="topStreak">0🔥</span></div>
+  </div>
+  <button class="btn btn-back" onclick="goMenu('dyslexia-games.html')">← Menu</button>
+</div>
+
+<!-- ── MENU ── -->
+<div class="screen active" id="screen-menu">
+  <div class="menu-hero">
+    <h1>🔊 Sound &amp; Match</h1>
+    <p>Listen to the sound, then pick the matching letter or word. Train your ears and boost your reading!</p>
+  </div>
+
+  <h3 style="font-family:'Fredoka One';font-size:.82rem;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Game Mode</h3>
+  <div class="mode-grid">
+    <div class="mode-card selected" onclick="selectMode('letter',this)">
+      <div class="mc-icon">🔤</div>
+      <div class="mc-name">Letter Sounds</div>
+      <div class="mc-sub">Hear a letter sound, pick the correct letter. Great for phonics!</div>
+    </div>
+    <div class="mode-card" onclick="selectMode('word',this)">
+      <div class="mc-icon">📖</div>
+      <div class="mc-name">Word Match</div>
+      <div class="mc-sub">Listen to a word, choose the matching written word.</div>
+    </div>
+    <div class="mode-card" onclick="selectMode('sentence',this)">
+      <div class="mc-icon">📝</div>
+      <div class="mc-name">Fill the Blank</div>
+      <div class="mc-sub">Hear a sentence with a missing word. Pick the right one!</div>
+    </div>
+    <div class="mode-card" onclick="selectMode('rhyme',this)">
+      <div class="mc-icon">🎵</div>
+      <div class="mc-name">Rhyme Finder</div>
+      <div class="mc-sub">Which word rhymes with what you hear? Find the sound pair!</div>
+    </div>
+  </div>
+
+  <h3 style="font-family:'Fredoka One';font-size:.82rem;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Difficulty</h3>
+  <div class="diff-row">
+    <button class="diff-btn selected" onclick="selectDiff('easy',this)">🐢 Easy (5 Q)</button>
+    <button class="diff-btn" onclick="selectDiff('medium',this)">🐇 Medium (8 Q)</button>
+    <button class="diff-btn" onclick="selectDiff('hard',this)">🚀 Hard (12 Q)</button>
+  </div>
+
+  <div class="start-row">
+    <button class="btn btn-primary" onclick="startGame()">🎮 Start Listening!</button>
+  </div>
+</div>
+
+<!-- ── GAME ── -->
+<div class="screen" id="screen-game">
+  <div class="game-header">
+    <div class="gh-box"><div class="gh-val" id="ghQ" style="color:var(--teal)">1</div><div class="gh-lbl">Question</div></div>
+    <div class="gh-box"><div class="gh-val" id="ghTotal">5</div><div class="gh-lbl">Total</div></div>
+    <div class="gh-box timer-wrap">
+      <svg width="68" height="68" viewBox="0 0 68 68">
+        <circle cx="34" cy="34" r="26" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="6"/>
+        <circle id="timerArc" cx="34" cy="34" r="26" fill="none" stroke="var(--teal)" stroke-width="6"
+          stroke-dasharray="163" stroke-dashoffset="0" stroke-linecap="round"/>
+      </svg>
+      <div class="timer-t" id="timerVal">--</div>
+    </div>
+    <div class="gh-box"><div class="gh-val" id="ghScore" style="color:var(--green)">0</div><div class="gh-lbl">Score</div></div>
+    <div class="gh-box"><div class="gh-val" id="ghCoins" style="color:var(--yellow)">🪙0</div><div class="gh-lbl">Coins</div></div>
+  </div>
+
+  <!-- dots progress -->
+  <div class="q-progress">
+    <div class="q-dots" id="qDots"></div>
+  </div>
+
+  <!-- sound zone -->
+  <div class="sound-zone">
+    <button class="sound-btn" id="soundBtn" onclick="playSound()">🔊</button>
+    <div class="sound-label">Tap to hear the sound</div>
+    <button class="replay-btn" onclick="playSound()">↺ Replay Sound</button>
+  </div>
+
+  <!-- letter mode -->
+  <div id="panelLetter" style="display:none">
+    <div class="opts-title">Pick the correct letter</div>
+    <div class="letter-grid" id="letterGrid"></div>
+  </div>
+
+  <!-- word mode -->
+  <div id="panelWord" style="display:none">
+    <div class="opts-title">Pick the matching word</div>
+    <div class="word-grid" id="wordGrid"></div>
+  </div>
+
+  <!-- sentence mode -->
+  <div id="panelSentence" style="display:none">
+    <div class="sent-display" id="sentDisplay"></div>
+    <div class="opts-title">Pick the missing word</div>
+    <div class="sent-opts" id="sentOpts"></div>
+  </div>
+
+  <!-- rhyme mode -->
+  <div id="panelRhyme" style="display:none">
+    <div class="opts-title">Which word <span style="color:var(--teal)">rhymes</span> with what you heard?</div>
+    <div class="word-grid" id="rhymeGrid"></div>
+  </div>
+
+  <div class="feedback" id="feedback"></div>
+  <div class="next-row" id="nextRow" style="display:none">
+    <button class="btn btn-primary" onclick="nextQuestion()">Next ➜</button>
+  </div>
+</div>
+
+<!-- ── RESULTS ── -->
+<div class="screen" id="screen-result">
+  <div class="result-box">
+    <span class="result-icon" id="resIcon">🏆</span>
+    <div class="result-title" id="resTitle">Brilliant!</div>
+    <div class="result-sub" id="resSub">Great listening skills!</div>
+    <div class="coins-anim" id="resCoins">+🪙0</div>
+    <div class="res-stats">
+      <div class="rs"><div class="rv" id="rsCorrect" style="color:var(--green)">0</div><div class="rl">Correct</div></div>
+      <div class="rs"><div class="rv" id="rsWrong" style="color:var(--red)">0</div><div class="rl">Wrong</div></div>
+      <div class="rs"><div class="rv" id="rsAcc" style="color:var(--teal)">--%</div><div class="rl">Accuracy</div></div>
+      <div class="rs"><div class="rv" id="rsCoins2" style="color:var(--yellow)">🪙0</div><div class="rl">Coins</div></div>
+    </div>
+    <div class="res-row">
+      <button class="btn btn-primary" onclick="playAgain()">🔄 Play Again</button>
+      <button class="btn btn-back" onclick="goMenu('dyslexia-games.html')">🏠 Menu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── QUESTION BANKS ──
+const DATA = {
+  letter: [
+    {sound:'A',opts:['A','B','C','D'],ans:0,hint:'sounds like "ay"'},
+    {sound:'B',opts:['P','B','D','Q'],ans:1,hint:'sounds like "buh"'},
+    {sound:'C',opts:['S','G','C','K'],ans:2,hint:'sounds like "kuh"'},
+    {sound:'D',opts:['B','P','T','D'],ans:3,hint:'sounds like "duh"'},
+    {sound:'E',opts:['E','I','A','O'],ans:0,hint:'sounds like "ee"'},
+    {sound:'F',opts:['V','P','F','B'],ans:2,hint:'sounds like "fff"'},
+    {sound:'G',opts:['J','G','C','Q'],ans:1,hint:'sounds like "guh"'},
+    {sound:'H',opts:['H','K','M','N'],ans:0,hint:'sounds like "huh"'},
+    {sound:'I',opts:['E','U','A','I'],ans:3,hint:'sounds like "eye"'},
+    {sound:'J',opts:['G','J','Y','Z'],ans:1,hint:'sounds like "juh"'},
+    {sound:'K',opts:['C','K','Q','X'],ans:1,hint:'sounds like "kuh"'},
+    {sound:'L',opts:['R','L','I','E'],ans:1,hint:'sounds like "lll"'},
+    {sound:'M',opts:['N','M','W','V'],ans:1,hint:'sounds like "mmm"'},
+    {sound:'N',opts:['M','H','N','U'],ans:2,hint:'sounds like "nnn"'},
+    {sound:'O',opts:['U','A','O','Q'],ans:2,hint:'sounds like "oh"'},
+    {sound:'P',opts:['B','D','P','Q'],ans:2,hint:'sounds like "puh"'},
+    {sound:'R',opts:['L','R','W','V'],ans:1,hint:'sounds like "rrr"'},
+    {sound:'S',opts:['Z','S','C','X'],ans:1,hint:'sounds like "sss"'},
+    {sound:'T',opts:['D','B','T','P'],ans:2,hint:'sounds like "tuh"'},
+    {sound:'V',opts:['F','W','B','V'],ans:3,hint:'sounds like "vvv"'},
+  ],
+  word: [
+    {sound:'cat',opts:['cat','car','cap','can'],ans:0},
+    {sound:'dog',opts:['dot','dog','dig','dug'],ans:1},
+    {sound:'sun',opts:['son','run','sin','sun'],ans:3},
+    {sound:'hat',opts:['hit','hot','hat','has'],ans:2},
+    {sound:'bed',opts:['bad','bid','bud','bed'],ans:3},
+    {sound:'big',opts:['bag','big','bug','bog'],ans:1},
+    {sound:'fun',opts:['fan','fun','fin','fog'],ans:1},
+    {sound:'map',opts:['map','mop','mug','mat'],ans:0},
+    {sound:'red',opts:['rod','rid','red','rug'],ans:2},
+    {sound:'sit',opts:['sat','set','sit','sot'],ans:2},
+    {sound:'top',opts:['tap','tip','top','tub'],ans:2},
+    {sound:'cup',opts:['cap','cop','cup','cob'],ans:2},
+    {sound:'hen',opts:['hit','hen','him','hug'],ans:1},
+    {sound:'wet',opts:['wit','wat','wet','wot'],ans:2},
+    {sound:'leg',opts:['lag','log','lug','leg'],ans:3},
+    {sound:'pin',opts:['pan','pin','pun','pen'],ans:1},
+    {sound:'mud',opts:['mad','mid','mod','mud'],ans:3},
+    {sound:'jug',opts:['jog','jag','jug','jam'],ans:2},
+  ],
+  sentence: [
+    {sent:'The ___ is hot.',sound:'sun is hot',opts:['sun','moon','star','rain'],ans:0,blank:'sun'},
+    {sent:'The cat sat on a ___.',sound:'cat sat on a mat',opts:['mat','hat','bat','rat'],ans:0,blank:'mat'},
+    {sent:'I like to ___ the book.',sound:'like to read the book',opts:['read','eat','see','buy'],ans:0,blank:'read'},
+    {sent:'The bird can ___.',sound:'bird can fly',opts:['fly','run','swim','jump'],ans:0,blank:'fly'},
+    {sent:'She has a big ___.',sound:'has a big dog',opts:['dog','cat','car','bag'],ans:0,blank:'dog'},
+    {sent:'We eat ___ for breakfast.',sound:'eat eggs for breakfast',opts:['eggs','cake','rice','soup'],ans:0,blank:'eggs'},
+    {sent:'The sky is ___.',sound:'sky is blue',opts:['blue','red','pink','black'],ans:0,blank:'blue'},
+    {sent:'He ___ to school every day.',sound:'walks to school every day',opts:['walks','runs','drives','flies'],ans:0,blank:'walks'},
+  ],
+  rhyme: [
+    {sound:'cat',target:'cat',opts:['hat','dog','cup','bus'],ans:0,hint:'rhymes with cat'},
+    {sound:'sun',target:'sun',opts:['moon','run','sky','sea'],ans:1,hint:'rhymes with sun'},
+    {sound:'bed',target:'bed',opts:['sit','run','red','cup'],ans:2,hint:'rhymes with bed'},
+    {sound:'big',target:'big',opts:['day','pig','run','hop'],ans:1,hint:'rhymes with big'},
+    {sound:'map',target:'map',opts:['cap','dog','run','big'],ans:0,hint:'rhymes with map'},
+    {sound:'hop',target:'hop',opts:['sit','run','cup','top'],ans:3,hint:'rhymes with hop'},
+    {sound:'dig',target:'dig',opts:['fig','cat','sun','bed'],ans:0,hint:'rhymes with dig'},
+    {sound:'fun',target:'fun',opts:['dog','gun','map','red'],ans:1,hint:'rhymes with fun'},
+    {sound:'pet',target:'pet',opts:['run','sun','set','hop'],ans:2,hint:'rhymes with pet'},
+    {sound:'ring',target:'ring',opts:['dog','sing','map','red'],ans:1,hint:'rhymes with ring'},
+    {sound:'lake',target:'lake',opts:['take','run','sun','map'],ans:0,hint:'rhymes with lake'},
+    {sound:'night',target:'night',opts:['dog','sun','right','map'],ans:2,hint:'rhymes with night'},
+  ]
+};
+
+// ── STATE ──
+let gameMode='letter', difficulty='easy';
+let questions=[], qIdx=0, score=0, correct=0, wrong=0, coinsEarned=0;
+let streak=0, timerInterval=null, timeLeft=15, answered=false;
+let totalCoins=parseInt(localStorage.getItem('esld_coins')||'0');
+let totalStreak=parseInt(localStorage.getItem('esld_streak')||'0');
+
+// ── HELPERS ──
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function goMenu(page){
+    clearInterval(timerInterval);
+    window.location.href = page;
+}
+function selectMode(m,el){gameMode=m;document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected')}
+function selectDiff(d,el){difficulty=d;document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected')}
+function updateTop(){document.getElementById('topCoins').textContent=totalCoins;document.getElementById('topStreak').textContent=totalStreak+'🔥'}
+function playAgain(){clearInterval(timerInterval);startGame()}
+function shuffle(arr){return arr.slice().sort(()=>Math.random()-.5)}
+
+// ── TTS SPEAK ──
+function speak(text, rate=0.85, pitch=1.1){
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.rate=rate; u.pitch=pitch; u.lang='en-US';
+  window.speechSynthesis.speak(u);
+  const btn=document.getElementById('soundBtn');
+  if(btn){btn.classList.add('playing');u.onend=()=>btn.classList.remove('playing')}
+}
+
+function playSound(){
+  if(!questions.length||qIdx>=questions.length)return;
+  const q=questions[qIdx];
+  if(gameMode==='letter') speak(q.sound+' makes the sound '+q.hint,0.75,1.05);
+  else if(gameMode==='sentence') speak(q.sound,0.8,1.1);
+  else speak(q.sound,0.8,1.1);
+}
+
+// ── START GAME ──
+function startGame(){
+  const pool=shuffle(DATA[gameMode]);
+  const count={easy:5,medium:8,hard:12}[difficulty];
+  questions=pool.slice(0,count);
+  qIdx=0; score=0; correct=0; wrong=0; coinsEarned=0; answered=false;
+
+  buildDots();
+  show('screen-game');
+  document.getElementById('ghTotal').textContent=count;
+  loadQuestion();
+}
+
+function buildDots(){
+  const dots=document.getElementById('qDots');
+  dots.innerHTML=questions.map((_,i)=>`<div class="q-dot" id="dot${i}"></div>`).join('');
+}
+
+function loadQuestion(){
+  if(qIdx>=questions.length){endGame();return}
+  answered=false;
+  const q=questions[qIdx];
+  document.getElementById('ghQ').textContent=qIdx+1;
+  document.getElementById('feedback').className='feedback';
+  document.getElementById('nextRow').style.display='none';
+
+  // update dot
+  document.querySelectorAll('.q-dot').forEach((d,i)=>{if(i===qIdx)d.className='q-dot cur'});
+
+  // hide all panels
+  ['Letter','Word','Sentence','Rhyme'].forEach(p=>document.getElementById('panel'+p).style.display='none');
+
+  if(gameMode==='letter') buildLetterPanel(q);
+  else if(gameMode==='word') buildWordPanel(q);
+  else if(gameMode==='sentence') buildSentencePanel(q);
+  else buildRhymePanel(q);
+
+  startTimer();
+  setTimeout(()=>playSound(), 600);
+}
+
+// ── LETTER ──
+function buildLetterPanel(q){
+  document.getElementById('panelLetter').style.display='';
+  const grid=document.getElementById('letterGrid');
+  // 4 options + extra distractors to fill 8 slots if medium/hard
+  const extra = difficulty==='easy' ? q.opts : shuffle([...q.opts,...'FGHIJKLMNOPQRSTUVWXYZ'.split('').filter(l=>!q.opts.includes(l)).slice(0,4)]).slice(0,8);
+  grid.style.gridTemplateColumns = extra.length>4?'repeat(4,1fr)':'repeat(4,1fr)';
+  grid.innerHTML=extra.map((l,i)=>`<div class="letter-opt" onclick="answerQ(this,'${l}','${q.opts[q.ans]}')">${l}</div>`).join('');
+}
+
+// ── WORD ──
+function buildWordPanel(q){
+  document.getElementById('panelWord').style.display='';
+  const grid=document.getElementById('wordGrid');
+  grid.innerHTML=q.opts.map((w,i)=>`<div class="word-opt" onclick="answerQ(this,'${w}','${q.opts[q.ans]}')">${w}</div>`).join('');
+}
+
+// ── SENTENCE ──
+function buildSentencePanel(q){
+  document.getElementById('panelSentence').style.display='';
+  document.getElementById('sentDisplay').innerHTML=q.sent.replace('___',`<span class="blank-slot">___</span>`);
+  const opts=document.getElementById('sentOpts');
+  opts.innerHTML=q.opts.map(o=>`<div class="sent-opt" onclick="answerQ(this,'${o}','${q.opts[q.ans]}')">${o}</div>`).join('');
+}
+
+// ── RHYME ──
+function buildRhymePanel(q){
+  document.getElementById('panelRhyme').style.display='';
+  const grid=document.getElementById('rhymeGrid');
+  grid.innerHTML=q.opts.map((w,i)=>`<div class="word-opt" onclick="answerQ(this,'${w}','${q.opts[q.ans]}')">${w}</div>`).join('');
+}
+
+// ── ANSWER ──
+function answerQ(el, chosen, correct_ans){
+  if(answered)return;
+  answered=true;
+  clearInterval(timerInterval);
+
+  const isCorrect = chosen===correct_ans;
+  const fb=document.getElementById('feedback');
+  const dot=document.getElementById('dot'+qIdx);
+
+  if(isCorrect){
+    el.className=el.className.replace(/word-opt|letter-opt|sent-opt/,'')+(el.className.includes('word')||el.className.includes('sent')?'word-opt':'letter-opt')+' correct';
+    el.classList.add('correct');
+    correct++;score+=10;coinsEarned+=5;streak++;
+    fb.textContent='✅ Correct! Great listening!';fb.className='feedback show correct';
+    dot.className='q-dot done-c';
+    window.speechSynthesis.cancel();
+    speak('Correct! Well done!',1,1.2);
+  } else {
+    el.classList.add('wrong');
+    wrong++;streak=0;
+    fb.textContent=`❌ Oops! The answer is "${correct_ans}"`;fb.className='feedback show wrong';
+    dot.className='q-dot done-w';
+    // reveal correct
+    document.querySelectorAll('.letter-opt,.word-opt,.sent-opt').forEach(o=>{
+      if(o.textContent.trim()===correct_ans)o.classList.add('reveal');
+      o.style.pointerEvents='none';
+    });
+    window.speechSynthesis.cancel();
+    speak('The answer is '+correct_ans,0.9,1.1);
+  }
+
+  document.getElementById('ghScore').textContent=score;
+  document.getElementById('ghCoins').textContent='🪙'+coinsEarned;
+  document.getElementById('nextRow').style.display='block';
+}
+
+// ── TIMER ──
+function startTimer(){
+  timeLeft={easy:20,medium:15,hard:12}[difficulty];
+  updateTimerUI();
+  timerInterval=setInterval(()=>{
+    timeLeft--;updateTimerUI();
+    if(timeLeft<=0){clearInterval(timerInterval);timeOut();}
+  },1000);
+}
+
+function updateTimerUI(){
+  const max={easy:20,medium:15,hard:12}[difficulty];
+  const pct=timeLeft/max;
+  const arc=document.getElementById('timerArc');
+  if(arc){arc.style.strokeDashoffset=163*(1-pct);arc.style.stroke=pct>.5?'var(--teal)':pct>.25?'var(--yellow)':'var(--red)'}
+  document.getElementById('timerVal').textContent=timeLeft;
+}
+
+function timeOut(){
+  if(answered)return;
+  answered=true;
+  const q=questions[qIdx];
+  wrong++;streak=0;
+  const fb=document.getElementById('feedback');
+  fb.textContent=`⏰ Time's up! Answer was "${q.opts[q.ans]}"`;fb.className='feedback show wrong';
+  document.getElementById('dot'+qIdx).className='q-dot done-w';
+  document.querySelectorAll('.letter-opt,.word-opt,.sent-opt').forEach(o=>{
+    if(o.textContent.trim()===q.opts[q.ans])o.classList.add('reveal');
+    o.style.pointerEvents='none';
+  });
+  document.getElementById('nextRow').style.display='block';
+}
+
+function nextQuestion(){
+  qIdx++;
+  loadQuestion();
+}
+
+// ── END ──
+function endGame(){
+  const total=questions.length;
+  const acc=Math.round((correct/total)*100);
+  totalCoins+=coinsEarned;
+  totalStreak=Math.max(totalStreak,streak);
+  localStorage.setItem('esld_coins',totalCoins);
+  localStorage.setItem('esld_streak',totalStreak);
+
+  // resolve the real logged-in student (same key every other page uses)
+  const sid = sessionStorage.getItem('studentId') || 'guest';
+
+  // save locally so it shows up on My Progress / parent / teacher reports
+  const hist = JSON.parse(localStorage.getItem('ml-history-'+sid) || '[]');
+  hist.unshift({date:new Date().toISOString().split('T')[0],game:'Sound & Match',module:'dyslexia',mode:gameMode+'_'+difficulty,accuracy:acc,correct,wrong,coins:coinsEarned});
+  localStorage.setItem('ml-history-'+sid, JSON.stringify(hist.slice(0,60)));
+  localStorage.setItem('coins-'+sid, (Number(localStorage.getItem('coins-'+sid))||0)+coinsEarned);
+  localStorage.setItem('gamesPlayed-'+sid, (Number(localStorage.getItem('gamesPlayed-'+sid))||0)+1);
+
+  // save to backend (best effort, won't block the result screen if offline)
+  const token=localStorage.getItem('esld_token');
+  if(token) fetch('http://localhost:5000/save-progress',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body:JSON.stringify({student_id:sid,game:'Sound & Match',module:'dyslexia',mode:gameMode+'_'+difficulty,accuracy:acc,correct,wrong,coins:coinsEarned})}).catch(()=>{});
+
+  show('screen-result');
+  document.getElementById('resIcon').textContent=acc>=80?'🏆':acc>=60?'⭐':acc>=40?'💪':'🎯';
+  document.getElementById('resTitle').textContent=acc>=80?'Amazing Ears!':acc>=60?'Good Job!':acc>=40?'Keep Practising!':'Listen Again!';
+  document.getElementById('resSub').textContent=`${acc}% accuracy in ${gameMode} mode`;
+  document.getElementById('resCoins').textContent=`+🪙${coinsEarned} coins earned!`;
+  document.getElementById('rsCorrect').textContent=correct;
+  document.getElementById('rsWrong').textContent=wrong;
+  document.getElementById('rsAcc').textContent=acc+'%';
+  document.getElementById('rsCoins2').textContent='🪙'+coinsEarned;
+  updateTop();
+}
+
+updateTop();
+</script>
+</body>
+</html>

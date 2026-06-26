@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ESLD – Letter Quiz ❓</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0b1120;--card:rgba(255,255,255,.07);--border:rgba(255,255,255,.12);--blue:#38bdf8;--green:#22c55e;--red:#ef4444;--yellow:#fbbf24;--purple:#a78bfa;--orange:#fb923c}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:#f1f5f9;min-height:100vh;padding-bottom:60px}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 20% 10%,rgba(56,189,248,.08),transparent),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(167,139,250,.07),transparent);z-index:0;pointer-events:none}
+.topbar{position:relative;z-index:10;display:flex;align-items:center;gap:14px;padding:16px 28px;background:rgba(11,17,32,.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.back-btn{padding:8px 16px;border-radius:999px;border:1px solid var(--border);background:transparent;color:#94a3b8;cursor:pointer;font-weight:800;font-family:'Nunito',sans-serif;font-size:.83rem;transition:.2s}
+.back-btn:hover{color:#f1f5f9;background:rgba(255,255,255,.08)}
+.game-title{font-family:'Fredoka One';font-size:1.5rem;background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.top-right{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.pill{padding:7px 16px;border-radius:999px;font-weight:800;font-size:.85rem;border:1px solid}
+.pill-yellow{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.25);color:var(--yellow)}
+.pill-blue{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.25);color:var(--blue)}
+.pill-green{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.25);color:var(--green)}
+
+/* GAME AREA */
+.game-area{position:relative;z-index:1;max-width:620px;margin:32px auto;padding:0 20px;display:flex;flex-direction:column;align-items:center;gap:22px}
+
+/* PROGRESS BAR */
+.q-progress{width:100%;background:rgba(255,255,255,.07);border-radius:999px;height:10px;overflow:hidden}
+.q-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--blue),var(--purple));transition:width .5s ease}
+.q-label{display:flex;justify-content:space-between;font-size:.78rem;font-weight:800;color:#64748b;width:100%;margin-bottom:-8px}
+
+/* TIMER */
+.timer-bar{width:100%;background:rgba(255,255,255,.07);border-radius:999px;height:8px;overflow:hidden}
+.timer-fill{height:100%;border-radius:999px;background:var(--green);transition:width .1s linear}
+
+/* LETTER DISPLAY */
+.letter-card{background:linear-gradient(135deg,rgba(56,189,248,.12),rgba(167,139,250,.08));border:2px solid rgba(56,189,248,.25);border-radius:28px;padding:30px 40px;text-align:center;width:100%;animation:slideIn .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes slideIn{from{transform:scale(.9);opacity:0}}
+.quiz-letter{font-family:'Fredoka One';font-size:100px;line-height:1;background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.quiz-q{color:#64748b;font-size:1rem;font-weight:700}
+.mode-tag{font-size:.75rem;color:var(--blue);font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+
+/* OPTIONS */
+.opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:480px}
+.opt-btn{padding:18px 16px;border-radius:18px;border:2px solid rgba(56,189,248,.25);background:rgba(56,189,248,.05);color:#f1f5f9;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;transition:.2s;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px}
+.opt-btn:hover{border-color:var(--blue);background:rgba(56,189,248,.12);transform:translateY(-3px)}
+.opt-btn.correct{border-color:var(--green)!important;background:rgba(34,197,94,.15)!important;color:var(--green)!important;transform:scale(1.03)}
+.opt-btn.wrong{border-color:var(--red)!important;background:rgba(239,68,68,.12)!important;color:var(--red)!important;animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.opt-btn:disabled{cursor:default}
+
+/* FEEDBACK */
+.feedback-row{font-weight:800;font-size:1rem;text-align:center;min-height:30px;transition:.3s}
+
+/* SCORE ROW */
+.score-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 20px;text-align:center;min-width:90px}
+.sn{font-family:'Fredoka One';font-size:1.7rem}
+.sl{font-size:.72rem;color:#64748b;font-weight:700}
+
+/* QUIZ TYPE SELECTOR */
+.type-bar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.type-btn{padding:8px 18px;border-radius:999px;border:1px solid var(--border);background:transparent;color:#64748b;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.82rem;transition:.2s}
+.type-btn.active,.type-btn:hover{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.35);color:var(--blue)}
+
+/* CONTROLS */
+.controls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.ctrl-btn{padding:10px 22px;border-radius:999px;border:none;font-family:'Nunito',sans-serif;font-weight:800;font-size:.88rem;cursor:pointer;transition:.2s}
+.ctrl-btn:hover{transform:translateY(-2px)}
+.btn-speak{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff}
+.btn-next{background:linear-gradient(135deg,var(--green),#16a34a);color:#fff}
+.btn-restart{background:rgba(255,255,255,.1);color:#f1f5f9}
+
+/* RESULT */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:100;display:none;place-items:center}
+.overlay.show{display:grid}
+.result-box{background:rgba(11,17,32,.98);border:2px solid rgba(56,189,248,.3);border-radius:28px;padding:40px;text-align:center;animation:popIn .4s cubic-bezier(.34,1.56,.64,1);max-width:420px;width:90%}
+@keyframes popIn{from{transform:scale(.85);opacity:0}}
+.res-icon{font-size:72px;display:block;margin-bottom:12px;animation:float 2s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.res-title{font-family:'Fredoka One';font-size:2rem;margin-bottom:6px}
+.res-sub{color:#64748b;margin-bottom:20px;font-size:.9rem}
+.res-stats{display:flex;gap:12px;justify-content:center;margin-bottom:22px;flex-wrap:wrap}
+.rs{background:rgba(255,255,255,.06);border-radius:12px;padding:10px 16px}
+.rn{font-family:'Fredoka One';font-size:1.6rem}
+.rl{font-size:.7rem;color:#64748b}
+.res-btns{display:flex;gap:10px;justify-content:center}
+.res-btn{padding:12px 26px;border-radius:999px;border:none;font-weight:900;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.9rem;transition:.2s}
+.res-btn:hover{transform:translateY(-2px)}
+.res-primary{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff}
+.res-sec{background:rgba(255,255,255,.08);color:#f1f5f9;border:1px solid var(--border)}
+
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(60px);background:linear-gradient(135deg,var(--green),var(--blue));color:#fff;padding:12px 26px;border-radius:999px;font-weight:800;font-size:.88rem;z-index:200;opacity:0;transition:.35s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.conf{position:fixed;width:9px;height:9px;top:-10px;border-radius:2px;animation:fall linear forwards;pointer-events:none;z-index:300}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:0}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="back-btn" onclick="location.href='dysgraphia-games.html'">← Games</button>
+  <div class="game-title">❓ Letter Quiz</div>
+  <div class="top-right">
+    <div class="pill pill-yellow">⚡ <span id="navXp">0</span> XP</div>
+    <div class="pill pill-blue">Q: <span id="navQ">1</span>/10</div>
+    <div class="pill pill-green">🎯 <span id="navAcc">0%</span></div>
+  </div>
+</div>
+
+<div class="game-area">
+
+  <!-- Quiz type -->
+  <div class="type-bar">
+    <button class="type-btn active" onclick="setType('word',this)">📝 Word Starts With</button>
+    <button class="type-btn" onclick="setType('sound',this)">🔊 Letter Sound</button>
+    <button class="type-btn" onclick="setType('picture',this)">🖼️ Picture Match</button>
+  </div>
+
+  <!-- Progress -->
+  <div style="width:100%">
+    <div class="q-label"><span id="qLabel">Question 1 of 10</span><span id="qXp">+10 XP per correct</span></div>
+    <div class="q-progress"><div class="q-fill" id="qFill" style="width:0%"></div></div>
+  </div>
+
+  <!-- Timer -->
+  <div style="width:100%">
+    <div style="font-size:.72rem;color:#64748b;font-weight:800;margin-bottom:4px">⏱️ Time remaining</div>
+    <div class="timer-bar"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+  </div>
+
+  <!-- Score row -->
+  <div class="score-row">
+    <div class="sc"><div class="sn" style="color:var(--yellow)" id="scoreVal">0</div><div class="sl">Score</div></div>
+    <div class="sc"><div class="sn" style="color:var(--green)" id="correctVal">0</div><div class="sl">Correct</div></div>
+    <div class="sc"><div class="sn" style="color:var(--red)" id="wrongVal">0</div><div class="sl">Wrong</div></div>
+    <div class="sc"><div class="sn" style="color:var(--blue)" id="streakVal">0</div><div class="sl">Streak 🔥</div></div>
+  </div>
+
+  <!-- Letter card -->
+  <div class="letter-card" id="letterCard">
+    <div class="mode-tag" id="modeTag">WORD STARTS WITH</div>
+    <div class="quiz-letter" id="quizLetter">A</div>
+    <div class="quiz-q" id="quizQ">Which word starts with this letter?</div>
+  </div>
+
+  <!-- Options -->
+  <div class="opts-grid" id="optsGrid"></div>
+
+  <!-- Feedback -->
+  <div class="feedback-row" id="feedbackRow"></div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="ctrl-btn btn-speak" onclick="speakLetter()">🔊 Hear Letter</button>
+    <button class="ctrl-btn btn-next" onclick="nextQ()">⏭️ Next</button>
+    <button class="ctrl-btn btn-restart" onclick="restart()">🔄 Restart</button>
+  </div>
+
+</div>
+
+<!-- RESULT -->
+<div class="overlay" id="resultOverlay">
+  <div class="result-box">
+    <span class="res-icon" id="resIcon">🏆</span>
+    <div class="res-title" id="resTitle">Quiz Complete!</div>
+    <div class="res-sub" id="resSub">Great effort!</div>
+    <div class="res-stats">
+      <div class="rs"><div class="rn" style="color:var(--yellow)" id="resXp">0</div><div class="rl">XP Earned</div></div>
+      <div class="rs"><div class="rn" style="color:var(--green)" id="resCorrect">0</div><div class="rl">Correct</div></div>
+      <div class="rs"><div class="rn" style="color:var(--blue)" id="resAcc">0%</div><div class="rl">Accuracy</div></div>
+    </div>
+    <div class="res-btns">
+      <button class="res-btn res-primary" onclick="restart()">🔄 Play Again</button>
+      <button class="res-btn res-sec" onclick="location.href='dysgraphia-games.html'">🎮 All Games</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const sid = sessionStorage.getItem('studentId') || 'guest';
+let globalXP=Number(localStorage.getItem('dysgraphia-xp-'+sid))||0;
+document.getElementById('navXp').textContent=globalXP;
+
+const QUIZ_DATA = [
+  {letter:'A',correct:'Apple',emoji:'🍎',options:['Apple','Banana','Cat','Dog'],sound:'Apple starts with A'},
+  {letter:'B',correct:'Banana',emoji:'🍌',options:['Apple','Banana','Frog','Ship'],sound:'Banana starts with B'},
+  {letter:'C',correct:'Cat',emoji:'🐱',options:['Dog','Bird','Cat','Fish'],sound:'Cat starts with C'},
+  {letter:'D',correct:'Dog',emoji:'🐶',options:['Cat','Dog','Apple','Tree'],sound:'Dog starts with D'},
+  {letter:'E',correct:'Egg',emoji:'🥚',options:['Egg','Fish','Goat','House'],sound:'Egg starts with E'},
+  {letter:'F',correct:'Fish',emoji:'🐟',options:['Bird','Apple','Dog','Fish'],sound:'Fish starts with F'},
+  {letter:'G',correct:'Goat',emoji:'🐐',options:['Cat','Goat','Bird','Train'],sound:'Goat starts with G'},
+  {letter:'H',correct:'House',emoji:'🏠',options:['Train','Car','House','Ship'],sound:'House starts with H'},
+  {letter:'I',correct:'Ice',emoji:'🧊',options:['Ice','Juice','Kite','Lion'],sound:'Ice starts with I'},
+  {letter:'J',correct:'Juice',emoji:'🧃',options:['Juice','Kite','Moon','Night'],sound:'Juice starts with J'},
+  {letter:'K',correct:'Kite',emoji:'🪁',options:['Kite','Lion','Moon','Sun'],sound:'Kite starts with K'},
+  {letter:'L',correct:'Lion',emoji:'🦁',options:['Kite','Lion','Mango','Night'],sound:'Lion starts with L'},
+  {letter:'M',correct:'Mango',emoji:'🥭',options:['Night','Mango','Ocean','Pearl'],sound:'Mango starts with M'},
+  {letter:'N',correct:'Nest',emoji:'🪺',options:['Nest','Orange','Parrot','Quill'],sound:'Nest starts with N'},
+  {letter:'O',correct:'Orange',emoji:'🍊',options:['Parrot','Orange','Quill','River'],sound:'Orange starts with O'},
+  {letter:'P',correct:'Parrot',emoji:'🦜',options:['Parrot','Quill','River','Star'],sound:'Parrot starts with P'},
+  {letter:'Q',correct:'Queen',emoji:'👑',options:['Rain','Star','Queen','Tiger'],sound:'Queen starts with Q'},
+  {letter:'R',correct:'Rain',emoji:'🌧️',options:['Rain','Star','Tiger','Umbrella'],sound:'Rain starts with R'},
+  {letter:'S',correct:'Star',emoji:'⭐',options:['Tiger','Star','Violin','Water'],sound:'Star starts with S'},
+  {letter:'T',correct:'Tiger',emoji:'🐯',options:['Tiger','Umbrella','Violin','Water'],sound:'Tiger starts with T'},
+  {letter:'U',correct:'Umbrella',emoji:'☂️',options:['Violin','Umbrella','Water','Xray'],sound:'Umbrella starts with U'},
+  {letter:'V',correct:'Violin',emoji:'🎻',options:['Violin','Water','Xray','Yak'],sound:'Violin starts with V'},
+  {letter:'W',correct:'Water',emoji:'💧',options:['Water','Xray','Yak','Zebra'],sound:'Water starts with W'},
+  {letter:'X',correct:'Xray',emoji:'🩻',options:['Xray','Yak','Zebra','Apple'],sound:'Xray starts with X'},
+  {letter:'Y',correct:'Yak',emoji:'🐂',options:['Yak','Zebra','Apple','Ball'],sound:'Yak starts with Y'},
+  {letter:'Z',correct:'Zebra',emoji:'🦓',options:['Zebra','Apple','Banana','Cat'],sound:'Zebra starts with Z'},
+];
+
+const TOTAL_Q=10;
+let quizType='word', score=0, correct=0, wrong=0, qStreak=0, qIndex=0, xpEarned=0;
+let timerInterval=null, timeLeft=15, answered=false;
+let questions=[];
+
+function setType(t,btn){
+  quizType=t;
+  document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  restart();
+}
+
+function restart(){
+  score=0;correct=0;wrong=0;qStreak=0;qIndex=0;xpEarned=0;
+  questions=[...QUIZ_DATA].sort(()=>Math.random()-.5).slice(0,TOTAL_Q);
+  document.getElementById('resultOverlay').classList.remove('show');
+  updateScoreUI();loadQ();
+}
+
+function loadQ(){
+  if(qIndex>=TOTAL_Q){endSession();return;}
+  answered=false;
+  const q=questions[qIndex];
+  // Update progress
+  document.getElementById('qLabel').textContent='Question '+(qIndex+1)+' of '+TOTAL_Q;
+  document.getElementById('navQ').textContent=(qIndex+1)+'/'+TOTAL_Q;
+  document.getElementById('qFill').style.width=((qIndex/TOTAL_Q)*100)+'%';
+
+  // Letter display
+  document.getElementById('quizLetter').textContent=q.letter;
+
+  // Mode-specific question
+  if(quizType==='word'){
+    document.getElementById('modeTag').textContent='WORD STARTS WITH';
+    document.getElementById('quizQ').textContent='Which word starts with "'+q.letter+'"?';
+  } else if(quizType==='sound'){
+    document.getElementById('modeTag').textContent='LETTER SOUND';
+    document.getElementById('quizQ').textContent='This letter sounds like... pick the matching word!';
+    speakLetter();
+  } else {
+    document.getElementById('modeTag').textContent='PICTURE MATCH';
+    document.getElementById('quizQ').textContent=q.emoji+' This picture — which letter does it start with?';
+    document.getElementById('quizLetter').textContent=q.emoji;
+  }
+
+  // Options
+  const shuffled=[...q.options].sort(()=>Math.random()-.5);
+  const grid=document.getElementById('optsGrid');grid.innerHTML='';
+  shuffled.forEach(opt=>{
+    const b=document.createElement('button');
+    b.className='opt-btn';
+    b.innerHTML=getOptEmoji(opt)+' '+opt;
+    b.onclick=()=>answer(opt,b,q);
+    grid.appendChild(b);
+  });
+  document.getElementById('feedbackRow').textContent='';
+  document.getElementById('feedbackRow').style.color='';
+
+  // Timer
+  clearInterval(timerInterval);timeLeft=15;
+  document.getElementById('timerFill').style.width='100%';
+  document.getElementById('timerFill').style.background='var(--green)';
+  timerInterval=setInterval(()=>{
+    timeLeft=Math.max(0,timeLeft-0.1);
+    const pct=(timeLeft/15)*100;
+    document.getElementById('timerFill').style.width=pct+'%';
+    document.getElementById('timerFill').style.background=pct>50?'var(--green)':pct>25?'var(--yellow)':'var(--red)';
+    if(timeLeft<=0){clearInterval(timerInterval);autoFail(q);}
+  },100);
+}
+
+const WORD_EMOJIS={Apple:'🍎',Banana:'🍌',Cat:'🐱',Dog:'🐶',Egg:'🥚',Fish:'🐟',Goat:'🐐',House:'🏠',Ice:'🧊',Juice:'🧃',Kite:'🪁',Lion:'🦁',Mango:'🥭',Nest:'🪺',Orange:'🍊',Parrot:'🦜',Queen:'👑',Rain:'🌧️',Star:'⭐',Tiger:'🐯',Umbrella:'☂️',Violin:'🎻',Water:'💧',Xray:'🩻',Yak:'🐂',Zebra:'🦓',Bird:'🐦',Frog:'🐸',Ship:'🚢',Tree:'🌳',Car:'🚗',Train:'🚂',Night:'🌙',Ocean:'🌊',Pearl:'🪩',Quill:'🪶',River:'🏞️',Violin:'🎻'};
+function getOptEmoji(w){return WORD_EMOJIS[w]||''}
+
+function answer(opt,btn,q){
+  if(answered)return;answered=true;clearInterval(timerInterval);
+  document.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);
+  if(opt===q.correct){
+    btn.classList.add('correct');
+    correct++;qStreak++;
+    const earned=10+(qStreak>=3?5:0);
+    score+=earned;xpEarned+=earned;
+    globalXP+=earned;localStorage.setItem('dysgraphia-xp-'+sid,globalXP);
+    document.getElementById('navXp').textContent=globalXP;
+    const msgs=['✅ Correct! "'+q.correct+'" starts with "'+q.letter+'"!','🌟 Excellent! '+q.emoji,'🎉 Spot on! Well done!','💎 Perfect answer!'];
+    setFeedback(msgs[Math.floor(Math.random()*msgs.length)]+(qStreak>=3?' 🔥 '+qStreak+' streak!':''),'var(--green)');
+    confetti();showToast('+'+earned+' XP ⚡');
+  } else {
+    btn.classList.add('wrong');qStreak=0;wrong++;
+    document.querySelectorAll('.opt-btn').forEach(b=>{if(b.textContent.includes(q.correct))b.classList.add('correct');});
+    setFeedback('❌ "'+q.correct+'" '+q.emoji+' starts with "'+q.letter+'"','var(--red)');
+  }
+  updateScoreUI();
+  setTimeout(()=>{qIndex++;loadQ();},1800);
+}
+
+function autoFail(q){
+  if(answered)return;answered=true;wrong++;qStreak=0;
+  document.querySelectorAll('.opt-btn').forEach(b=>{b.disabled=true;if(b.textContent.includes(q.correct))b.classList.add('correct');});
+  setFeedback('⏱️ Time up! "'+q.correct+'" '+q.emoji+' starts with "'+q.letter+'"','var(--red)');
+  updateScoreUI();
+  setTimeout(()=>{qIndex++;loadQ();},1800);
+}
+
+function nextQ(){clearInterval(timerInterval);qIndex++;loadQ();}
+
+function speakLetter(){
+  if(!('speechSynthesis' in window))return;
+  const q=questions[qIndex];if(!q)return;
+  const u=new SpeechSynthesisUtterance(quizType==='sound'?q.sound:q.letter);
+  u.rate=0.8;u.pitch=1.1;speechSynthesis.speak(u);
+}
+
+function setFeedback(msg,color){
+  const el=document.getElementById('feedbackRow');el.textContent=msg;el.style.color=color;
+}
+
+function updateScoreUI(){
+  const total=correct+wrong;
+  const acc=total>0?Math.round((correct/total)*100):0;
+  document.getElementById('scoreVal').textContent=score;
+  document.getElementById('correctVal').textContent=correct;
+  document.getElementById('wrongVal').textContent=wrong;
+  document.getElementById('streakVal').textContent=qStreak;
+  document.getElementById('navAcc').textContent=acc+'%';
+}
+
+function endSession(){
+  clearInterval(timerInterval);
+  const total=correct+wrong;
+  const acc=total>0?Math.round((correct/total)*100):0;
+  document.getElementById('resIcon').textContent=acc>=80?'🏆':acc>=50?'🌟':'💪';
+  document.getElementById('resTitle').textContent=acc>=80?'Quiz Master!':acc>=50?'Good Job!':'Keep Practicing!';
+  document.getElementById('resSub').textContent='You answered '+total+' questions in '+quizType+' mode';
+  document.getElementById('resXp').textContent=xpEarned;
+  document.getElementById('resCorrect').textContent=correct;
+  document.getElementById('resAcc').textContent=acc+'%';
+  document.getElementById('resultOverlay').classList.add('show');
+  // Save
+  const hist=JSON.parse(localStorage.getItem('ml-history-'+sid)||'[]');
+  hist.unshift({date:new Date().toISOString().split('T')[0],game:'Letter Quiz',mode:quizType,accuracy:acc,correct,wrong,coins:xpEarned});
+  localStorage.setItem('ml-history-'+sid,JSON.stringify(hist.slice(0,50)));
+  const gp=Number(localStorage.getItem('gamesPlayed-'+sid)||0)+1;
+  localStorage.setItem('gamesPlayed-'+sid,gp);
+  const totalCoins=Number(localStorage.getItem('coins-'+sid)||0)+xpEarned;
+  localStorage.setItem('coins-'+sid,totalCoins);
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function confetti(){const cols=['#fbbf24','#22c55e','#38bdf8','#a78bfa','#fb923c'];for(let i=0;i<30;i++){const c=document.createElement('div');c.className='conf';c.style.cssText=`left:${Math.random()*100}vw;background:${cols[i%cols.length]};animation-duration:${1.3+Math.random()*1.5}s;animation-delay:${Math.random()*.35}s;border-radius:${Math.random()>.5?'50%':'2px'}`;document.body.appendChild(c);setTimeout(()=>c.remove(),3000);}}
+
+restart();
+</script>
+</body>
+</html>

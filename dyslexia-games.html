@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ESLD – Dyslexia Games Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#06101e;
+  --g1:#00e676;--g2:#00c853;
+  --b1:#29b6f6;--b2:#0288d1;
+  --p1:#ce93d8;--p2:#9c27b0;
+  --y1:#ffeb3b;--y2:#f9a825;
+  --r1:#ff7043;--r2:#d84315;
+  --t1:#4db6ac;--t2:#00796b;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:#eef2ff;min-height:100vh;overflow-x:hidden}
+
+/* ── ANIMATED BG ── */
+.bg-layer{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg-blob{position:absolute;border-radius:50%;filter:blur(90px);animation:blobDrift ease-in-out infinite alternate}
+.bb1{width:500px;height:500px;background:rgba(0,230,118,.08);top:-100px;left:-100px;animation-duration:16s}
+.bb2{width:400px;height:400px;background:rgba(41,182,246,.08);right:-80px;bottom:10%;animation-duration:20s;animation-delay:-6s}
+.bb3{width:300px;height:300px;background:rgba(206,147,216,.08);left:40%;top:30%;animation-duration:14s;animation-delay:-3s}
+@keyframes blobDrift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(60px,-50px) scale(1.2)}}
+
+/* ── TOP BAR ── */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 28px;
+  background:rgba(6,16,30,.88);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-logo{
+  width:44px;height:44px;border-radius:14px;font-size:22px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--g1),var(--b1));
+  box-shadow:0 0 20px rgba(0,230,118,.3);
+  animation:logoBounce 3s ease-in-out infinite;
+}
+@keyframes logoBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.brand h1{font-family:'Fredoka',sans-serif;font-size:1.4rem;
+  background:linear-gradient(90deg,var(--g1),var(--b1));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+
+.topbar-right{display:flex;align-items:center;gap:10px}
+.coins-pill{
+  display:flex;align-items:center;gap:6px;padding:7px 14px;
+  border-radius:999px;background:rgba(251,191,36,.12);
+  border:1px solid rgba(251,191,36,.25);color:#fbbf24;font-weight:800;font-size:.88rem;
+}
+.back-btn{
+  padding:8px 18px;border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);
+  color:#c8d0e0;cursor:pointer;font-weight:700;font-family:'Nunito',sans-serif;
+  font-size:.85rem;transition:.3s;
+}
+.back-btn:hover{background:rgba(255,255,255,.12);color:#fff;transform:translateY(-2px)}
+
+/* ── HERO BANNER ── */
+.hero-banner{
+  position:relative;z-index:2;
+  margin:88px 28px 0;
+  background:linear-gradient(135deg,rgba(0,230,118,.12),rgba(41,182,246,.08),rgba(206,147,216,.06));
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:32px;padding:40px 48px;overflow:hidden;
+}
+.hero-banner::before{
+  content:'';position:absolute;top:-80px;right:-80px;
+  width:300px;height:300px;border-radius:50%;
+  background:rgba(0,230,118,.1);filter:blur(60px);
+}
+.hero-banner::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.03),transparent);
+  animation:shine 5s linear infinite;
+}
+@keyframes shine{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+.hero-inner{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.hero-text h2{font-family:'Fredoka',sans-serif;font-size:2.8rem;line-height:1.1}
+.hero-text h2 em{font-style:normal;background:linear-gradient(90deg,var(--y1),var(--r1));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-text p{margin-top:10px;color:#8899bb;font-size:1rem;max-width:560px;line-height:1.6}
+.hero-emoji-big{font-size:110px;animation:heroBounce 3s ease-in-out infinite;line-height:1;flex-shrink:0}
+@keyframes heroBounce{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-15px) rotate(5deg)}}
+
+/* hero stats */
+.hero-stats{
+  display:flex;gap:16px;margin-top:22px;flex-wrap:wrap;
+}
+.hs{
+  padding:8px 18px;border-radius:12px;border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.05);font-size:.85rem;font-weight:700;
+  display:flex;align-items:center;gap:6px;
+}
+
+/* ── STATS ROW ── */
+.stats-row{
+  position:relative;z-index:2;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+  margin:20px 28px;
+}
+.stat-box{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+  border-radius:20px;padding:20px;text-align:center;transition:.3s;
+  animation:statIn .6s ease both;
+}
+.stat-box:nth-child(1){animation-delay:.1s}.stat-box:nth-child(2){animation-delay:.2s}
+.stat-box:nth-child(3){animation-delay:.3s}.stat-box:nth-child(4){animation-delay:.4s}
+@keyframes statIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+.stat-box:hover{background:rgba(255,255,255,.08);transform:translateY(-4px)}
+.sb-ic{font-size:28px;margin-bottom:6px}
+.sb-n{font-family:'Fredoka',sans-serif;font-size:2rem}
+.sb-l{color:#4a5880;font-size:.78rem;margin-top:2px;font-weight:700}
+
+/* ── GAMES SECTION ── */
+.games-section{position:relative;z-index:2;padding:0 28px 60px}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin:28px 0 20px}
+.sec-head h3{font-family:'Fredoka',sans-serif;font-size:1.8rem}
+.sec-head .badge{
+  padding:6px 14px;border-radius:999px;font-size:.78rem;font-weight:800;
+  background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.25);color:var(--g1);
+}
+
+.games-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
+}
+
+/* ── GAME CARD ── */
+.gcard{
+  position:relative;border-radius:26px;overflow:hidden;
+  text-decoration:none;color:#eef2ff;
+  min-height:280px;display:flex;flex-direction:column;
+  border:1px solid rgba(255,255,255,.08);
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1),box-shadow .4s;
+  animation:gameCardIn .7s ease both;cursor:pointer;
+}
+.gcard:nth-child(1){animation-delay:.1s}.gcard:nth-child(2){animation-delay:.15s}
+.gcard:nth-child(3){animation-delay:.2s}.gcard:nth-child(4){animation-delay:.25s}
+.gcard:nth-child(5){animation-delay:.3s}.gcard:nth-child(6){animation-delay:.35s}
+@keyframes gameCardIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+
+.gcard:hover{transform:translateY(-14px) scale(1.03)}
+.gc1:hover{box-shadow:0 24px 60px rgba(255,112,67,.3)}
+.gc2:hover{box-shadow:0 24px 60px rgba(41,182,246,.3)}
+.gc3:hover{box-shadow:0 24px 60px rgba(255,235,59,.25)}
+.gc4:hover{box-shadow:0 24px 60px rgba(206,147,216,.3)}
+.gc5:hover{box-shadow:0 24px 60px rgba(77,182,172,.3)}
+.gc6:hover{box-shadow:0 24px 60px rgba(255,112,67,.3)}
+
+.gc1{background:linear-gradient(145deg,#2d1200,#ff7043 400%)}
+.gc2{background:linear-gradient(145deg,#001929,#29b6f6 400%)}
+.gc3{background:linear-gradient(145deg,#1a1500,#ffeb3b 400%)}
+.gc4{background:linear-gradient(145deg,#1a0029,#ce93d8 400%)}
+.gc5{background:linear-gradient(145deg,#001a18,#4db6ac 400%)}
+.gc6{background:linear-gradient(145deg,#200000,#ef5350 400%)}
+
+/* card shine sweep */
+.gcard::after{
+  content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);
+  transition:left .6s;
+}
+.gcard:hover::after{left:140%}
+
+.gc-content{padding:26px;flex:1;display:flex;flex-direction:column;position:relative;z-index:2}
+.gc-icon{font-size:60px;margin-bottom:14px;display:block;transition:transform .3s}
+.gcard:hover .gc-icon{transform:scale(1.15) rotate(8deg)}
+.gc-badge{
+  display:inline-flex;align-items:center;gap:5px;padding:4px 10px;
+  border-radius:999px;font-size:.7rem;font-weight:800;margin-bottom:8px;
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);
+  width:fit-content;
+}
+.gc-title{font-family:'Fredoka',sans-serif;font-size:1.55rem;margin-bottom:8px}
+.gc-desc{font-size:.85rem;color:rgba(255,255,255,.75);line-height:1.5;flex:1}
+.gc-play{
+  display:inline-flex;align-items:center;gap:8px;margin-top:18px;
+  padding:10px 18px;border-radius:999px;
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);
+  font-weight:800;font-size:.85rem;width:fit-content;
+  transition:.3s;
+}
+.gcard:hover .gc-play{background:rgba(255,255,255,.28)}
+
+/* ── MOTIVATE BANNER ── */
+.motivate{
+  position:relative;z-index:2;
+  margin:0 28px 28px;
+  padding:22px 28px;border-radius:24px;
+  background:linear-gradient(135deg,rgba(0,230,118,.08),rgba(41,182,246,.06));
+  border:1px solid rgba(0,230,118,.15);
+  display:flex;align-items:center;gap:16px;
+}
+.motivate-emoji{font-size:40px}
+.motivate h4{font-family:'Fredoka',sans-serif;font-size:1.2rem;color:var(--g1);margin-bottom:4px}
+.motivate p{color:#8899bb;font-size:.9rem}
+
+/* PROGRESS BTN */
+.progress-btn{
+  position:fixed;bottom:28px;right:28px;z-index:100;
+  display:flex;align-items:center;gap:8px;
+  padding:14px 22px;border-radius:999px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--g2),var(--g1));color:#003300;
+  font-weight:900;font-size:.9rem;font-family:'Nunito',sans-serif;
+  box-shadow:0 8px 30px rgba(0,230,118,.4);
+  transition:.3s;animation:btnPop .5s 1s ease both;
+}
+@keyframes btnPop{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+.progress-btn:hover{transform:translateY(-3px) scale(1.05);box-shadow:0 12px 40px rgba(0,230,118,.5)}
+
+@media(max-width:900px){
+  .hero-banner{margin:80px 14px 0;padding:24px}
+  .hero-emoji-big{font-size:70px}
+  .hero-text h2{font-size:2rem}
+  .stats-row{grid-template-columns:1fr 1fr;margin:14px}
+  .games-grid{grid-template-columns:1fr 1fr}
+  .games-section{padding:0 14px 60px}
+  .motivate{margin:0 14px 14px}
+}
+@media(max-width:520px){
+  .games-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-layer">
+  <div class="bg-blob bb1"></div>
+  <div class="bg-blob bb2"></div>
+  <div class="bg-blob bb3"></div>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-logo">📖</div>
+    <h1>ESLD Dyslexia Studio</h1>
+  </div>
+  <div class="topbar-right">
+    <div class="coins-pill">🪙 <span id="topCoins">0</span></div>
+    <button class="back-btn" onclick="location.href='student-games.html'">← Back</button>
+  </div>
+</div>
+
+<!-- HERO BANNER -->
+<div class="hero-banner">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <h2>Learn Through <em>Play & Adventure!</em></h2>
+      <p>Improve reading, spelling, memory, and recognition with specially designed games. Every game helps you get stronger!</p>
+      <div class="hero-stats">
+        <div class="hs">🎮 <span id="h_games">0</span> Games Played</div>
+        <div class="hs">⭐ <span id="h_acc">0%</span> Accuracy</div>
+        <div class="hs">🏆 Level <span id="h_level">1</span></div>
+      </div>
+    </div>
+    <div class="hero-emoji-big">🚀</div>
+  </div>
+</div>
+
+<!-- STATS ROW -->
+<div class="stats-row">
+  <div class="stat-box"><div class="sb-ic">🎮</div><div class="sb-n" id="sbGames" style="color:var(--g1)">0</div><div class="sb-l">Games Played</div></div>
+  <div class="stat-box"><div class="sb-ic">🪙</div><div class="sb-n" id="sbCoins" style="color:#fbbf24">0</div><div class="sb-l">Coins Earned</div></div>
+  <div class="stat-box"><div class="sb-ic">🏆</div><div class="sb-n" id="sbLevel" style="color:var(--p1)">1</div><div class="sb-l">Current Level</div></div>
+  <div class="stat-box"><div class="sb-ic">⭐</div><div class="sb-n" id="sbAcc" style="color:var(--b1)">0%</div><div class="sb-l">Avg Accuracy</div></div>
+</div>
+
+<!-- GAMES GRID -->
+<div class="games-section">
+  <div class="sec-head">
+    <h3>🎯 Pick a Game to Play</h3>
+    <div class="badge">6 Games Available</div>
+  </div>
+
+  <div class="games-grid">
+
+    <a href="dyslexia-missing-letter.html" class="gcard gc1">
+      <div class="gc-content">
+        <span class="gc-icon">🔤</span>
+        <div class="gc-badge">⭐ Most Popular</div>
+        <div class="gc-title">Missing Letter</div>
+        <div class="gc-desc">Fill in the missing letter to complete words. Great for spelling improvement!</div>
+        <div class="gc-play">Play Now ▶</div>
+      </div>
+    </a>
+
+    <a href="dyslexia-letter-confusion.html" class="gcard gc2">
+      <div class="gc-content">
+        <span class="gc-icon">🔄</span>
+        <div class="gc-badge">🔬 Brain Training</div>
+        <div class="gc-title">Letter Confusion</div>
+        <div class="gc-desc">Practice b, d, p, q letters that look similar. Train your eye to see the difference!</div>
+        <div class="gc-play">Start ▶</div>
+      </div>
+    </a>
+
+    <a href="dyslexia-word-builder.html" class="gcard gc3">
+      <div class="gc-content">
+        <span class="gc-icon">🧩</span>
+        <div class="gc-badge">🧠 Logic Game</div>
+        <div class="gc-title">Word Builder</div>
+        <div class="gc-desc">Arrange scrambled letters to build real words. Unlock your inner wordsmith!</div>
+        <div class="gc-play">Build ▶</div>
+      </div>
+    </a>
+
+    <a href="dyslexia-read-match.html" class="gcard gc4">
+      <div class="gc-content">
+        <span class="gc-icon">📚</span>
+        <div class="gc-badge">👁️ Visual Match</div>
+        <div class="gc-title">Read & Match</div>
+        <div class="gc-desc">Read the word and match it with the correct picture. Strengthen your word recognition!</div>
+        <div class="gc-play">Match ▶</div>
+      </div>
+    </a>
+
+    <a href="dyslexia-sound-match.html" class="gcard gc5">
+      <div class="gc-content">
+        <span class="gc-icon">🔊</span>
+        <div class="gc-badge">👂 Audio Game</div>
+        <div class="gc-title">Sound Match</div>
+        <div class="gc-desc">Listen carefully to sounds and match the correct letter or word. Train your ears!</div>
+        <div class="gc-play">Listen ▶</div>
+      </div>
+    </a>
+
+    <a href="dyslexia-speed-reading.html" class="gcard gc6">
+      <div class="gc-content">
+        <span class="gc-icon">⚡</span>
+        <div class="gc-badge">🔥 Challenge</div>
+        <div class="gc-title">Speed Reading</div>
+        <div class="gc-desc">Race against the clock! Improve your reading speed with fun timed challenges.</div>
+        <div class="gc-play">Race ▶</div>
+      </div>
+    </a>
+
+  </div>
+</div>
+
+<!-- MOTIVATE -->
+<div class="motivate">
+  <div class="motivate-emoji" id="mEmoji">🌈</div>
+  <div>
+    <h4 id="mTitle">Every Child Learns Differently</h4>
+    <p id="mText">Learning is not a race. Every small step is a huge achievement. Keep practicing and keep smiling!</p>
+  </div>
+</div>
+
+<!-- PROGRESS BTN -->
+<button class="progress-btn" onclick="location.href='student-progress.html'">📊 View Progress</button>
+
+<script>
+// ── AUTH ──
+const id = sessionStorage.getItem('studentId');
+if(!id) location.href='student-login.html';
+
+// ── LOAD STATS ──
+const hist    = JSON.parse(localStorage.getItem('ml-history-'+id)||'[]');
+const coins   = Number(localStorage.getItem('coins-'+id))||0;
+const sessions= Number(localStorage.getItem('gamesPlayed-'+id))||0;
+
+let avgAcc=0,best=0;
+if(hist.length){
+  avgAcc = Math.round(hist.reduce((a,h)=>a+h.accuracy,0)/hist.length);
+  best   = Math.max(...hist.map(h=>h.accuracy));
+}
+const level = Math.max(1,Math.floor(coins/50)+1);
+
+// fill UI
+document.getElementById('topCoins').textContent = coins;
+document.getElementById('h_games').textContent  = sessions;
+document.getElementById('h_acc').textContent    = avgAcc+'%';
+document.getElementById('h_level').textContent  = level;
+document.getElementById('sbGames').textContent  = sessions;
+document.getElementById('sbCoins').textContent  = coins;
+document.getElementById('sbLevel').textContent  = level;
+document.getElementById('sbAcc').textContent    = avgAcc+'%';
+
+// motivate message based on progress
+if(avgAcc>=90){
+  document.getElementById('mEmoji').textContent='🏆';
+  document.getElementById('mTitle').textContent='Outstanding! You\'re a Star!';
+  document.getElementById('mText').textContent='Your accuracy is incredible at '+avgAcc+'%! You are an inspiration. Keep reaching for the top!';
+}else if(avgAcc>=70){
+  document.getElementById('mEmoji').textContent='🔥';
+  document.getElementById('mTitle').textContent='Great Job! You\'re Improving!';
+  document.getElementById('mText').textContent='Your accuracy is '+avgAcc+'% — you\'re doing amazing! Try a harder level and push even further!';
+}else if(sessions>0){
+  document.getElementById('mEmoji').textContent='💪';
+  document.getElementById('mTitle').textContent='Keep Going! You\'ve Got This!';
+  document.getElementById('mText').textContent='You\'ve already played '+sessions+' sessions. Every practice session makes you stronger. Don\'t give up!';
+}
+
+// ── VOICE WELCOME ──
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    window.speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance('Welcome to ESLD Dyslexia Games. Let\'s learn and have fun together!');
+    u.rate=0.9;u.pitch=1.1;u.lang='en-US';
+    window.speechSynthesis.speak(u);
+  },800);
+});
+
+// ── FLOATING PARTICLES ──
+const colors=['#00e676','#29b6f6','#ce93d8','#ffeb3b','#ff7043','#4db6ac'];
+setInterval(()=>{
+  const p=document.createElement('div');
+  const sz=8+Math.random()*16;
+  Object.assign(p.style,{
+    position:'fixed',bottom:'-30px',
+    left:Math.random()*100+'vw',
+    width:sz+'px',height:sz+'px',borderRadius:'50%',
+    background:colors[Math.floor(Math.random()*colors.length)],
+    opacity:'.6',zIndex:'1',pointerEvents:'none',
+    filter:'blur(2px)',
+    animation:`particleUp ${5+Math.random()*5}s linear forwards`,
+  });
+  document.body.appendChild(p);
+  setTimeout(()=>p.remove(),10000);
+},300);
+
+const st=document.createElement('style');
+st.textContent=`@keyframes particleUp{0%{transform:translateY(0) scale(0);opacity:0}10%{opacity:.6}100%{transform:translateY(-110vh) scale(1.5) rotate(720deg);opacity:0}}`;
+document.head.appendChild(st);
+</script>
+</body>
+</html>

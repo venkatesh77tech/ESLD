@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ESLD – Audio Stories</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0b1120;--sidebar:#0f172a;--card:rgba(255,255,255,.07);--border:rgba(255,255,255,.12);--radius:20px;--green:#22c55e;--blue:#38bdf8;--purple:#a78bfa;--yellow:#fbbf24;--orange:#fb923c}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:#f1f5f9;min-height:100vh;display:grid;grid-template-columns:260px 1fr;grid-template-rows:auto 1fr}
+.sidebar{grid-row:1/-1;background:var(--sidebar);border-right:1px solid var(--border);padding:20px 16px;display:flex;flex-direction:column;gap:8px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidebar-logo{font-family:'Fredoka One';font-size:1.5rem;padding:10px 8px 18px;border-bottom:1px solid var(--border);margin-bottom:8px;background:linear-gradient(90deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;cursor:pointer;transition:.2s;font-weight:700;font-size:.9rem;color:#64748b;border:none;background:none;width:100%;text-align:left;font-family:'Nunito',sans-serif}
+.nav-item:hover{background:rgba(255,255,255,.08);color:#f1f5f9}
+.nav-item.active{background:rgba(56,189,248,.1);color:var(--blue)}
+.sidebar-coins{margin-top:auto;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.2);border-radius:14px;padding:14px;text-align:center}
+.coins-num{font-family:'Fredoka One';font-size:2rem;color:var(--yellow)}
+.coins-label{font-size:.8rem;color:#64748b}
+.topbar{grid-column:2;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--border);background:rgba(15,23,42,.6);backdrop-filter:blur(12px);position:sticky;top:0;z-index:10}
+.topbar h2{font-family:'Fredoka One';font-size:1.4rem}
+main{grid-column:2;padding:24px 28px;overflow-y:auto}
+
+/* PLAYER */
+.player-card{background:linear-gradient(135deg,rgba(56,189,248,.15),rgba(167,139,250,.1));border:1px solid rgba(56,189,248,.3);border-radius:24px;padding:28px;margin-bottom:28px;position:relative;overflow:hidden}
+.player-card::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(167,139,250,.15),transparent 70%);pointer-events:none}
+.player-now-label{font-size:.78rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.player-title{font-family:'Fredoka One';font-size:1.5rem;margin-bottom:4px}
+.player-meta{color:#64748b;font-size:.82rem;margin-bottom:20px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.player-tag{padding:3px 10px;border-radius:999px;font-size:.72rem;font-weight:800}
+/* PROGRESS BAR */
+.prog-wrap{margin-bottom:16px}
+.prog-bar{width:100%;height:8px;background:rgba(255,255,255,.08);border-radius:4px;cursor:pointer;position:relative}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:4px;transition:width .25s linear;pointer-events:none}
+.prog-times{display:flex;justify-content:space-between;font-size:.75rem;color:#64748b;margin-top:5px;font-weight:700}
+/* CONTROLS */
+.controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.ctrl-btn{width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:#f1f5f9;font-size:18px;cursor:pointer;display:grid;place-items:center;transition:.2s;flex-shrink:0}
+.ctrl-btn:hover{background:rgba(255,255,255,.15)}
+.ctrl-btn.play-btn{width:56px;height:56px;font-size:22px;background:linear-gradient(135deg,var(--blue),var(--purple));border:none}
+.ctrl-btn.play-btn:hover{opacity:.9;transform:scale(1.05)}
+.speed-select{padding:6px 12px;border-radius:999px;border:1px solid var(--border);background:rgba(0,0,0,.4);color:#f1f5f9;font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:700;outline:none;cursor:pointer}
+.vol-wrap{display:flex;align-items:center;gap:8px;flex:1;min-width:120px;max-width:180px}
+.vol-wrap span{font-size:18px}
+input[type=range]{-webkit-appearance:none;flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.15);outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--blue);cursor:pointer}
+
+/* STORY TEXT */
+.story-text-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px;margin-bottom:24px;max-height:220px;overflow-y:auto;font-size:1rem;line-height:1.8;color:#cbd5e1}
+.story-text-card .word{display:inline;transition:background .1s,color .1s;border-radius:3px;padding:0 1px}
+.story-text-card .word.active{background:rgba(56,189,248,.3);color:#f1f5f9}
+
+/* FILTER */
+.filter-row{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.filter-btn{padding:7px 15px;border-radius:999px;border:1px solid var(--border);background:transparent;color:#64748b;cursor:pointer;font-weight:700;font-size:.8rem;font-family:'Nunito',sans-serif;transition:.2s}
+.filter-btn:hover,.filter-btn.active{border-color:var(--blue);color:var(--blue);background:rgba(56,189,248,.1)}
+.search-input{padding:8px 16px;border-radius:999px;border:1px solid var(--border);background:rgba(0,0,0,.3);color:#f1f5f9;font-family:'Nunito',sans-serif;font-size:.82rem;outline:none;width:200px}
+.search-input::placeholder{color:#475569}
+/* STORY GRID */
+.stories-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:24px}
+.story-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;cursor:pointer;transition:.25s;position:relative;overflow:hidden}
+.story-card:hover{background:rgba(255,255,255,.1);border-color:rgba(56,189,248,.3);transform:translateY(-2px)}
+.story-card.playing{border-color:var(--blue);background:rgba(56,189,248,.08)}
+.story-card.playing::after{content:'▶ NOW PLAYING';position:absolute;top:10px;right:10px;font-size:.62rem;font-weight:800;color:var(--blue);background:rgba(56,189,248,.15);padding:2px 8px;border-radius:999px;letter-spacing:.06em}
+.story-emoji{font-size:38px;margin-bottom:10px;display:block}
+.story-title{font-family:'Fredoka One';font-size:1rem;margin-bottom:5px}
+.story-excerpt{color:#64748b;font-size:.78rem;line-height:1.5;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.story-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.story-badge{padding:3px 9px;border-radius:999px;font-size:.68rem;font-weight:800}
+.story-dur{color:#64748b;font-size:.75rem;font-weight:700}
+.story-progress{height:3px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:10px}
+.story-progress-fill{height:100%;border-radius:2px;background:var(--blue);transition:width .3s}
+/* TTS not supported notice */
+.tts-notice{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:.83rem;color:var(--yellow);font-weight:700}
+@media(max-width:900px){body{grid-template-columns:1fr}.sidebar{display:none}.topbar{grid-column:1}main{grid-column:1;padding:14px}.stories-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">🦋 ESLD</div>
+  <button class="nav-item" onclick="go('student-dashboard.html')"><span>🏠</span><span>Dashboard</span></button>
+  <button class="nav-item" onclick="go('student-games.html')"><span>🎮</span><span>Games</span></button>
+  <button class="nav-item" onclick="go('student-assignments.html')"><span>📋</span><span>My Assignments</span></button>
+  <button class="nav-item" onclick="go('student-messages.html')"><span>💬</span><span>Messages</span></button>
+  <button class="nav-item" onclick="go('student-progress.html')"><span>📊</span><span>My Progress</span></button>
+  <button class="nav-item active"><span>🎧</span><span>Audio Stories</span></button>
+  <button class="nav-item" onclick="go('student-leaderboard.html')"><span>🏆</span><span>Leaderboard</span></button>
+  <button class="nav-item" onclick="logout()"><span>🚪</span><span>Logout</span></button>
+  <div class="sidebar-coins"><div class="coins-num" id="sideCoins">0</div><div class="coins-label">🪙 My Coins</div></div>
+</aside>
+
+<div class="topbar">
+  <h2>🎧 Audio Stories</h2>
+  <span style="color:#64748b;font-size:.85rem" id="stuLabel"></span>
+</div>
+
+<main>
+  <!-- PLAYER -->
+  <div class="player-card" id="playerCard">
+    <div class="player-now-label">🎵 Now Playing</div>
+    <div class="player-title" id="playerTitle">Select a story below to begin</div>
+    <div class="player-meta" id="playerMeta"><span>Choose any story from the list to start listening</span></div>
+    <div class="prog-wrap">
+      <div class="prog-bar" id="progBar" onclick="seekClick(event)">
+        <div class="prog-fill" id="progFill" style="width:0%"></div>
+      </div>
+      <div class="prog-times"><span id="timeNow">0:00</span><span id="timeTot">0:00</span></div>
+    </div>
+    <div class="controls">
+      <button class="ctrl-btn" onclick="skip(-10)" title="Rewind 10s">⏮</button>
+      <button class="ctrl-btn play-btn" id="playBtn" onclick="togglePlay()">▶</button>
+      <button class="ctrl-btn" onclick="skip(10)" title="Forward 10s">⏭</button>
+      <select class="speed-select" onchange="setSpeed(this.value)">
+        <option value="0.75">0.75×</option>
+        <option value="1" selected>1×</option>
+        <option value="1.25">1.25×</option>
+        <option value="1.5">1.5×</option>
+        <option value="2">2×</option>
+      </select>
+      <div class="vol-wrap"><span>🔊</span><input type="range" min="0" max="1" step=".05" value="1" onchange="setVol(this.value)"/></div>
+    </div>
+  </div>
+
+  <!-- STORY TEXT HIGHLIGHT -->
+  <div class="story-text-card" id="storyTextCard" style="display:none">
+    <div id="storyTextBody"></div>
+  </div>
+
+  <!-- FILTER -->
+  <div class="filter-row">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="filter-btn active" onclick="filterStories('all',this)">📚 All Stories</button>
+      <button class="filter-btn" onclick="filterStories('dyslexia',this)">📖 Dyslexia</button>
+      <button class="filter-btn" onclick="filterStories('dysgraphia',this)">✍️ Dysgraphia</button>
+      <button class="filter-btn" onclick="filterStories('adhd',this)">⚡ ADHD</button>
+      <button class="filter-btn" onclick="filterStories('all-level',this)">🌟 For Everyone</button>
+    </div>
+    <input class="search-input" type="text" placeholder="🔍 Search stories..." oninput="searchStories(this.value)"/>
+  </div>
+
+  <div class="stories-grid" id="storiesGrid"></div>
+</main>
+
+<script>
+const API = 'http://localhost:5000';
+const myId   = sessionStorage.getItem('studentId');
+const myName = sessionStorage.getItem('studentName') || 'Student';
+const myDisability = (sessionStorage.getItem('disability') || 'dyslexia').toLowerCase();
+if(!myId) location.href = 'student-login.html';
+
+document.getElementById('stuLabel').textContent = '👤 ' + myName;
+
+// Load coins
+fetch(`${API}/get-progress/${myId}`).then(r=>r.json()).then(d=>{
+  document.getElementById('sideCoins').textContent = d.total_coins || 0;
+}).catch(()=>{});
+
+function go(u){ location.href=u; }
+function logout(){ sessionStorage.clear(); location.href='student-login.html'; }
+
+// ─── STORY LIBRARY ───────────────────────────────────────────────
+const STORIES = [
+  {
+    id:1, emoji:'🦁', title:'The Brave Little Lion', category:'all-level',
+    badge:'For Everyone', badgeColor:'rgba(34,197,94,.15)', badgeText:'#22c55e',
+    duration:'3:20', level:'Beginner',
+    text:`Once upon a time, in a big green jungle, there lived a little lion named Leo. Leo was small, but his heart was very, very big. All the other animals were much bigger than Leo. The elephant, the giraffe, and even the zebra were taller. But Leo never felt sad about being small. One sunny morning, Leo heard a loud cry. A baby elephant was stuck in the mud! The big elephant tried to pull, but he could not reach. Leo looked around. He saw a long vine hanging from a tree. Leo grabbed the vine with his small paws. He tied one end to a strong tree. Then he tossed the other end to the baby elephant. "Hold on tight!" said Leo. The baby elephant held the vine. Leo pulled and pulled. POP! The baby elephant jumped out of the mud. Everyone cheered for Leo. "You are brave!" said the big elephant. Leo smiled. He knew that being brave was not about being big. It was about helping others, no matter how small you are. And from that day on, Leo was called the Bravest Lion in the jungle.`
+  },
+  {
+    id:2, emoji:'🐟', title:'Finn Finds His Way', category:'dyslexia',
+    badge:'Dyslexia', badgeColor:'rgba(34,197,94,.13)', badgeText:'#22c55e',
+    duration:'2:45', level:'Beginner',
+    text:`Finn was a small blue fish who lived in a big, wide ocean. Every day, Finn swam with his friends. But Finn had a problem. He always got lost! When he turned left, he ended up going right. When he tried to go up, he went down. His friends laughed kindly. "Finn, you swim in zigzags!" said his friend Coral. Finn felt sad. One day, a kind old turtle named Tara swam up to Finn. "I see you have trouble finding your way," said Tara. "I do too, when I was young," she added. Tara showed Finn a trick. "Look at the light from the sun. It always comes from above. When you see the light, you know which way is up." Finn looked up and saw the warm golden light. "I see it!" said Finn. "Now look at the dark. Dark means deep water below," said Tara. Finn practiced every day. Light means up. Dark means down. Slowly, Finn stopped getting lost. He found his way back to his friends each time. "You did it, Finn!" said Coral. Finn smiled and swam in a straight, happy line. Sometimes we just need a little help to find our way.`
+  },
+  {
+    id:3, emoji:'🎨', title:'Mia and the Magic Pencil', category:'dysgraphia',
+    badge:'Dysgraphia', badgeColor:'rgba(56,189,248,.13)', badgeText:'#38bdf8',
+    duration:'3:05', level:'Beginner',
+    text:`Mia loved to draw, but writing words was very hard for her. Her letters would go up, then down, then fall off the line. Her teacher would smile and say, "Keep trying, Mia." But Mia felt frustrated. One afternoon, she found a shiny pencil on her desk. It had a fat, soft grip that felt perfect in her hand. "Where did this come from?" she wondered. She held the pencil and wrote her name. M... i... a. The letters sat right on the line! They were not perfect, but they were hers. Mia wrote more words. CAT. DOG. SUN. Each one was slow and careful. The pencil helped her hand stay steady. Her teacher came over. "Mia! Look at your writing today!" she said with a big smile. Mia felt proud. She learned that the right tools can make hard things easier. Every day, Mia practiced a little more. Her letters got neater. Her words got longer. And one day, she wrote a whole story. It was called, "Mia and the Magic Pencil." Because for Mia, a pencil that fit just right was magic indeed.`
+  },
+  {
+    id:4, emoji:'⚡', title:'Zigzag the Speedy Rabbit', category:'adhd',
+    badge:'ADHD', badgeColor:'rgba(251,146,60,.13)', badgeText:'#fb923c',
+    duration:'2:30', level:'Beginner',
+    text:`Zigzag the rabbit never sat still. He hopped left. He hopped right. He jumped on the log, then jumped off. His friends would say, "Zigzag, stop moving!" But Zigzag could not stop. Moving made him feel alive and happy. One day, the forest animals had a race. Every animal lined up at the start. The owl said, "Ready, set, GO!" All the animals ran. But Zigzag ran in zigzags! He zipped between trees. He leaped over rocks. He spun around twice. The other animals thought he was confused. But at the end of the race, Zigzag crossed the finish line first! He had hopped so many extra paths, but his speed was amazing. "Zigzag wins!" said the owl. The animals cheered. Zigzag laughed. "I know I do things differently," he said, "but different can still be great!" His friend the tortoise nodded. "You are the fastest AND the most creative," said the tortoise. That evening, Zigzag sat for one whole minute to eat his carrots. It was hard, but he was proud. And then, of course, he zoomed off into the forest, zigzagging all the way home.`
+  },
+  {
+    id:5, emoji:'🌈', title:'The Rainbow Bridge', category:'all-level',
+    badge:'For Everyone', badgeColor:'rgba(34,197,94,.15)', badgeText:'#22c55e',
+    duration:'4:00', level:'Intermediate',
+    text:`High up in the mountains, there was a village split in two by a deep river. On one side lived children who loved to paint. On the other side lived children who loved to sing. They could hear each other across the river, but they had never met. One day, a big storm came. Rain poured down for three whole days. When the storm stopped, something magical had happened. A rainbow appeared right above the river. And it was solid! It was a bridge. A real, glowing rainbow bridge. The painting children were scared at first. But one girl named Priya picked up her brush and walked forward. The singing children were scared too. But a boy named Sam took a deep breath and began to hum. When Priya and Sam met in the middle of the rainbow bridge, they both stopped. Priya showed Sam her painting. It was of the river during the storm. Sam sang a song he had written about the same storm. They both laughed. They had seen the same thing and felt the same feelings, just in different ways. That day, the children from both sides of the village came together. The painters painted. The singers sang. And together, they made something more beautiful than anything they could do alone. The rainbow bridge stayed as long as they were friends.`
+  },
+  {
+    id:6, emoji:'🚀', title:'Riya Reaches the Stars', category:'dyslexia',
+    badge:'Dyslexia', badgeColor:'rgba(34,197,94,.13)', badgeText:'#22c55e',
+    duration:'3:40', level:'Intermediate',
+    text:`Riya wanted to be an astronaut more than anything in the world. But reading the big science books was hard for her. The letters seemed to jump around on the page. B looked like D. P looked like Q. Riya felt like she would never learn. Her father bought her audiobooks. She listened to science stories at night before bed. She learned about planets, stars, and rockets, by listening instead of reading. At school, her teacher gave her extra time for tests. Slowly, Riya learned all the planets. Mercury. Venus. Earth. Mars. She knew the names of every constellation. She stayed up late to watch rocket launches on TV. Ten years later, Riya stood in a space suit. She was about to launch into space. As the rocket counted down, she remembered the little girl who thought she could not learn. Ten. Nine. Eight. She had learned. Just differently. Three. Two. One. The rocket roared to life. Riya soared into the sky, past the clouds, past the moon, all the way to the stars she had always loved. In space, there were no letters to confuse her. Only stars, planets, and the deep, beautiful silence of the universe. Riya smiled inside her helmet. She had reached the stars after all.`
+  },
+  {
+    id:7, emoji:'🐢', title:'Slow and Steady Wins', category:'all-level',
+    badge:'For Everyone', badgeColor:'rgba(34,197,94,.15)', badgeText:'#22c55e',
+    duration:'2:15', level:'Beginner',
+    text:`Everyone knows the story of the tortoise and the hare. But did you ever hear what happened after the race? The hare was embarrassed. He had lost to a slow tortoise! He asked the tortoise, "How did you win? You are so slow!" The tortoise sat down and thought carefully before answering. "I did not race against you," said the tortoise. "I raced against myself. I asked myself, can I go a little farther? Can I keep going when it is hard? And each time, the answer was yes." The hare had been watching the tortoise all along. He had never thought about running against himself. The next week, the animals held another race. This time, the hare did not show off. He ran steadily, one step at a time. He was still fast, but he did not stop or look around. He focused on his own path. Both the hare and the tortoise finished the race at almost the same time. The crowd cheered for both of them. "What changed?" asked the rabbit. The tortoise smiled. "You stopped racing others. You started racing yourself." From that day, the hare ran every morning, not to beat anyone, but to be a little better than he was yesterday. And that, my friends, is the real secret of winning.`
+  },
+  {
+    id:8, emoji:'🎵', title:'The Boy Who Could Not Sit Still', category:'adhd',
+    badge:'ADHD', badgeColor:'rgba(251,146,60,.13)', badgeText:'#fb923c',
+    duration:'3:15', level:'Intermediate',
+    text:`Arjun could not sit still in class. His legs bounced. His pencil tapped. His eyes looked out the window at the birds. His teacher, Mr. Krishnan, noticed. One afternoon, Mr. Krishnan asked Arjun to stay after school. Arjun was worried he was in trouble. But Mr. Krishnan just smiled and handed him a drum. "Try this," he said. Arjun held the drum and tapped it. Boom. Boom. Tap-tap-boom. Something clicked inside him. The rhythm moved through his hands and his legs stopped bouncing. The next day, Mr. Krishnan let Arjun tap a soft drum under his desk while the class learned mathematics. Arjun paid attention for the first time in months. He heard every word. He answered three questions correctly. Mr. Krishnan told Arjun's parents about the drum. They found a music teacher who taught Arjun real drumming. Within a year, Arjun could play full songs. He performed at the school concert. The whole audience clapped along to his rhythm. After the show, a younger boy came up to Arjun. "I also cannot sit still," the boy whispered. Arjun knelt down. "That energy inside you," he said quietly, "it is not a problem. You just need to find the right way to use it." He handed the boy a small drum. And the boy began to tap.`
+  },
+];
+
+// ─── STATE ──────────────────────────────────────────────────────
+let currentFilter  = 'all';
+let searchQuery    = '';
+let currentStory   = null;
+let utterance      = null;
+let isPlaying      = false;
+let wordSpans      = [];
+let wordIndex      = 0;
+let totalChars     = 0;
+let charsPerSec    = 0;
+let elapsed        = 0;
+let startTime      = 0;
+let rafId          = null;
+let pausedElapsed  = 0;
+let listenedStories = JSON.parse(localStorage.getItem('audioListened-'+myId)||'[]');
+let storyProgress  = JSON.parse(localStorage.getItem('audioProgress-'+myId)||'{}');
+
+// ─── TTS SUPPORT ─────────────────────────────────────────────────
+const ttsOk = 'speechSynthesis' in window;
+
+// ─── FILTER & SEARCH ─────────────────────────────────────────────
+function filterStories(f, btn){
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid();
+}
+function searchStories(q){ searchQuery = q.toLowerCase(); renderGrid(); }
+
+function getFiltered(){
+  return STORIES.filter(s=>{
+    const catMatch = currentFilter==='all' || s.category===currentFilter || (currentFilter===myDisability && s.category===myDisability);
+    const searchMatch = !searchQuery || s.title.toLowerCase().includes(searchQuery) || s.text.toLowerCase().includes(searchQuery);
+    return catMatch && searchMatch;
+  });
+}
+
+// ─── GRID ────────────────────────────────────────────────────────
+function renderGrid(){
+  const list = getFiltered();
+  const grid = document.getElementById('storiesGrid');
+  if(!list.length){
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:#64748b"><div style="font-size:48px">📭</div><p style="margin-top:10px">No stories found.</p></div>`;
+    return;
+  }
+  grid.innerHTML = list.map(s=>{
+    const pct = storyProgress[s.id] || 0;
+    const done = listenedStories.includes(s.id);
+    const isNow = currentStory && currentStory.id === s.id;
+    return `<div class="story-card${isNow?' playing':''}" onclick="loadStory(${s.id})">
+      <span class="story-emoji">${s.emoji}</span>
+      <div class="story-title">${s.title} ${done?'✅':''}</div>
+      <div class="story-excerpt">${s.text.slice(0,120)}…</div>
+      <div class="story-footer">
+        <span class="story-badge" style="background:${s.badgeColor};color:${s.badgeText}">${s.badge}</span>
+        <span class="story-dur">⏱ ${s.duration} · ${s.level}</span>
+      </div>
+      ${pct>0?`<div class="story-progress"><div class="story-progress-fill" style="width:${pct}%"></div></div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ─── LOAD STORY ──────────────────────────────────────────────────
+function loadStory(id){
+  stopAudio();
+  currentStory = STORIES.find(s=>s.id===id);
+  if(!currentStory) return;
+
+  document.getElementById('playerTitle').textContent = currentStory.emoji + ' ' + currentStory.title;
+  document.getElementById('playerMeta').innerHTML = `
+    <span class="story-badge" style="background:${currentStory.badgeColor};color:${currentStory.badgeText}">${currentStory.badge}</span>
+    <span>⏱ ${currentStory.duration}</span>
+    <span>📊 ${currentStory.level}</span>
+  `;
+
+  // Build word spans
+  const textCard = document.getElementById('storyTextCard');
+  textCard.style.display = 'block';
+  const words = currentStory.text.split(/(\s+)/);
+  wordSpans = [];
+  document.getElementById('storyTextBody').innerHTML = words.map((w,i)=>{
+    if(/\s+/.test(w)) return w;
+    const id = 'w'+wordSpans.length;
+    wordSpans.push(id);
+    return `<span class="word" id="${id}">${w}</span>`;
+  }).join('');
+
+  // Estimate duration for progress bar
+  const wordsOnly = currentStory.text.split(/\s+/).length;
+  const [m,sec] = currentStory.duration.split(':').map(Number);
+  const totalSec = m*60 + sec;
+  charsPerSec = currentStory.text.length / totalSec;
+  totalChars  = currentStory.text.length;
+
+  document.getElementById('timeTot').textContent = fmtTime(totalSec);
+  document.getElementById('progFill').style.width = '0%';
+  document.getElementById('timeNow').textContent  = '0:00';
+  elapsed = pausedElapsed = 0;
+  wordIndex = 0;
+
+  renderGrid();
+  playAudio();
+}
+
+// ─── AUDIO (TTS) ─────────────────────────────────────────────────
+function playAudio(){
+  if(!ttsOk || !currentStory) return;
+  stopAudio();
+  isPlaying = true;
+  document.getElementById('playBtn').textContent = '⏸';
+
+  utterance = new SpeechSynthesisUtterance(currentStory.text);
+  utterance.rate  = parseFloat(document.querySelector('.speed-select').value);
+  utterance.volume= parseFloat(document.querySelector('input[type=range]').value);
+  utterance.pitch = 1;
+
+  // Prefer a friendly English voice
+  const voices = speechSynthesis.getVoices();
+  const preferred = voices.find(v=>v.lang.startsWith('en') && v.name.includes('Female'))
+                 || voices.find(v=>v.lang.startsWith('en'))
+                 || voices[0];
+  if(preferred) utterance.voice = preferred;
+
+  // Word boundary highlighting
+  wordIndex = 0;
+  utterance.onboundary = e => {
+    if(e.name === 'word'){
+      // Remove previous highlight
+      if(wordIndex > 0 && wordIndex-1 < wordSpans.length){
+        const prev = document.getElementById(wordSpans[wordIndex-1]);
+        if(prev) prev.classList.remove('active');
+      }
+      if(wordIndex < wordSpans.length){
+        const el = document.getElementById(wordSpans[wordIndex]);
+        if(el){
+          el.classList.add('active');
+          el.scrollIntoView({block:'nearest',behavior:'smooth'});
+        }
+        wordIndex++;
+      }
+    }
+  };
+
+  utterance.onend = () => {
+    isPlaying = false;
+    document.getElementById('playBtn').textContent = '▶';
+    document.getElementById('progFill').style.width = '100%';
+    cancelAnimationFrame(rafId);
+    // Mark as listened
+    if(!listenedStories.includes(currentStory.id)){
+      listenedStories.push(currentStory.id);
+      localStorage.setItem('audioListened-'+myId, JSON.stringify(listenedStories));
+    }
+    storyProgress[currentStory.id] = 100;
+    localStorage.setItem('audioProgress-'+myId, JSON.stringify(storyProgress));
+    renderGrid();
+  };
+
+  speechSynthesis.speak(utterance);
+  startTime = performance.now() - pausedElapsed * 1000;
+  tickProgress();
+}
+
+function stopAudio(){
+  if(utterance) speechSynthesis.cancel();
+  isPlaying = false;
+  document.getElementById('playBtn').textContent = '▶';
+  cancelAnimationFrame(rafId);
+  // Clear highlights
+  wordSpans.forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); });
+}
+
+function togglePlay(){
+  if(!currentStory){ alert('Please select a story first!'); return; }
+  if(isPlaying){
+    speechSynthesis.pause();
+    isPlaying = false;
+    document.getElementById('playBtn').textContent = '▶';
+    pausedElapsed = elapsed;
+    cancelAnimationFrame(rafId);
+  } else {
+    if(speechSynthesis.paused){
+      speechSynthesis.resume();
+      isPlaying = true;
+      document.getElementById('playBtn').textContent = '⏸';
+      startTime = performance.now() - pausedElapsed * 1000;
+      tickProgress();
+    } else {
+      playAudio();
+    }
+  }
+}
+
+function skip(secs){
+  // TTS can't seek; restart from beginning as fallback
+  if(!currentStory) return;
+  stopAudio();
+  pausedElapsed = Math.max(0, elapsed + secs);
+  // Restart TTS (browsers don't support seeking)
+  playAudio();
+}
+
+function setSpeed(v){
+  if(!currentStory) return;
+  const wasPaused = !isPlaying;
+  const e = elapsed;
+  stopAudio();
+  pausedElapsed = e;
+  if(!wasPaused) playAudio();
+}
+
+function setVol(v){
+  if(utterance){ speechSynthesis.cancel(); if(isPlaying){ pausedElapsed=elapsed; playAudio(); } }
+}
+
+function seekClick(event){
+  if(!currentStory) return;
+  const bar = document.getElementById('progBar');
+  const pct = event.offsetX / bar.offsetWidth;
+  const [m,s] = currentStory.duration.split(':').map(Number);
+  const total = m*60+s;
+  stopAudio();
+  pausedElapsed = pct * total;
+  elapsed = pausedElapsed;
+  updateProgUI();
+  playAudio();
+}
+
+function tickProgress(){
+  rafId = requestAnimationFrame(()=>{
+    if(!isPlaying) return;
+    elapsed = (performance.now() - startTime) / 1000;
+    updateProgUI();
+    const [m,s] = currentStory.duration.split(':').map(Number);
+    const total = m*60+s;
+    const pct = Math.min(100, (elapsed/total)*100);
+    storyProgress[currentStory.id] = Math.round(pct);
+    tickProgress();
+  });
+}
+
+function updateProgUI(){
+  const [m,s] = (currentStory?.duration||'0:00').split(':').map(Number);
+  const total = m*60+s;
+  const pct = Math.min(100, (elapsed/total)*100);
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('timeNow').textContent  = fmtTime(Math.round(elapsed));
+}
+
+function fmtTime(sec){
+  const m = Math.floor(sec/60);
+  const s = Math.floor(sec%60);
+  return `${m}:${s.toString().padStart(2,'0')}`;
+}
+
+// ─── INIT ────────────────────────────────────────────────────────
+// Wait for voices to load
+speechSynthesis.onvoiceschanged = ()=>{};
+
+// Auto-recommend stories based on disability
+if(myDisability && myDisability !== 'all'){
+  const matchBtn = document.querySelector(`.filter-btn[onclick*="${myDisability}"]`);
+  if(matchBtn) { filterStories(myDisability, matchBtn); matchBtn.classList.add('active'); document.querySelector('.filter-btn').classList.remove('active'); }
+  else renderGrid();
+} else {
+  renderGrid();
+}
+</script>
+</body>
+</html>

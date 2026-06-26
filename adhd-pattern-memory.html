@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Pattern Memory 🧩 | ESLD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     ESLD Mini-Game: Pattern Memory
+     Self-contained, works standalone or embedded as an <iframe>.
+
+     Integration notes for the ESLD platform:
+     - On level pass / hint / game over, saveProgress() writes to
+       localStorage under key "esld_progress_pattern-memory"
+       AND posts a window.parent.postMessage({type:'esld-game-progress', ...})
+       so a parent dashboard can listen for it if this is embedded.
+     - Swap saveProgress()'s localStorage block for a fetch() call to
+       your Flask /api/progress endpoint whenever the backend is ready;
+       the postMessage call can stay as-is either way.
+     ============================================================ */
+
+  :root{
+    --accent1:#4cc9f0;
+    --accent2:#4361ee;
+    --glow: rgba(76,201,240,.18);
+    --bg-deep:#0b0f1a;
+    --bg-panel:#141a2b;
+    --bg-panel2:#1c2338;
+    --text:#eef2ff;
+    --text-dim:#9aa5c0;
+    --success:#06d6a0;
+    --danger:#ef476f;
+    --warning:#ffd166;
+    --radius:18px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:'Nunito',sans-serif;
+    color:var(--text);
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 15% -10%, var(--glow), transparent 55%),
+      radial-gradient(circle at 110% 110%, rgba(67,97,238,.16), transparent 50%),
+      var(--bg-deep);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:18px 14px 40px;
+  }
+  h1,h2,h3,.display{font-family:'Fredoka',sans-serif; margin:0;}
+
+  /* ---------- Header ---------- */
+  .topbar{
+    width:100%;
+    max-width:560px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .title-block{display:flex; align-items:center; gap:10px;}
+  .title-block .emoji{font-size:32px;}
+  .title-block h1{font-size:22px; line-height:1.1;}
+  .title-block p{margin:2px 0 0; font-size:13px; color:var(--text-dim);}
+  .icon-btn{
+    background:var(--bg-panel);
+    border:1px solid rgba(255,255,255,.08);
+    color:var(--text);
+    border-radius:12px;
+    width:42px; height:42px;
+    font-size:18px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    transition:.15s transform ease, .15s background ease;
+  }
+  .icon-btn:hover{background:var(--bg-panel2); transform:translateY(-1px);}
+  .icon-btn:focus-visible, .cell:focus-visible, .btn:focus-visible{
+    outline:3px solid var(--accent1);
+    outline-offset:2px;
+  }
+  .header-actions{display:flex; gap:8px;}
+
+  /* ---------- HUD ---------- */
+  .hud{
+    width:100%;
+    max-width:560px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--bg-panel);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:16px;
+    padding:10px 16px;
+    margin-bottom:18px;
+    font-weight:700;
+    font-size:14px;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .hud .stat{display:flex; align-items:center; gap:6px; color:var(--text-dim);}
+  .hud .stat b{color:var(--text); font-size:15px;}
+  .hearts{display:flex; gap:3px; font-size:16px;}
+  .heart-lost{opacity:.25; filter:grayscale(1);}
+  .xp-pill{
+    background:linear-gradient(135deg,var(--accent1),var(--accent2));
+    color:#0b0f1a;
+    padding:4px 12px;
+    border-radius:999px;
+    font-size:13px;
+  }
+
+  /* ---------- Stage ---------- */
+  .stage{
+    width:100%;
+    max-width:560px;
+    background:var(--bg-panel);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:24px;
+    padding:24px 20px 28px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .stage::before{
+    content:'';
+    position:absolute; inset:0;
+    background:linear-gradient(135deg,var(--accent1),var(--accent2));
+    opacity:.05;
+    pointer-events:none;
+  }
+  .badge{
+    display:inline-block;
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    color:#0b0f1a;
+    background:linear-gradient(135deg,var(--accent1),var(--accent2));
+    padding:5px 14px;
+    border-radius:999px;
+    margin-bottom:10px;
+  }
+  .stage h2{font-size:24px; margin-bottom:6px;}
+  .stage .sub{color:var(--text-dim); font-size:14.5px; max-width:380px; margin:0 auto 18px;}
+
+  .btn{
+    font-family:'Fredoka',sans-serif;
+    font-size:16px;
+    font-weight:600;
+    border:none;
+    border-radius:14px;
+    padding:13px 26px;
+    cursor:pointer;
+    color:#0b0f1a;
+    background:linear-gradient(135deg,var(--accent1),var(--accent2));
+    box-shadow:0 8px 22px rgba(67,97,238,.35);
+    transition:.15s transform ease, .15s box-shadow ease;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn:active{transform:translateY(0);}
+  .btn.secondary{
+    background:var(--bg-panel2);
+    color:var(--text);
+    box-shadow:none;
+    border:1px solid rgba(255,255,255,.1);
+  }
+  .btn.secondary:hover{background:#232b45;}
+  .btn:disabled{opacity:.45; cursor:not-allowed; transform:none;}
+  .btn-row{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:6px;}
+
+  /* ---------- Countdown ring (memorize phase) ---------- */
+  .ring-wrap{position:relative; width:84px; height:84px; margin:0 auto 14px;}
+  .ring-wrap svg{transform:rotate(-90deg);}
+  .ring-bg{fill:none; stroke:rgba(255,255,255,.08); stroke-width:6;}
+  .ring-fg{
+    fill:none; stroke:var(--accent1); stroke-width:6; stroke-linecap:round;
+    stroke-dasharray:226; stroke-dashoffset:0;
+  }
+  .ring-fg.run{animation:ringRun linear forwards;}
+  @keyframes ringRun{ from{stroke-dashoffset:0;} to{stroke-dashoffset:226;} }
+  .ring-num{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:'Fredoka',sans-serif; font-size:24px; font-weight:600;
+  }
+
+  /* ---------- Grid ---------- */
+  .grid-wrap{display:flex; justify-content:center; margin:6px 0 14px;}
+  .grid{
+    display:grid;
+    gap:10px;
+    width:100%;
+    max-width:340px;
+  }
+  .cell{
+    aspect-ratio:1/1;
+    border-radius:14px;
+    background:var(--bg-panel2);
+    border:1px solid rgba(255,255,255,.07);
+    cursor:pointer;
+    transition:.12s transform ease, .15s background ease, .15s box-shadow ease;
+  }
+  .cell:hover{transform:scale(1.04);}
+  .cell.lit{
+    background:linear-gradient(135deg,var(--accent1),var(--accent2));
+    box-shadow:0 0 18px rgba(76,201,240,.55);
+  }
+  .cell.selected{
+    background:var(--bg-panel2);
+    border:2px solid var(--accent1);
+    box-shadow:inset 0 0 0 3px rgba(76,201,240,.35);
+  }
+  .cell.correct{
+    background:linear-gradient(135deg,var(--success),#1b9aaa);
+    box-shadow:0 0 18px rgba(6,214,160,.55);
+  }
+  .cell.missed{
+    border:2px dashed var(--warning);
+    background:var(--bg-panel2);
+  }
+  .cell.wrong{
+    background:linear-gradient(135deg,var(--danger),#b5174e);
+    box-shadow:0 0 18px rgba(239,71,111,.5);
+  }
+  .cell.hinted{box-shadow:0 0 0 4px var(--warning) inset;}
+  .cell.locked{cursor:default;}
+
+  .recall-status{
+    font-weight:700;
+    color:var(--text-dim);
+    margin-bottom:12px;
+    font-size:14.5px;
+  }
+  .recall-status b{color:var(--text);}
+
+  .result-msg{
+    font-family:'Fredoka',sans-serif;
+    font-size:21px;
+    margin:6px 0 4px;
+  }
+  .result-msg.ok{color:var(--success);}
+  .result-msg.bad{color:var(--warning);}
+  .result-sub{color:var(--text-dim); font-size:14px; margin-bottom:16px;}
+
+  /* ---------- Confetti ---------- */
+  .confetti-piece{
+    position:fixed; top:-10px; width:8px; height:14px; border-radius:2px;
+    z-index:50; pointer-events:none;
+    animation:fall linear forwards;
+  }
+  @keyframes fall{
+    to{ transform:translateY(110vh) rotate(540deg); opacity:0.6; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .cell, .btn, .icon-btn{transition:none;}
+    .confetti-piece{display:none;}
+  }
+
+  footer{
+    margin-top:18px;
+    font-size:12.5px;
+    color:var(--text-dim);
+    text-align:center;
+    max-width:480px;
+  }
+
+  @media (max-width:380px){
+    .title-block h1{font-size:19px;}
+    .stage{padding:20px 14px 24px;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="title-block">
+      <span class="emoji">🧩</span>
+      <div>
+        <h1>Pattern Memory</h1>
+        <p>Watch closely, then rebuild it!</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="muteBtn" title="Mute sounds" aria-label="Toggle sound">🔊</button>
+      <button class="icon-btn" id="backBtn" title="Back to games" aria-label="Back to games">←</button>
+    </div>
+  </div>
+
+  <div class="hud">
+    <div class="stat">Level <b id="hudLevel">1</b></div>
+    <div class="stat">Streak <b id="hudStreak">0</b></div>
+    <div class="hearts" id="hudHearts" aria-label="Lives remaining">❤️❤️❤️</div>
+    <div class="xp-pill">⚡ <span id="hudXp">0</span> XP</div>
+  </div>
+
+  <div class="stage" id="stage"><!-- phases render here --></div>
+
+  <footer>Tip: each level adds more cells or a bigger grid. Take your time during recall — there's no rush, and a hint is always nearby. 💙</footer>
+
+<script>
+(function(){
+  "use strict";
+  const GAME_ID = 'pattern-memory';
+  const STORAGE_KEY = 'esld_progress_' + GAME_ID;
+
+  // ---------------- State ----------------
+  let level = 1;
+  let hearts = 3;
+  let xp = 0;
+  let streak = 0;
+  let bestLevel = 1;
+  let muted = false;
+  let pattern = [];      // indices that are part of the pattern
+  let selected = new Set();
+  let hintUsed = false;
+  let triesThisLevel = 0;
+  let audioCtx = null;
+
+  const stage = document.getElementById('stage');
+
+  // ---------------- Level config ----------------
+  function getLevelConfig(lvl){
+    const base = [
+      {grid:3, cells:3, time:3000},
+      {grid:3, cells:4, time:3000},
+      {grid:3, cells:5, time:3500},
+      {grid:4, cells:5, time:3500},
+      {grid:4, cells:6, time:4000},
+      {grid:4, cells:7, time:4000},
+      {grid:5, cells:7, time:4500},
+      {grid:5, cells:8, time:4500},
+      {grid:5, cells:9, time:5000},
+      {grid:5, cells:10, time:5000},
+    ];
+    if (lvl <= base.length) return base[lvl - 1];
+    const extra = lvl - base.length;
+    const grid = Math.min(6, 5 + Math.floor(extra / 4));
+    const cells = Math.min(grid*grid - 2, 10 + Math.floor(extra / 2));
+    return {grid, cells, time:5000};
+  }
+
+  // ---------------- Persistence ----------------
+  function loadProgress(){
+    try{
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      bestLevel = data.bestLevel || 1;
+    }catch(e){ bestLevel = 1; }
+  }
+  function saveProgress(xpEarned){
+    try{
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      data.bestLevel = Math.max(data.bestLevel || 1, level);
+      data.totalXP = (data.totalXP || 0) + xpEarned;
+      data.lastPlayed = new Date().toISOString();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      bestLevel = data.bestLevel;
+    }catch(e){ /* localStorage unavailable, ignore */ }
+    try{
+      window.parent.postMessage({type:'esld-game-progress', game:GAME_ID, xp:xpEarned, level:level}, '*');
+    }catch(e){ /* not embedded, ignore */ }
+  }
+
+  // ---------------- Sound ----------------
+  function tone(freq, dur, type){
+    if (muted) return;
+    try{
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + dur);
+    }catch(e){}
+  }
+  const sfx = {
+    tap: ()=>tone(420, .08, 'sine'),
+    correct: ()=>{ tone(523,.12,'triangle'); setTimeout(()=>tone(659,.15,'triangle'),90); },
+    wrong: ()=>tone(180,.25,'sawtooth'),
+    levelup: ()=>{ tone(523,.1); setTimeout(()=>tone(659,.1),100); setTimeout(()=>tone(784,.18),200); }
+  };
+
+  document.getElementById('muteBtn').addEventListener('click', function(){
+    muted = !muted;
+    this.textContent = muted ? '🔇' : '🔊';
+    try{ localStorage.setItem('esld_mute_pref', muted ? '1' : '0'); }catch(e){}
+  });
+  document.getElementById('backBtn').addEventListener('click', function(){
+    try{ window.parent.postMessage({type:'esld-close-game', game:GAME_ID}, '*'); }catch(e){}
+    if (window.history.length > 1) window.history.back();
+  });
+
+  // ---------------- HUD ----------------
+  function updateHud(){
+    document.getElementById('hudLevel').textContent = level;
+    document.getElementById('hudStreak').textContent = streak;
+    document.getElementById('hudXp').textContent = xp;
+    const heartsEl = document.getElementById('hudHearts');
+    let html = '';
+    for(let i=0;i<3;i++){
+      html += `<span class="${i < hearts ? '' : 'heart-lost'}">❤️</span>`;
+    }
+    heartsEl.innerHTML = html;
+  }
+
+  // ---------------- Confetti ----------------
+  function confettiBurst(){
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const colors = ['#4cc9f0','#4361ee','#06d6a0','#ffd166'];
+    for(let i=0;i<26;i++){
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = Math.random()*100 + 'vw';
+      piece.style.background = colors[i % colors.length];
+      piece.style.animationDuration = (1.6 + Math.random()*1.2) + 's';
+      piece.style.opacity = (0.7 + Math.random()*0.3).toString();
+      document.body.appendChild(piece);
+      setTimeout(()=>piece.remove(), 3000);
+    }
+  }
+
+  const ENCOURAGE = ["Nice focus! 🌟","You remembered it! 🎯","Great job! 💪","Sharp eyes! 👀","Keep that streak going! 🔥"];
+  const TRYAGAIN = ["So close — try again!","Almost! One more look.","Good attempt, let's retry.","Nearly there!"];
+
+  // ---------------- Phase: Intro ----------------
+  function renderIntro(){
+    const cfg = getLevelConfig(level);
+    stage.innerHTML = `
+      <span class="badge">Level ${level}</span>
+      <h2>Get ready to memorize</h2>
+      <p class="sub">A ${cfg.grid}×${cfg.grid} grid will flash <b>${cfg.cells}</b> highlighted tiles for ${(cfg.time/1000).toFixed(1)}s. Watch closely, then tap the same tiles from memory.</p>
+      <div class="btn-row">
+        <button class="btn" id="startBtn">Start Round ▶</button>
+      </div>
+    `;
+    document.getElementById('startBtn').addEventListener('click', beginMemorize);
+  }
+
+  // ---------------- Phase: Memorize ----------------
+  function beginMemorize(){
+    const cfg = getLevelConfig(level);
+    const total = cfg.grid * cfg.grid;
+    const indices = Array.from({length:total}, (_,i)=>i);
+    // shuffle and take first N
+    for(let i=indices.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [indices[i],indices[j]] = [indices[j],indices[i]];
+    }
+    pattern = indices.slice(0, cfg.cells);
+    selected = new Set();
+    hintUsed = false;
+
+    stage.innerHTML = `
+      <span class="badge">Level ${level}</span>
+      <div class="ring-wrap">
+        <svg width="84" height="84" viewBox="0 0 84 84">
+          <circle class="ring-bg" cx="42" cy="42" r="36"></circle>
+          <circle class="ring-fg run" cx="42" cy="42" r="36" style="animation-duration:${cfg.time}ms"></circle>
+        </svg>
+      </div>
+      <h2>Memorize the pattern!</h2>
+      <p class="sub">Tiles will hide in a moment...</p>
+      <div class="grid-wrap">
+        <div class="grid" id="grid" style="grid-template-columns:repeat(${cfg.grid},1fr)"></div>
+      </div>
+    `;
+    const gridEl = document.getElementById('grid');
+    for(let i=0;i<total;i++){
+      const cell = document.createElement('div');
+      cell.className = 'cell' + (pattern.includes(i) ? ' lit' : '');
+      gridEl.appendChild(cell);
+    }
+    setTimeout(beginRecall, cfg.time);
+  }
+
+  // ---------------- Phase: Recall ----------------
+  function beginRecall(){
+    const cfg = getLevelConfig(level);
+    const total = cfg.grid * cfg.grid;
+    stage.innerHTML = `
+      <span class="badge">Level ${level}</span>
+      <h2>Now rebuild it!</h2>
+      <p class="recall-status">Selected <b id="selCount">0</b> / ${cfg.cells}</p>
+      <div class="grid-wrap">
+        <div class="grid" id="grid" style="grid-template-columns:repeat(${cfg.grid},1fr)"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn secondary" id="hintBtn">💡 Hint</button>
+        <button class="btn secondary" id="clearBtn">↺ Clear</button>
+        <button class="btn" id="checkBtn" disabled>Check Pattern ✓</button>
+      </div>
+    `;
+    const gridEl = document.getElementById('grid');
+    for(let i=0;i<total;i++){
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.tabIndex = 0;
+      cell.setAttribute('role','button');
+      cell.setAttribute('aria-label','tile ' + (i+1));
+      cell.addEventListener('click', ()=>toggleCell(i, cell));
+      cell.addEventListener('keydown', (e)=>{
+        if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleCell(i, cell); }
+      });
+      gridEl.appendChild(cell);
+    }
+    document.getElementById('checkBtn').addEventListener('click', checkAnswer);
+    document.getElementById('clearBtn').addEventListener('click', clearSelection);
+    document.getElementById('hintBtn').addEventListener('click', useHint);
+  }
+
+  function toggleCell(i, el){
+    if (selected.has(i)){
+      selected.delete(i);
+      el.classList.remove('selected');
+    } else {
+      selected.add(i);
+      el.classList.add('selected');
+      sfx.tap();
+    }
+    document.getElementById('selCount').textContent = selected.size;
+    document.getElementById('checkBtn').disabled = selected.size === 0;
+  }
+
+  function clearSelection(){
+    selected.clear();
+    document.querySelectorAll('#grid .cell').forEach(c=>c.classList.remove('selected'));
+    document.getElementById('selCount').textContent = '0';
+    document.getElementById('checkBtn').disabled = true;
+  }
+
+  function useHint(){
+    if (hintUsed) return;
+    const remaining = pattern.filter(i => !selected.has(i));
+    if (remaining.length === 0) return;
+    const pick = remaining[Math.floor(Math.random()*remaining.length)];
+    const cells = document.querySelectorAll('#grid .cell');
+    cells[pick].classList.add('hinted');
+    setTimeout(()=>cells[pick].classList.remove('hinted'), 900);
+    hintUsed = true;
+    document.getElementById('hintBtn').disabled = true;
+  }
+
+  function checkAnswer(){
+    triesThisLevel++;
+    const cells = document.querySelectorAll('#grid .cell');
+    let allCorrect = true;
+    pattern.forEach(i=>{
+      if (selected.has(i)){
+        cells[i].classList.add('correct');
+      } else {
+        cells[i].classList.add('missed');
+        allCorrect = false;
+      }
+    });
+    selected.forEach(i=>{
+      if (!pattern.includes(i)){
+        cells[i].classList.add('wrong');
+        allCorrect = false;
+      }
+    });
+    cells.forEach(c=>c.classList.add('locked'));
+    document.querySelectorAll('#grid .cell').forEach(c=>c.onclick=null);
+    document.getElementById('checkBtn').disabled = true;
+    document.getElementById('hintBtn').disabled = true;
+    document.getElementById('clearBtn').disabled = true;
+
+    setTimeout(()=>showResult(allCorrect), 750);
+  }
+
+  // ---------------- Phase: Result ----------------
+  function showResult(success){
+    if (success){
+      streak++;
+      let earned = Math.min(35, 20 + Math.floor(level * 1.3));
+      if (hintUsed) earned = Math.round(earned * 0.85);
+      if (triesThisLevel > 1) earned = Math.round(earned * 0.6);
+      xp += earned;
+      saveProgress(earned);
+      sfx.correct();
+      confettiBurst();
+      updateHud();
+      const msg = ENCOURAGE[Math.floor(Math.random()*ENCOURAGE.length)];
+      stage.innerHTML = `
+        <h2 class="result-msg ok">${msg}</h2>
+        <p class="result-sub">+${earned} XP earned ${hintUsed ? '(hint used)' : '— perfect memory!'}</p>
+        <div class="btn-row">
+          <button class="btn" id="nextBtn">Next Level →</button>
+        </div>
+      `;
+      document.getElementById('nextBtn').addEventListener('click', ()=>{
+        level++;
+        triesThisLevel = 0;
+        renderIntro();
+      });
+      if (level % 3 === 0) sfx.levelup();
+    } else {
+      streak = 0;
+      hearts--;
+      sfx.wrong();
+      updateHud();
+      const msg = TRYAGAIN[Math.floor(Math.random()*TRYAGAIN.length)];
+      if (hearts <= 0){
+        renderGameOver();
+        return;
+      }
+      stage.innerHTML = `
+        <h2 class="result-msg bad">${msg}</h2>
+        <p class="result-sub">You have ${hearts} ${hearts===1?'life':'lives'} left. Let's see the pattern again.</p>
+        <div class="btn-row">
+          <button class="btn" id="retryBtn">Try This Level Again</button>
+        </div>
+      `;
+      document.getElementById('retryBtn').addEventListener('click', beginMemorize);
+    }
+  }
+
+  function renderGameOver(){
+    stage.innerHTML = `
+      <h2 class="result-msg bad">Out of lives — nice effort! 💙</h2>
+      <p class="result-sub">You reached Level ${level} this round and earned ${xp} XP.<br>Your best level overall is ${Math.max(bestLevel, level)}.</p>
+      <div class="btn-row">
+        <button class="btn" id="restartBtn">Play Again</button>
+      </div>
+    `;
+    document.getElementById('restartBtn').addEventListener('click', ()=>{
+      level = 1; hearts = 3; xp = 0; streak = 0; triesThisLevel = 0;
+      updateHud();
+      renderIntro();
+    });
+  }
+
+  // ---------------- Init ----------------
+  try{
+    const mp = localStorage.getItem('esld_mute_pref');
+    if (mp === '1'){ muted = true; document.getElementById('muteBtn').textContent = '🔇'; }
+  }catch(e){}
+  loadProgress();
+  updateHud();
+  renderIntro();
+})();
+</script>
+</body>
+</html>

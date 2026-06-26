@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ESLD – Parent Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{
+  --bg:#080d1a;--sidebar:#0b1120;--card:rgba(255,255,255,.06);
+  --border:rgba(255,255,255,.1);--radius:18px;
+  --green:#22c55e;--blue:#38bdf8;--teal:#2dd4bf;
+  --purple:#a78bfa;--yellow:#fbbf24;--orange:#fb923c;--red:#ef4444;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:#f1f5f9;
+     display:grid;grid-template-columns:252px 1fr;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{background:var(--sidebar);border-right:1px solid var(--border);
+  padding:18px 12px;display:flex;flex-direction:column;gap:3px;
+  height:100vh;position:sticky;top:0;overflow-y:auto;}
+.s-logo{font-family:'Fredoka One';font-size:1.3rem;
+  padding:8px 10px 18px;border-bottom:1px solid var(--border);margin-bottom:10px;
+  background:linear-gradient(90deg,var(--green),var(--teal));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.nav{display:flex;align-items:center;gap:10px;padding:11px 12px;
+  border-radius:12px;cursor:pointer;transition:.18s;font-weight:700;font-size:.87rem;color:#64748b;
+  border:none;background:none;width:100%;text-align:left;font-family:'Nunito',sans-serif;position:relative;}
+.nav:hover{background:rgba(255,255,255,.07);color:#f1f5f9}
+.nav.on{background:rgba(34,197,94,.11);color:var(--green)}
+.nav .ni{font-size:18px;width:24px;text-align:center;flex-shrink:0}
+.nbadge{position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  background:var(--red);color:#fff;border-radius:999px;
+  font-size:.62rem;font-weight:900;padding:2px 7px;min-width:20px;text-align:center;}
+.s-child{margin-top:auto;background:rgba(34,197,94,.07);
+  border:1px solid rgba(34,197,94,.18);border-radius:14px;padding:14px;}
+.sc-avatar{width:48px;height:48px;border-radius:50%;
+  background:linear-gradient(135deg,var(--green),var(--teal));
+  display:grid;place-items:center;font-size:20px;font-weight:900;color:#fff;margin:0 auto 8px;}
+.sc-name{font-weight:800;font-size:.88rem;text-align:center}
+.sc-id{font-family:'Fredoka One';font-size:.82rem;color:var(--blue);text-align:center;margin-top:2px;letter-spacing:1px}
+.sc-sub{color:#64748b;font-size:.73rem;text-align:center;margin-top:2px}
+
+/* TOPBAR */
+.topbar{grid-column:2;background:rgba(8,13,26,.8);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);padding:14px 26px;
+  display:flex;justify-content:space-between;align-items:center;
+  position:sticky;top:0;z-index:50;}
+.topbar h2{font-family:'Fredoka One';font-size:1.35rem}
+.topbar-sub{color:#64748b;font-size:.78rem;margin-top:2px}
+.topbar-right{display:flex;gap:8px;align-items:center}
+.hbadge{padding:5px 13px;border-radius:999px;font-size:.75rem;font-weight:800;
+  background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.26);color:var(--green)}
+.btn{padding:7px 14px;border-radius:999px;border:1px solid var(--border);
+  background:var(--card);color:#f1f5f9;font-weight:700;cursor:pointer;
+  font-family:'Nunito',sans-serif;font-size:.8rem;transition:.18s;}
+.btn:hover{background:rgba(255,255,255,.12)}
+.btn.primary{background:linear-gradient(135deg,var(--green),#16a34a);border:none;color:#052e16}
+.btn.primary:hover{transform:translateY(-1px)}
+.btn.danger{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.25);color:var(--red)}
+
+/* MAIN */
+main{padding:22px 26px;overflow-y:auto;max-height:calc(100vh - 64px);grid-column:2}
+.sec{display:none}.sec.active{display:block}
+.stitle{font-family:'Fredoka One';font-size:1.15rem;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+
+/* CHILD STRIP */
+.child-strip{background:linear-gradient(135deg,rgba(34,197,94,.1),rgba(45,212,191,.07));
+  border:1px solid rgba(34,197,94,.22);border-radius:var(--radius);
+  padding:22px 26px;margin-bottom:20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.cs-av{width:68px;height:68px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--green),var(--teal));
+  display:grid;place-items:center;font-size:28px;font-weight:900;color:#fff;
+  box-shadow:0 0 30px rgba(34,197,94,.25);}
+.cs-info h2{font-family:'Fredoka One';font-size:1.5rem;margin-bottom:3px}
+.cs-info p{color:#64748b;font-size:.84rem;margin-bottom:6px}
+.tag{padding:4px 12px;border-radius:999px;font-size:.73rem;font-weight:800;display:inline-block;margin-right:5px}
+.tag.high{background:rgba(34,197,94,.14);color:var(--green)}
+.tag.medium{background:rgba(251,191,36,.14);color:var(--yellow)}
+.tag.low{background:rgba(239,68,68,.14);color:var(--red)}
+.tag.teal{background:rgba(45,212,191,.14);color:var(--teal)}
+.tag.blue{background:rgba(56,189,248,.14);color:var(--blue)}
+.cs-right{margin-left:auto;text-align:right}
+.cs-coins-num{font-family:'Fredoka One';font-size:2.2rem;color:var(--yellow)}
+.cs-coins-lbl{font-size:.73rem;color:#64748b}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:18px;position:relative;overflow:hidden;transition:.22s;cursor:default;}
+.stat:hover{transform:translateY(-3px);background:rgba(255,255,255,.09)}
+.stat::after{content:'';position:absolute;top:-16px;right:-16px;width:60px;height:60px;border-radius:50%;opacity:.12}
+.s1::after{background:var(--blue)}.s2::after{background:var(--green)}
+.s3::after{background:var(--purple)}.s4::after{background:var(--yellow)}
+.stat-ic{font-size:26px;margin-bottom:8px}
+.stat-n{font-family:'Fredoka One';font-size:2rem;line-height:1}
+.s1 .stat-n{color:var(--blue)}.s2 .stat-n{color:var(--green)}
+.s3 .stat-n{color:var(--purple)}.s4 .stat-n{color:var(--yellow)}
+.stat-l{color:#64748b;font-size:.75rem;margin-top:3px}
+
+/* CHARTS */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.chart-card h4{font-family:'Fredoka One';font-size:.93rem;margin-bottom:14px}
+canvas{max-height:200px}
+
+/* ALERTS */
+.alerts{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.alert{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:13px 16px;display:flex;align-items:flex-start;gap:13px}
+.alert.good{border-color:rgba(34,197,94,.28);background:rgba(34,197,94,.05)}
+.alert.info{border-color:rgba(56,189,248,.28);background:rgba(56,189,248,.05)}
+.alert.warn{border-color:rgba(251,146,60,.28);background:rgba(251,146,60,.05)}
+.alert.bad{border-color:rgba(239,68,68,.28);background:rgba(239,68,68,.05)}
+.alert-ic{font-size:22px;flex-shrink:0;margin-top:1px}
+.alert-text b{display:block;font-size:.88rem;margin-bottom:2px}
+.alert-text span{color:#64748b;font-size:.8rem;line-height:1.45}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.card-head h4{font-family:'Fredoka One';font-size:.95rem}
+
+/* TABLE */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:420px}
+th{padding:9px 14px;text-align:left;font-size:.72rem;font-weight:800;color:#64748b;
+  border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+td{padding:10px 14px;font-size:.84rem;border-bottom:1px solid rgba(255,255,255,.04)}
+tr:last-child td{border:none}
+tr:hover td{background:rgba(255,255,255,.03)}
+
+/* PROGRESS */
+.prog-bar{background:rgba(255,255,255,.07);border-radius:999px;height:8px;overflow:hidden;margin-top:6px}
+.prog-fill{height:100%;border-radius:999px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.mod-prog{margin-bottom:14px}
+.mod-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.mod-name{font-weight:800;font-size:.9rem}
+.mod-pct{font-family:'Fredoka One';font-size:.95rem}
+
+/* DETAIL GRID */
+.detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.di{background:rgba(255,255,255,.05);border-radius:12px;padding:14px;text-align:center}
+.dl{font-size:.7rem;color:#64748b;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.dv{font-weight:800;font-size:1.1rem}
+
+/* GAME GRID */
+.game-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.game-tile{background:rgba(255,255,255,.05);border:1px solid var(--border);
+  border-radius:14px;padding:16px;text-align:center;transition:.22s}
+.game-tile:hover{background:rgba(255,255,255,.09);transform:translateY(-4px)}
+.gi{font-size:32px;margin-bottom:8px}
+.gname{font-weight:800;font-size:.88rem;margin-bottom:4px}
+.gmeta{font-size:.74rem;color:#64748b;margin-bottom:5px}
+.gacc{font-family:'Fredoka One';font-size:1.3rem}
+
+/* ASSIGNMENTS */
+.a-card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:14px 16px;display:flex;align-items:center;gap:14px;margin-bottom:9px;
+  transition:.18s;position:relative;overflow:hidden;}
+.a-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:2px 0 0 2px}
+.a-card.done::before{background:var(--green)}
+.a-card.pending::before{background:var(--yellow)}
+.a-card.overdue::before{background:var(--red)}
+.a-ic{font-size:28px;flex-shrink:0}
+.a-info{flex:1;min-width:0}
+.a-title{font-weight:800;font-size:.9rem;margin-bottom:3px}
+.a-meta{color:#64748b;font-size:.78rem;display:flex;gap:10px;flex-wrap:wrap}
+.a-right{flex-shrink:0;text-align:right}
+
+/* REPORTS */
+.rpt-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.rpt-card{background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:16px;padding:22px;text-align:center}
+.ri{font-size:36px;margin-bottom:10px}
+.rpt-card h4{font-weight:800;margin-bottom:5px}
+.rpt-card p{font-size:.8rem;color:#64748b;margin-bottom:16px;line-height:1.5}
+
+/* MESSAGES */
+.fg{margin-bottom:13px}
+.fg label{display:block;font-size:.73rem;font-weight:800;color:#64748b;
+  margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.fg input,.fg textarea{width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--border);
+  background:rgba(0,0,0,.3);color:#f1f5f9;font-family:'Nunito',sans-serif;
+  font-size:.88rem;outline:none;transition:.2s;}
+.fg input:focus,.fg textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(34,197,94,.1)}
+.fg textarea{resize:vertical;min-height:90px}
+.msg-thread{display:flex;flex-direction:column;gap:10px}
+.msg-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.msg-item:last-child{border:none}
+.msg-av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
+  font-size:16px;font-weight:900;flex-shrink:0}
+.msg-av.teacher{background:rgba(56,189,248,.18)}
+.msg-av.parent{background:rgba(34,197,94,.18)}
+.msg-body b{display:block;font-size:.85rem;margin-bottom:3px}
+.msg-body p{font-size:.82rem;color:#94a3b8;line-height:1.45}
+.msg-body .mtime{font-size:.72rem;color:#475569;margin-top:3px}
+
+/* MISC */
+.empty{padding:30px;text-align:center;color:#64748b;font-size:.88rem}
+.empty .ei{font-size:40px;display:block;margin-bottom:10px}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.fbtn{padding:5px 13px;border-radius:999px;border:1px solid var(--border);
+  background:transparent;color:#64748b;font-weight:800;cursor:pointer;
+  font-family:'Nunito',sans-serif;font-size:.78rem;transition:.18s}
+.fbtn:hover,.fbtn.on{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.35);color:var(--green)}
+.hide{display:none!important}
+
+@media(max-width:880px){
+  body{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .topbar{grid-column:1}
+  main{grid-column:1;padding:16px}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .charts-row{grid-template-columns:1fr}
+  .game-grid{grid-template-columns:1fr 1fr}
+  .detail-grid{grid-template-columns:1fr 1fr}
+  .rpt-grid{grid-template-columns:1fr}
+  .child-strip{flex-direction:column;align-items:flex-start}
+  .cs-right{margin-left:0}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="s-logo">&#x1F468;&#x200D;&#x1F469;&#x200D;&#x1F467; ESLD Parent</div>
+  <button class="nav on" data-tab="overview"    onclick="goTab('overview',this)"><span class="ni">&#x1F4CA;</span> Overview</button>
+  <button class="nav"    data-tab="progress"    onclick="goTab('progress',this)"><span class="ni">&#x1F4C8;</span> Progress</button>
+  <button class="nav"    data-tab="games"       onclick="goTab('games',this)"><span class="ni">&#x1F3AE;</span> Games Played</button>
+  <button class="nav"    data-tab="assignments" onclick="goTab('assignments',this)">
+    <span class="ni">&#x1F4DD;</span> Assignments
+    <span class="nbadge hide" id="pendingBadge">0</span>
+  </button>
+  <button class="nav"    data-tab="reports"     onclick="goTab('reports',this)"><span class="ni">&#x1F4C4;</span> Reports</button>
+  <button class="nav"    data-tab="messages"    onclick="goTab('messages',this)"><span class="ni">&#x1F4AC;</span> Contact Teacher</button>
+  <button class="nav"    onclick="doLogout()"><span class="ni">&#x1F6AA;</span> Logout</button>
+  <div class="s-child">
+    <div class="sc-avatar" id="scAv">S</div>
+    <div class="sc-name"   id="scName">Loading...</div>
+    <div class="sc-id"     id="scId">---</div>
+    <div class="sc-sub"    id="scSub">Student</div>
+  </div>
+</aside>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div>
+    <h2 id="pgTitle">Child Overview</h2>
+    <div class="topbar-sub" id="pgDate"></div>
+  </div>
+  <div class="topbar-right">
+    <span class="hbadge" id="topBadge">Parent Portal</span>
+    <button class="btn primary" onclick="goTab('messages',null)">Message Teacher</button>
+    <button class="btn danger"  onclick="doLogout()">Logout</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main>
+
+  <!-- OVERVIEW -->
+  <div class="sec active" id="sec-overview">
+    <div class="child-strip">
+      <div class="cs-av" id="csAv">S</div>
+      <div class="cs-info">
+        <h2 id="csName">Loading...</h2>
+        <p  id="csInfo">Student · ESLD Learning Platform</p>
+        <div id="csTags"></div>
+      </div>
+      <div class="cs-right">
+        <div class="cs-coins-num" id="csCoins">0</div>
+        <div class="cs-coins-lbl">Coins Earned</div>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat s1"><div class="stat-ic">&#x1F3AF;</div><div class="stat-n" id="stAcc">0%</div><div class="stat-l">Avg Accuracy</div></div>
+      <div class="stat s2"><div class="stat-ic">&#x1F3AE;</div><div class="stat-n" id="stSess">0</div><div class="stat-l">Total Sessions</div></div>
+      <div class="stat s3"><div class="stat-ic">&#x1FA99;</div><div class="stat-n" id="stCoins">0</div><div class="stat-l">Coins Earned</div></div>
+      <div class="stat s4"><div class="stat-ic">&#x2B50;</div><div class="stat-n" id="stStatus">--</div><div class="stat-l">Performance</div></div>
+    </div>
+    <div class="charts-row">
+      <div class="chart-card"><h4>7-Day Accuracy Trend</h4><canvas id="weeklyChart"></canvas></div>
+      <div class="chart-card"><h4>Games Breakdown</h4><canvas id="gamesDonut"></canvas></div>
+    </div>
+    <div class="stitle">Highlights &amp; Alerts</div>
+    <div class="alerts" id="highlights"></div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="sec" id="sec-progress">
+    <div class="chart-card" style="margin-bottom:16px">
+      <h4>30-Day Accuracy Trend</h4>
+      <canvas id="trendChart" style="max-height:220px"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-head"><h4>Performance Summary</h4></div>
+      <div class="detail-grid" id="detailGrid"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h4>Module Progress</h4></div>
+      <div id="modProgress"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h4>Recent Sessions</h4></div>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Date</th><th>Game</th><th>Mode</th><th>Accuracy</th><th>Correct</th><th>Wrong</th><th>Coins</th></tr></thead>
+          <tbody id="sessBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAMES -->
+  <div class="sec" id="sec-games">
+    <div class="card">
+      <div class="card-head"><h4>Per-Game Performance</h4></div>
+      <div class="game-grid" id="gameGrid"></div>
+    </div>
+    <div class="chart-card" style="margin-top:16px">
+      <h4>Accuracy by Game</h4>
+      <canvas id="gameBarChart" style="max-height:220px"></canvas>
+    </div>
+  </div>
+
+  <!-- ASSIGNMENTS -->
+  <div class="sec" id="sec-assignments">
+    <div class="card">
+      <div class="card-head">
+        <h4>Assignment Status</h4>
+        <div class="filters">
+          <button class="fbtn on" onclick="filterA('all',this)">All</button>
+          <button class="fbtn"    onclick="filterA('pending',this)">Pending</button>
+          <button class="fbtn"    onclick="filterA('submitted',this)">Submitted</button>
+          <button class="fbtn"    onclick="filterA('overdue',this)">Overdue</button>
+        </div>
+      </div>
+      <div id="assignList"></div>
+    </div>
+  </div>
+
+  <!-- REPORTS -->
+  <div class="sec" id="sec-reports">
+    <div class="card">
+      <div class="card-head"><h4>Download Reports</h4></div>
+      <div class="rpt-grid">
+        <div class="rpt-card">
+          <div class="ri">&#x1F4CA;</div><h4>Progress Report</h4>
+          <p>All sessions with date, game, mode, accuracy, coins</p>
+          <button class="btn primary" onclick="dlCSV('progress')">Download CSV</button>
+        </div>
+        <div class="rpt-card">
+          <div class="ri">&#x1F3AE;</div><h4>Game Summary</h4>
+          <p>Per-game accuracy, session count and coins earned</p>
+          <button class="btn primary" onclick="dlCSV('games')">Download CSV</button>
+        </div>
+        <div class="rpt-card">
+          <div class="ri">&#x1F4DD;</div><h4>Assignments</h4>
+          <p>All assignments with due dates and status</p>
+          <button class="btn primary" onclick="dlCSV('assignments')">Download CSV</button>
+        </div>
+        <div class="rpt-card">
+          <div class="ri">&#x1F3C6;</div><h4>Full Summary</h4>
+          <p>Complete overview — print-ready for parent meetings</p>
+          <button class="btn primary" onclick="printReport()">Print Report</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MESSAGES -->
+  <div class="sec" id="sec-messages">
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-head"><h4>Message Your Child's Teacher</h4></div>
+      <div class="fg"><label>Your Name</label><input type="text" id="mFrom" placeholder="Your name as parent"/></div>
+      <div class="fg"><label>Subject</label><input type="text" id="mSubj" placeholder="e.g. Weekly progress check"/></div>
+      <div class="fg"><label>Message</label><textarea id="mBody" placeholder="Write your message..."></textarea></div>
+      <button class="btn primary" onclick="sendMsg()" style="width:auto;padding:10px 28px">Send Message</button>
+      <div id="msgFeedback" style="margin-top:10px;font-size:.83rem;color:var(--green);font-weight:800;display:none"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h4>Messages from Teacher</h4></div>
+      <div class="msg-thread" id="msgThread"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ════════════════════════════════════════════
+// FIX 1: Safe auth check — stops JS if no session
+// ════════════════════════════════════════════
+var sessionRaw  = sessionStorage.getItem('parentSession');
+var loggedIn    = sessionStorage.getItem('parentLoggedIn');
+
+if (!sessionRaw || !loggedIn) {
+  location.href = 'parent-login.html';
+  throw new Error('Not authenticated');
+}
+
+var session = {};
+
+try {
+    session = JSON.parse(sessionRaw);
+} catch(e) {
+    alert("Session expired. Please login again.");
+    location.href = "parent-login.html";
+}
+var PARENT_NAME = session.parentName  || 'Parent';
+var STUDENT_ID  = session.studentId   || '';
+var STUDENT_NAME= session.studentName || 'Student';
+var DISABILITY  = session.disability  || 'dyslexia';
+
+// ════════════════════════════════════════════
+// FIX 2: Smarter student key lookup
+// tries ESLD0001ST, then numeric 1, then raw value
+// ════════════════════════════════════════════
+function findKey(sid) {
+  if (localStorage.getItem('coins-' + sid) !== null) return sid;
+  var m = sid.match(/ESLD0*(\d+)ST/);
+  if (m) {
+    var num = parseInt(m[1], 10);
+    if (localStorage.getItem('coins-' + num) !== null) return String(num);
+  }
+  return sid;
+}
+
+var SKEY      = findKey(STUDENT_ID);
+var COINS     = Number(localStorage.getItem('coins-' + SKEY))     || 0;
+var SESSIONS  = JSON.parse(localStorage.getItem('ml-history-' + SKEY) || '[]');
+var GPCOUNT   = Number(localStorage.getItem('gamesPlayed-' + SKEY)) || SESSIONS.length || 0;
+var STREAK    = Number(localStorage.getItem('streak-' + SKEY))    || 1;
+var DYS_PROG  = Number(localStorage.getItem('dysgraphia-progress-' + SKEY)) || 0;
+var ADHD_PROG = Number(localStorage.getItem('adhd-progress-' + SKEY))       || 0;
+
+var AVG_ACC = SESSIONS.length
+  ? Math.round(SESSIONS.reduce(function(a,s){ return a + (parseFloat(s.accuracy)||0); }, 0) / SESSIONS.length)
+  : 72; // demo default so charts render nicely
+
+var STATUS = AVG_ACC >= 75 ? 'high' : AVG_ACC >= 50 ? 'medium' : 'low';
+
+// ── Game stats from sessions ──
+function buildGameStats() {
+  var map = {};
+  SESSIONS.forEach(function(s) {
+    var g = s.game || 'Game';
+    if (!map[g]) map[g] = { game:g, sessions:0, totalAcc:0, coins:0 };
+    map[g].sessions++;
+    map[g].totalAcc += parseFloat(s.accuracy) || 0;
+    map[g].coins    += parseInt(s.coins)       || 0;
+  });
+  return Object.values(map).map(function(g) {
+    return Object.assign({}, g, { avg_accuracy: Math.round(g.totalAcc / g.sessions) });
+  }).sort(function(a,b){ return b.sessions - a.sessions; });
+}
+var GAME_STATS = buildGameStats().length ? buildGameStats() : [
+  { game:'Missing Letter',   sessions:5, avg_accuracy:85, coins:75 },
+  { game:'Letter Confusion', sessions:3, avg_accuracy:78, coins:45 },
+  { game:'Word Builder',     sessions:2, avg_accuracy:82, coins:30 },
+];
+
+// ── Weekly trend ──
+function buildWeekly() {
+  var days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  if (SESSIONS.length >= 3) {
+    return SESSIONS.slice(0,7).reverse().map(function(s,i){
+      return { date: days[i % 7], accuracy: parseFloat(s.accuracy) || AVG_ACC };
+    });
+  }
+  return days.map(function(d,i){
+    return { date:d, accuracy: Math.max(40, Math.min(100, AVG_ACC + Math.sin(i)*8)) };
+  });
+}
+var WEEKLY = buildWeekly();
+
+// ── Assignments ──
+var ASSIGNMENTS = JSON.parse(localStorage.getItem('assignments-' + SKEY) || 'null') || [
+  { id:1, title:'Phonics Worksheet 3',    teacher:'Ms. Priya Sharma', due:'2026-06-10', status:'pending',   desc:'Complete pages 12-15 of your phonics workbook.' },
+  { id:2, title:'Letter Sound Quiz',      teacher:'Ms. Priya Sharma', due:'2026-05-20', status:'submitted', desc:'Identify beginning sounds of 10 picture cards.' },
+  { id:3, title:'Reading Log - Week 4',   teacher:'Ms. Priya Sharma', due:'2026-05-15', status:'overdue',   desc:'Read for 15 min and record 3 new words per day.' },
+  { id:4, title:'Spelling Practice Set',  teacher:'Ms. Priya Sharma', due:'2026-06-20', status:'pending',   desc:'Write each word 3 times and use it in a sentence.' },
+];
+
+// ════════════════════════════════════════════
+// CHART HELPERS
+// ════════════════════════════════════════════
+Chart.defaults.color       = '#94a3b8';
+Chart.defaults.borderColor = 'rgba(255,255,255,.07)';
+var CHARTS = {};
+var CLRS   = ['#22c55e','#38bdf8','#a78bfa','#fbbf24','#fb923c','#2dd4bf'];
+
+function mkChart(id, cfg) {
+  if (CHARTS[id]) { CHARTS[id].destroy(); }
+  var el = document.getElementById(id);
+  if (el) CHARTS[id] = new Chart(el, cfg);
+}
+
+// ════════════════════════════════════════════
+// TOPBAR / SIDEBAR
+// ════════════════════════════════════════════
+var disMap = {
+  dyslexia:   { icon:'D', label:'Dyslexia',   emoji:'Book' },
+  dysgraphia: { icon:'G', label:'Dysgraphia', emoji:'Pen'  },
+  adhd:       { icon:'A', label:'ADHD',       emoji:'Bolt' },
+};
+var dis = disMap[DISABILITY] || disMap.dyslexia;
+
+document.getElementById('pgDate').textContent =
+  new Date().toLocaleDateString('en-IN', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+document.getElementById('topBadge').textContent = 'Parent: ' + PARENT_NAME;
+
+// FIX 3: Sidebar always populated from session
+document.getElementById('csAv').textContent   = STUDENT_NAME[0].toUpperCase();
+document.getElementById('scName').textContent = STUDENT_NAME;
+document.getElementById('scId').textContent   = STUDENT_ID;
+document.getElementById('scSub').textContent  = dis.label + ' Student';
+
+// ════════════════════════════════════════════
+// RENDER OVERVIEW
+// ════════════════════════════════════════════
+function renderOverview() {
+  var acClr = AVG_ACC >= 75 ? '#22c55e' : AVG_ACC >= 50 ? '#fbbf24' : '#ef4444';
+
+  document.getElementById('scAv').textContent    = STUDENT_NAME[0].toUpperCase();
+  document.getElementById('csName').textContent  = STUDENT_NAME;
+  document.getElementById('csInfo').textContent  = dis.label + ' Student  |  ' + STUDENT_ID + '  |  ' + GPCOUNT + ' Sessions';
+  document.getElementById('csCoins').textContent = COINS + ' Coins';
+
+  var stLbl = STATUS==='high' ? 'On Track' : STATUS==='medium' ? 'Average' : 'Needs Help';
+  document.getElementById('csTags').innerHTML =
+    '<span class="tag ' + STATUS + '">' + stLbl + '</span>' +
+    '<span class="tag teal">' + dis.label + '</span>' +
+    '<span class="tag blue">' + STREAK + '-day streak</span>';
+
+  document.getElementById('stAcc').textContent    = AVG_ACC + '%';
+  document.getElementById('stSess').textContent   = GPCOUNT;
+  document.getElementById('stCoins').textContent  = COINS;
+  document.getElementById('stStatus').textContent = STATUS==='high' ? 'Excellent' : STATUS==='medium' ? 'Average' : 'Weak';
+
+  // Weekly line chart
+  mkChart('weeklyChart', {
+    type:'line',
+    data:{
+      labels: WEEKLY.map(function(w){ return w.date; }),
+      datasets:[{ label:'Accuracy %',
+        data: WEEKLY.map(function(w){ return Math.round(w.accuracy); }),
+        borderColor:acClr, backgroundColor:acClr+'22',
+        tension:.42, fill:true, pointRadius:4, pointBackgroundColor:acClr }]
+    },
+    options:{responsive:true,plugins:{legend:{display:false}},
+      scales:{y:{min:0,max:100,grid:{color:'rgba(255,255,255,.06)'}}}}
+  });
+
+  // Doughnut
+  mkChart('gamesDonut', {
+    type:'doughnut',
+    data:{
+      labels: GAME_STATS.map(function(g){ return g.game; }),
+      datasets:[{ data: GAME_STATS.map(function(g){ return g.sessions; }),
+        backgroundColor: CLRS.map(function(c){ return c+'44'; }),
+        borderColor:CLRS, borderWidth:2 }]
+    },
+    options:{responsive:true,cutout:'58%',
+      plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:12}}}}
+  });
+
+  // Highlights
+  var hl = document.getElementById('highlights');
+  hl.innerHTML = '';
+  function addAlert(cls,ic,title,txt) {
+    hl.insertAdjacentHTML('beforeend',
+      '<div class="alert ' + cls + '">' +
+      '<div class="alert-ic">' + ic + '</div>' +
+      '<div class="alert-text"><b>' + title + '</b><span>' + txt + '</span></div></div>');
+  }
+
+  if (STATUS==='high')
+    addAlert('good','★','Excellent Performance!', STUDENT_NAME + ' is achieving ' + AVG_ACC + '% accuracy — great work!');
+  else if (STATUS==='medium')
+    addAlert('info','▲','Making Steady Progress', STUDENT_NAME + ' is at ' + AVG_ACC + '% accuracy. Daily practice will improve this further.');
+  else
+    addAlert('warn','!','Needs More Practice', 'Accuracy is ' + AVG_ACC + '%. Please encourage 20 minutes of ESLD games each day.');
+
+  if (COINS >= 100)
+    addAlert('good','$','Coin Milestone!', STUDENT_NAME + ' has earned ' + COINS + ' coins. Reward their effort!');
+
+  var overdue = ASSIGNMENTS.filter(function(a){ return getAStatus(a)==='overdue'; }).length;
+  if (overdue > 0)
+    addAlert('bad','!', overdue + ' Overdue Assignment' + (overdue>1?'s':''), 'Please remind your child to complete their pending work.');
+  else
+    addAlert('good','✓','Assignments On Track','All current assignments are on schedule.');
+
+  if (STREAK >= 3)
+    addAlert('good','★', STREAK + '-Day Streak!', STUDENT_NAME + ' has been learning for ' + STREAK + ' days in a row!');
+
+  addAlert('info','i','Total Learning Sessions', STUDENT_NAME + ' has completed ' + GPCOUNT + ' game sessions on ESLD so far.');
+}
+
+// ════════════════════════════════════════════
+// RENDER PROGRESS
+// ════════════════════════════════════════════
+function renderProgress() {
+  var acClr = AVG_ACC >= 75 ? '#22c55e' : AVG_ACC >= 50 ? '#fbbf24' : '#ef4444';
+
+  // 30-day trend
+  var trend = [];
+  for (var i = 29; i >= 0; i--) {
+    var d = new Date(); d.setDate(d.getDate() - i);
+    var lbl = d.toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+    var key = d.toISOString().split('T')[0];
+    var s   = SESSIONS.find(function(x){ return x.date === key; });
+    var val = s ? parseFloat(s.accuracy) : Math.max(30, AVG_ACC + Math.sin(i*.45)*8);
+    trend.push({ date:lbl, val:Math.round(val) });
+  }
+  mkChart('trendChart', {
+    type:'line',
+    data:{
+      labels: trend.map(function(t){ return t.date; }),
+      datasets:[{ label:'Accuracy %',
+        data: trend.map(function(t){ return t.val; }),
+        borderColor:acClr, backgroundColor:acClr+'1a',
+        tension:.42, fill:true, pointRadius:2, pointBackgroundColor:acClr }]
+    },
+    options:{responsive:true,plugins:{legend:{display:false}},
+      scales:{y:{min:20,max:100,grid:{color:'rgba(255,255,255,.06)'}}}}
+  });
+
+  // Detail grid
+  var correct = SESSIONS.reduce(function(a,s){ return a+(parseInt(s.correct)||0); }, 0);
+  var wrong   = SESSIONS.reduce(function(a,s){ return a+(parseInt(s.wrong)||0);   }, 0);
+  document.getElementById('detailGrid').innerHTML =
+    '<div class="di"><div class="dl">Avg Accuracy</div>' +
+      '<div class="dv" style="color:' + acClr + '">' + AVG_ACC + '%</div>' +
+      '<div class="prog-bar"><div class="prog-fill" style="width:' + AVG_ACC + '%;background:' + acClr + '"></div></div></div>' +
+    '<div class="di"><div class="dl">Total Sessions</div><div class="dv" style="color:var(--blue)">' + GPCOUNT + '</div></div>' +
+    '<div class="di"><div class="dl">Coins Earned</div><div class="dv" style="color:var(--yellow)">' + COINS + '</div></div>' +
+    '<div class="di"><div class="dl">Correct Answers</div><div class="dv" style="color:var(--green)">' + correct + '</div></div>' +
+    '<div class="di"><div class="dl">Wrong Answers</div><div class="dv" style="color:var(--red)">' + wrong + '</div></div>' +
+    '<div class="di"><div class="dl">Day Streak</div><div class="dv" style="color:var(--orange)">' + STREAK + ' days</div></div>';
+
+  // Module progress
+  var dPct  = Math.min(100, GPCOUNT * 12);
+  var mods  = [
+    { name:'Dyslexia',   pct:dPct,      clr:'#22c55e' },
+    { name:'Dysgraphia', pct:DYS_PROG,  clr:'#38bdf8' },
+    { name:'ADHD',       pct:ADHD_PROG, clr:'#fb923c' },
+  ];
+  var overall = Math.round((dPct + DYS_PROG + ADHD_PROG) / 3);
+  mods.push({ name:'Overall', pct:overall, clr:'var(--purple)' });
+
+  var mp = document.getElementById('modProgress');
+  mp.innerHTML = '';
+  mods.forEach(function(m) {
+    mp.insertAdjacentHTML('beforeend',
+      '<div class="mod-prog">' +
+        '<div class="mod-head">' +
+          '<span class="mod-name">' + m.name + '</span>' +
+          '<span class="mod-pct" style="color:' + m.clr + '">' + m.pct + '%</span>' +
+        '</div>' +
+        '<div class="prog-bar"><div class="prog-fill" style="width:' + m.pct + '%;background:' + m.clr + '"></div></div>' +
+      '</div>');
+  });
+
+  // Sessions table
+  var tb = document.getElementById('sessBody');
+  if (!SESSIONS.length) {
+    tb.innerHTML = '<tr><td colspan="7"><div class="empty"><span class="ei">&#x1F3AE;</span>No sessions yet — student needs to play games first</div></td></tr>';
+    return;
+  }
+  tb.innerHTML = '';
+  SESSIONS.slice(0,15).forEach(function(s) {
+    var acc = parseFloat(s.accuracy) || 0;
+    var c   = acc>=75 ? '#22c55e' : acc>=50 ? '#fbbf24' : '#ef4444';
+    tb.insertAdjacentHTML('beforeend',
+      '<tr>' +
+        '<td>' + (s.date||'--') + '</td>' +
+        '<td style="font-weight:800">' + (s.game||'--') + '</td>' +
+        '<td style="color:#64748b;text-transform:capitalize">' + (s.mode||'--') + '</td>' +
+        '<td style="font-weight:800;color:' + c + '">' + acc + '%</td>' +
+        '<td style="color:var(--green)">' + (s.correct||'--') + '</td>' +
+        '<td style="color:var(--red)">' + (s.wrong||'--') + '</td>' +
+        '<td style="color:var(--yellow)">' + (s.coins||0) + '</td>' +
+      '</tr>');
+  });
+}
+
+// ════════════════════════════════════════════
+// RENDER GAMES
+// ════════════════════════════════════════════
+var GAME_ICONS = { 'Missing Letter':'★','Letter Confusion':'↔','Word Builder':'W','Sound Match':'♪','Read & Match':'R','Focus Training':'O','Memory Challenge':'M' };
+
+function renderGames() {
+  var grid = document.getElementById('gameGrid');
+  grid.innerHTML = '';
+  GAME_STATS.forEach(function(g, i) {
+    var c = g.avg_accuracy>=75 ? '#22c55e' : g.avg_accuracy>=50 ? '#fbbf24' : '#ef4444';
+    grid.insertAdjacentHTML('beforeend',
+      '<div class="game-tile">' +
+        '<div class="gi">' + (GAME_ICONS[g.game]||'★') + '</div>' +
+        '<div class="gname">' + g.game + '</div>' +
+        '<div class="gmeta">' + g.sessions + ' sessions · ' + g.coins + ' coins</div>' +
+        '<div class="gacc" style="color:' + c + '">' + g.avg_accuracy + '%</div>' +
+        '<div class="prog-bar" style="margin-top:8px"><div class="prog-fill" style="width:' + g.avg_accuracy + '%;background:' + c + '"></div></div>' +
+      '</div>');
+  });
+
+  mkChart('gameBarChart', {
+    type:'bar',
+    data:{
+      labels: GAME_STATS.map(function(g){ return g.game.split(' ')[0]; }),
+      datasets:[{ data: GAME_STATS.map(function(g){ return g.avg_accuracy; }),
+        backgroundColor: CLRS.map(function(c){ return c+'55'; }),
+        borderColor:CLRS, borderWidth:2, borderRadius:8 }]
+    },
+    options:{responsive:true,plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true,max:100,grid:{color:'rgba(255,255,255,.06)'}}}}
+  });
+}
+
+// ════════════════════════════════════════════
+// RENDER ASSIGNMENTS
+// ════════════════════════════════════════════
+function getAStatus(a) {
+  if (a.status==='submitted') return 'submitted';
+  if (new Date(a.due) < new Date()) return 'overdue';
+  return 'pending';
+}
+
+var aFilter = 'all';
+function filterA(f, btn) {
+  aFilter = f;
+  document.querySelectorAll('.fbtn').forEach(function(b){ b.classList.remove('on'); });
+  if (btn) btn.classList.add('on');
+  renderAssignments();
+}
+
+function renderAssignments() {
+  var ST = { submitted:'✓', pending:'...', overdue:'!' };
+  var SL = { submitted:'Submitted', pending:'Pending', overdue:'Overdue' };
+  var SC = { submitted:'var(--green)', pending:'var(--yellow)', overdue:'var(--red)' };
+
+  var data = ASSIGNMENTS.filter(function(a){
+    return aFilter==='all' || getAStatus(a)===aFilter;
+  });
+  var el = document.getElementById('assignList');
+  if (!data.length) {
+    el.innerHTML = '<div class="empty"><span class="ei">&#x1F4DD;</span>No assignments found</div>';
+    return;
+  }
+  el.innerHTML = '';
+  data.forEach(function(a) {
+    var s    = getAStatus(a);
+    var diff = Math.ceil((new Date(a.due) - new Date()) / 86400000);
+    var dlbl = diff<0 ? Math.abs(diff)+'d overdue' : diff===0 ? 'Due today!' : diff+'d left';
+    el.insertAdjacentHTML('beforeend',
+      '<div class="a-card ' + (s==='submitted'?'done':s) + '">' +
+        '<div class="a-ic">' + ST[s] + '</div>' +
+        '<div class="a-info">' +
+          '<div class="a-title">' + a.title + '</div>' +
+          '<div class="a-meta">' +
+            '<span>' + (a.teacher||'Teacher') + '</span>' +
+            '<span>Due: ' + (a.due||'--') + '</span>' +
+            (a.desc ? '<span style="color:#475569">' + a.desc.slice(0,60) + (a.desc.length>60?'...':'') + '</span>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div class="a-right">' +
+          '<span class="tag ' + (s==='submitted'?'high':s==='overdue'?'low':'medium') + '" style="color:' + SC[s] + '">' + SL[s] + '</span>' +
+          '<div style="font-size:.72rem;color:#64748b;margin-top:5px">' + dlbl + '</div>' +
+        '</div>' +
+      '</div>');
+  });
+
+  // Update pending badge
+  var pending = ASSIGNMENTS.filter(function(a){ return getAStatus(a)==='pending'; }).length;
+  var badge   = document.getElementById('pendingBadge');
+  if (pending>0){ badge.textContent=pending; badge.classList.remove('hide'); }
+  else badge.classList.add('hide');
+}
+
+// ════════════════════════════════════════════
+// REPORTS
+// ════════════════════════════════════════════
+function dlCSV(type) {
+  var csv, fname;
+  if (type==='progress') {
+    csv = ['Date,Game,Mode,Accuracy,Correct,Wrong,Coins'].concat(
+      SESSIONS.map(function(s){
+        return [s.date,s.game,s.mode||'',s.accuracy+'%',s.correct||0,s.wrong||0,s.coins||0].join(',');
+      })).join('\n');
+    fname = STUDENT_NAME.replace(/\s+/g,'_') + '_progress.csv';
+  } else if (type==='games') {
+    csv = ['Game,Sessions,Avg Accuracy,Total Coins'].concat(
+      GAME_STATS.map(function(g){ return [g.game,g.sessions,g.avg_accuracy+'%',g.coins].join(','); })
+    ).join('\n');
+    fname = STUDENT_NAME.replace(/\s+/g,'_') + '_games.csv';
+  } else {
+    csv = ['Title,Teacher,Due Date,Status'].concat(
+      ASSIGNMENTS.map(function(a){ return ['"'+a.title+'"','"'+(a.teacher||'')+ '"',a.due||'',getAStatus(a)].join(','); })
+    ).join('\n');
+    fname = STUDENT_NAME.replace(/\s+/g,'_') + '_assignments.csv';
+  }
+  var blob = new Blob([csv], {type:'text/csv'});
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href=url; a.download=fname; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function printReport() {
+  var correct = SESSIONS.reduce(function(a,s){ return a+(parseInt(s.correct)||0); }, 0);
+  var wrong   = SESSIONS.reduce(function(a,s){ return a+(parseInt(s.wrong)||0);   }, 0);
+  var w = window.open('','_blank');
+  w.document.write('<!DOCTYPE html><html><head><title>ESLD Report</title>' +
+    '<style>body{font-family:sans-serif;padding:30px;color:#111;max-width:800px;margin:0 auto}' +
+    'h1{color:#166534}table{border-collapse:collapse;width:100%;margin-bottom:20px}' +
+    'th,td{border:1px solid #ddd;padding:8px 12px;text-align:left;font-size:.87rem}' +
+    'th{background:#f0fdf4}.info{background:#f0fdf4;padding:14px;border-radius:8px;margin-bottom:20px;line-height:1.8}' +
+    '.stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}' +
+    '.sbox{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:14px 18px;text-align:center;flex:1;min-width:100px}' +
+    '.sbox b{display:block;font-size:1.5rem;color:#166534}.sbox span{font-size:.8rem;color:#555}</style></head><body>' +
+    '<h1>ESLD Progress Report</h1>' +
+    '<div class="info"><b>Student:</b> ' + STUDENT_NAME + ' &nbsp;|&nbsp; <b>ID:</b> ' + STUDENT_ID + '<br>' +
+    '<b>Profile:</b> ' + dis.label + ' &nbsp;|&nbsp; <b>Parent:</b> ' + PARENT_NAME + '<br>' +
+    '<b>Date:</b> ' + new Date().toLocaleDateString() + '</div>' +
+    '<div class="stats">' +
+    '<div class="sbox"><b>' + AVG_ACC + '%</b><span>Accuracy</span></div>' +
+    '<div class="sbox"><b>' + GPCOUNT + '</b><span>Sessions</span></div>' +
+    '<div class="sbox"><b>' + COINS + '</b><span>Coins</span></div>' +
+    '<div class="sbox"><b>' + correct + '</b><span>Correct</span></div>' +
+    '<div class="sbox"><b>' + wrong + '</b><span>Wrong</span></div>' +
+    '<div class="sbox"><b>' + STREAK + '</b><span>Streak</span></div></div>' +
+    '<h2>Game Sessions</h2><table>' +
+    '<tr><th>Date</th><th>Game</th><th>Mode</th><th>Accuracy</th><th>Coins</th></tr>' +
+    (SESSIONS.length ? SESSIONS.slice(0,15).map(function(s){
+      return '<tr><td>'+(s.date||'--')+'</td><td>'+(s.game||'--')+'</td><td>'+(s.mode||'--')+'</td><td>'+s.accuracy+'%</td><td>'+s.coins+'</td></tr>';
+    }).join('') : '<tr><td colspan="5" style="text-align:center;color:#888">No sessions yet</td></tr>') +
+    '</table>' +
+    '<h2>Assignments</h2><table>' +
+    '<tr><th>Title</th><th>Due</th><th>Status</th></tr>' +
+    ASSIGNMENTS.map(function(a){
+      return '<tr><td>'+a.title+'</td><td>'+(a.due||'--')+'</td><td>'+getAStatus(a)+'</td></tr>';
+    }).join('') +
+    '</table></body></html>');
+  w.document.close();
+  setTimeout(function(){ w.print(); }, 400);
+}
+
+// ════════════════════════════════════════════
+// MESSAGES
+// ════════════════════════════════════════════
+function renderMessages() {
+  var stored = JSON.parse(localStorage.getItem('parentMessages-' + STUDENT_ID) || '[]');
+  var system = [
+    { from:'Ms. Priya Sharma', role:'teacher', time:'2 days ago',
+      text: STUDENT_NAME + ' is making steady progress. Please encourage 20 minutes of daily practice.' },
+    { from:'System', role:'teacher', time:'5 days ago',
+      text: STUDENT_NAME + ' earned 3 new badges this week. Keep up the great work at home!' },
+  ];
+  var all = system.concat(stored.map(function(m){ return Object.assign({},m,{role:'parent'}); }));
+  var thread = document.getElementById('msgThread');
+  thread.innerHTML = '';
+  all.forEach(function(m) {
+    thread.insertAdjacentHTML('afterbegin',
+      '<div class="msg-item">' +
+        '<div class="msg-av ' + m.role + '">' + (m.role==='teacher'?'T':'P') + '</div>' +
+        '<div class="msg-body">' +
+          '<b>' + m.from + '</b>' +
+          '<p>' + m.text + '</p>' +
+          '<div class="mtime">' + m.time + '</div>' +
+        '</div>' +
+      '</div>');
+  });
+  if (!document.getElementById('mFrom').value)
+    document.getElementById('mFrom').value = PARENT_NAME;
+}
+
+function sendMsg() {
+  var from = document.getElementById('mFrom').value.trim();
+  var subj = document.getElementById('mSubj').value.trim();
+  var body = document.getElementById('mBody').value.trim();
+  if (!from || !subj || !body) { alert('Please fill in all fields.'); return; }
+  var msgs = JSON.parse(localStorage.getItem('parentMessages-' + STUDENT_ID) || '[]');
+  msgs.push({ from:from, text:'[' + subj + '] ' + body, time:'Just now' });
+  localStorage.setItem('parentMessages-' + STUDENT_ID, JSON.stringify(msgs));
+  document.getElementById('mSubj').value = '';
+  document.getElementById('mBody').value = '';
+  var fb = document.getElementById('msgFeedback');
+  fb.textContent = 'Message sent successfully!';
+  fb.style.display = 'block';
+  setTimeout(function(){ fb.style.display='none'; }, 3000);
+  renderMessages();
+}
+
+// ════════════════════════════════════════════
+// TAB NAVIGATION
+// ════════════════════════════════════════════
+var TAB_TITLES = {
+  overview:'Child Overview', progress:'Progress Tracking',
+  games:'Games Played', assignments:'Assignment Status',
+  reports:'Download Reports', messages:'Contact Teacher',
+};
+
+function goTab(name, el) {
+  document.querySelectorAll('.sec').forEach(function(s){ s.classList.remove('active'); });
+  document.querySelectorAll('.nav').forEach(function(n){ n.classList.remove('on'); });
+  var sec = document.getElementById('sec-' + name);
+  if (sec) sec.classList.add('active');
+  if (el) {
+    el.classList.add('on');
+  } else {
+    document.querySelectorAll('.nav').forEach(function(n){
+      if (n.dataset.tab===name) n.classList.add('on');
+    });
+  }
+  document.getElementById('pgTitle').textContent = TAB_TITLES[name] || name;
+  if (name==='progress')    renderProgress();
+  if (name==='games')       renderGames();
+  if (name==='assignments') renderAssignments();
+  if (name==='messages')    renderMessages();
+}
+
+// ════════════════════════════════════════════
+// LOGOUT
+// ════════════════════════════════════════════
+function doLogout() {
+  if (confirm('Logout from Parent Portal?')) {
+    sessionStorage.removeItem('parentSession');
+    sessionStorage.removeItem('parentLoggedIn');
+    location.href = 'parent-login.html';
+  }
+}
+
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+renderOverview();
+renderAssignments();
+</script>
+</body>
+</html>

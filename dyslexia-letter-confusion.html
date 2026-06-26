@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ESLD – Letter Confusion Game 🔄</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#060e1a;--card:#0d1829;--border:rgba(255,255,255,.09);
+  --blue:#40c4ff;--green:#00e676;--red:#ff5252;--yellow:#ffd740;--purple:#ea80fc;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:#eef2ff;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+
+.bg-fx{position:fixed;inset:0;z-index:0;pointer-events:none}
+.bg-c{position:absolute;border-radius:50%;filter:blur(110px);opacity:.09;animation:bgP ease-in-out infinite alternate}
+.c1{width:600px;height:600px;background:var(--blue);top:-200px;left:-200px;animation-duration:15s}
+.c2{width:500px;height:500px;background:var(--purple);right:-150px;bottom:-150px;animation-duration:20s;animation-delay:-8s}
+@keyframes bgP{0%{transform:scale(1)}100%{transform:scale(1.3) translate(40px,-30px)}}
+
+/* TOP BAR */
+.topbar{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:14px 22px;background:rgba(6,14,26,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.back-btn{display:flex;align-items:center;gap:6px;padding:8px 18px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.06);color:#c0cce0;cursor:pointer;font-weight:700;font-family:'Nunito',sans-serif;font-size:.85rem;transition:.3s}
+.back-btn:hover{background:rgba(255,255,255,.12);color:#fff}
+.page-brand{font-family:'Fredoka',sans-serif;font-size:1.2rem;background:linear-gradient(90deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stu-pill{padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid var(--border);font-size:.82rem;font-weight:700}
+
+/* HUD */
+.hud{position:relative;z-index:5;display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:12px 22px;background:rgba(13,24,41,.8);border-bottom:1px solid var(--border)}
+.hp{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:10px 8px;text-align:center}
+.hp-l{font-size:.62rem;font-weight:800;color:#4a5880;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.hp-v{font-family:'Fredoka',sans-serif;font-size:1.2rem}
+
+/* MAIN */
+.game-area{position:relative;z-index:5;flex:1;padding:20px 22px;max-width:900px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+
+/* MODE TABS */
+.mode-row{display:flex;gap:8px;flex-wrap:wrap}
+.mode-tab{padding:8px 16px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:#4a5880;font-weight:800;font-size:.82rem;cursor:pointer;transition:.3s;font-family:'Nunito',sans-serif}
+.mode-tab:hover{background:rgba(255,255,255,.1);color:#eef2ff}
+.mode-tab.active{background:rgba(64,196,255,.15);border-color:rgba(64,196,255,.4);color:var(--blue)}
+
+/* GAME CARD */
+.game-card{background:var(--card);border:2px solid var(--border);border-radius:28px;padding:30px;display:flex;flex-direction:column;align-items:center;gap:20px;transition:.3s}
+.game-card.correct{border-color:var(--green);box-shadow:0 0 40px rgba(0,230,118,.25);animation:cPop .5s ease}
+.game-card.wrong{border-color:var(--red);box-shadow:0 0 40px rgba(255,82,82,.25);animation:shake .4s ease}
+@keyframes cPop{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+
+/* INSTRUCTION */
+.instruction{font-size:1rem;color:#8899bb;text-align:center;font-weight:700;padding:10px 18px;background:rgba(255,255,255,.04);border-radius:12px;border:1px solid var(--border)}
+
+/* BIG LETTER DISPLAY */
+.letter-display{
+  font-family:'Fredoka',sans-serif;
+  font-size:min(10vw,120px);font-weight:700;
+  width:min(220px,60vw);height:min(220px,60vw);
+  display:grid;place-items:center;border-radius:28px;
+  background:linear-gradient(135deg,rgba(64,196,255,.12),rgba(234,128,252,.08));
+  border:2px solid rgba(64,196,255,.2);
+  color:#eef2ff;letter-spacing:2px;
+  animation:letterPop .4s cubic-bezier(.34,1.56,.64,1);
+  position:relative;overflow:hidden;
+  cursor:default;user-select:none;
+}
+@keyframes letterPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+.letter-display::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(45deg,transparent,rgba(255,255,255,.06),transparent);
+  animation:shine 3s linear infinite;
+}
+@keyframes shine{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+/* WORD WITH HIGHLIGHT */
+.word-highlight{font-family:'Fredoka',sans-serif;font-size:2.5rem;letter-spacing:6px;text-align:center}
+.word-highlight .target-letter{color:var(--yellow);text-shadow:0 0 20px rgba(255,215,64,.4);animation:blinkL 1s ease-in-out infinite}
+@keyframes blinkL{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* CHOICE BUTTONS */
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:400px}
+.choice-btn{
+  padding:20px;border-radius:18px;border:2px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.05);color:#eef2ff;
+  font-family:'Fredoka',sans-serif;font-size:3.5rem;
+  cursor:pointer;transition:.3s;text-align:center;
+  position:relative;overflow:hidden;
+}
+.choice-btn:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);transform:scale(1.05)}
+.choice-btn:hover::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.08),transparent)}
+.choice-btn.correct-choice{background:rgba(0,230,118,.15);border-color:var(--green);color:var(--green)}
+.choice-btn.wrong-choice{background:rgba(255,82,82,.15);border-color:var(--red);color:var(--red)}
+.choice-btn:disabled{cursor:not-allowed}
+
+/* TYPE MODE */
+.type-input{
+  width:100%;max-width:300px;padding:16px;border-radius:16px;
+  border:2px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);
+  color:#eef2ff;font-family:'Fredoka',sans-serif;font-size:2.2rem;
+  text-align:center;outline:none;letter-spacing:4px;transition:.3s;
+}
+.type-input:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(64,196,255,.12)}
+
+/* FEEDBACK */
+.feedback{font-family:'Fredoka',sans-serif;font-size:1.15rem;min-height:32px;text-align:center;padding:8px 18px;border-radius:12px;transition:.3s}
+.feedback.ok{color:var(--green);background:rgba(0,230,118,.1)}
+.feedback.bad{color:var(--red);background:rgba(255,82,82,.1)}
+
+/* ACTION BTNS */
+.action-row{display:flex;gap:10px;width:100%;justify-content:center;flex-wrap:wrap}
+.btn{padding:11px 24px;border-radius:999px;border:none;font-weight:900;font-family:'Nunito',sans-serif;font-size:.9rem;cursor:pointer;display:flex;align-items:center;gap:6px;transition:.3s}
+.btn:hover{transform:translateY(-2px)}
+.btn-check{background:linear-gradient(135deg,#00c853,var(--green));color:#002200;flex:1}
+.btn-skip{background:rgba(255,255,255,.07);border:1px solid var(--border);color:#8899bb}
+.btn-speak{background:rgba(64,196,255,.1);border:1px solid rgba(64,196,255,.25);color:var(--blue)}
+
+/* STREAK */
+.streak-bar{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 16px;border-radius:999px;background:rgba(255,215,64,.1);border:1px solid rgba(255,215,64,.2);color:var(--yellow);font-weight:800;font-size:.88rem;width:fit-content;margin:0 auto}
+
+/* PROGRESS */
+.prog-wrap{width:100%;display:flex;flex-direction:column;gap:6px}
+.prog-labels{display:flex;justify-content:space-between;font-size:.75rem;color:#4a5880;font-weight:700}
+.prog-track{height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--blue),var(--purple));transition:width .5s ease}
+
+/* MODAL */
+.modal-wrap{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(12px);z-index:500;display:none;place-items:center}
+.modal-wrap.open{display:grid}
+.modal-box{background:#0d1829;border:1px solid var(--border);border-radius:28px;padding:36px;width:min(480px,92vw);text-align:center;animation:mIn .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes mIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+.modal-emoji{font-size:68px;display:block;margin-bottom:10px}
+.modal-title{font-family:'Fredoka',sans-serif;font-size:1.9rem;color:var(--green);margin-bottom:6px}
+.modal-sub{color:#8899bb;font-size:.9rem;margin-bottom:20px}
+.modal-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:22px}
+.ms{background:rgba(255,255,255,.05);border-radius:14px;padding:12px}
+.ms-n{font-family:'Fredoka',sans-serif;font-size:1.7rem}
+.ms-l{font-size:.68rem;color:#4a5880;font-weight:700}
+.modal-btn{display:block;width:100%;padding:13px;border-radius:999px;border:none;font-weight:900;font-size:.95rem;cursor:pointer;font-family:'Nunito',sans-serif;transition:.3s;margin-bottom:8px}
+.modal-btn.green{background:linear-gradient(135deg,#00c853,var(--green));color:#002200}
+.modal-btn.ghost{background:rgba(255,255,255,.07);border:1px solid var(--border);color:#c0cce0}
+.modal-btn:hover{transform:translateY(-2px)}
+
+/* CONFETTI */
+.conf-wrap{position:fixed;inset:0;pointer-events:none;z-index:1000}
+.conf-dot{position:absolute;border-radius:2px;animation:confFall linear forwards}
+@keyframes confFall{0%{opacity:1;transform:translateY(-20px) rotate(0deg)}100%{opacity:0;transform:translateY(110vh) rotate(720deg)}}
+
+@media(max-width:600px){.choices{grid-template-columns:1fr 1fr;gap:8px}.choice-btn{font-size:2.8rem;padding:16px}}
+</style>
+</head>
+<body>
+
+<div class="bg-fx"><div class="bg-c c1"></div><div class="bg-c c2"></div></div>
+<div class="conf-wrap" id="confWrap"></div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <button class="back-btn" onclick="location.href='dyslexia-games.html'">⬅ Back</button>
+  <span class="page-brand">🔄 Letter Confusion Game</span>
+  <div class="stu-pill">🎓 <span id="stuId">--</span></div>
+</div>
+
+<!-- HUD -->
+<div class="hud">
+  <div class="hp"><div class="hp-l">Round</div><div class="hp-v" id="hudRound">1/10</div></div>
+  <div class="hp"><div class="hp-l">Correct</div><div class="hp-v" id="hudCorrect" style="color:var(--green)">0</div></div>
+  <div class="hp"><div class="hp-l">Wrong</div><div class="hp-v" id="hudWrong" style="color:var(--red)">0</div></div>
+  <div class="hp"><div class="hp-l">Streak</div><div class="hp-v" id="hudStreak" style="color:var(--yellow)">0</div></div>
+  <div class="hp"><div class="hp-l">Coins</div><div class="hp-v" id="hudCoins" style="color:var(--yellow)">0</div></div>
+</div>
+
+<!-- GAME AREA -->
+<div class="game-area">
+
+  <!-- MODE SELECT -->
+  <div class="mode-row">
+    <button class="mode-tab active" onclick="setMode('identify',this)">🔍 Identify Letter</button>
+    <button class="mode-tab" onclick="setMode('choose',this)">🎯 Choose Correct Word</button>
+    <button class="mode-tab" onclick="setMode('type',this)">⌨️ Type the Letter</button>
+    <button class="mode-tab" onclick="setMode('mirror',this)">🪞 Mirror Challenge</button>
+  </div>
+
+  <!-- GAME CARD -->
+  <div class="game-card" id="gameCard">
+    <div class="instruction" id="instruction">Look at the letter carefully and choose the correct one!</div>
+    <div id="gameContent"><!-- rendered by JS --></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="action-row" id="actionRow">
+      <button class="btn btn-speak" onclick="speakCurrent()">🔊 Hear</button>
+      <button class="btn btn-skip" onclick="skipQ()">⏭ Skip</button>
+    </div>
+    <div class="streak-bar" id="streakBar" style="display:none">🔥 <span id="streakTxt">0</span> in a row!</div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="prog-wrap">
+    <div class="prog-labels"><span>Session Progress</span><span id="progLabel">0/10</span></div>
+    <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  </div>
+
+</div>
+
+<!-- LEVEL COMPLETE MODAL -->
+<div class="modal-wrap" id="modalWrap">
+  <div class="modal-box">
+    <span class="modal-emoji" id="mEmoji">🎉</span>
+    <div class="modal-title" id="mTitle">Round Complete!</div>
+    <div class="modal-sub" id="mSub">Great practice session!</div>
+    <div class="modal-stats">
+      <div class="ms"><div class="ms-n" id="mAcc" style="color:var(--green)">0%</div><div class="ms-l">Accuracy</div></div>
+      <div class="ms"><div class="ms-n" id="mCoins" style="color:var(--yellow)">0</div><div class="ms-l">Coins</div></div>
+      <div class="ms"><div class="ms-n" id="mStreak" style="color:var(--blue)">0</div><div class="ms-l">Best Streak</div></div>
+    </div>
+    <button class="modal-btn green" onclick="restartGame()">▶ Play Again</button>
+    <button class="modal-btn ghost" onclick="location.href='dyslexia-games.html'">🎮 All Games</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  AUTH & KEYS
+// ══════════════════════════════════════════
+const sid = sessionStorage.getItem('studentId');
+const studentName = sessionStorage.getItem('studentName');
+
+if(!sid){
+   location.href='student-login.html';
+}
+
+document.getElementById('stuId').textContent = studentName;
+
+const HISTORY_KEY     = 'ml-history-'+sid;
+const LEVEL_KEY       = 'level-status-'+sid;
+const COINS_KEY       = 'coins-'+sid;
+const GAMES_PLAYED_KEY= 'gamesPlayed-'+sid;
+
+// ── LETTER DATA ──
+// confusable groups: b/d/p/q and n/m/u and others
+const SETS = {
+  identify: [
+    {letter:'b', distractors:['d','p','q'], word:'ball', clue:'Starts with the letter that has a bump on the right'},
+    {letter:'d', distractors:['b','p','q'], word:'dog',  clue:'Starts with the letter that has a bump on the left'},
+    {letter:'p', distractors:['b','d','q'], word:'pen',  clue:'Starts with the letter that has a tail going down-right'},
+    {letter:'q', distractors:['b','d','p'], word:'queen',clue:'Starts with the letter that has a tail going down-left'},
+    {letter:'b', distractors:['d','p','q'], word:'book', clue:'The letter that faces RIGHT like a b-owl!'},
+    {letter:'d', distractors:['b','p','q'], word:'duck', clue:'The letter that faces LEFT like a d-uck door!'},
+    {letter:'p', distractors:['b','d','q'], word:'pig',  clue:'The tall letter that hangs DOWN on the right'},
+    {letter:'q', distractors:['b','d','p'], word:'quiz', clue:'The tall letter that hangs DOWN on the left'},
+    {letter:'n', distractors:['m','u','h'], word:'nest', clue:'The letter with two bumps going UP'},
+    {letter:'m', distractors:['n','u','w'], word:'moon', clue:'The letter with three bumps going UP'},
+  ],
+  choose:[
+    {question:'Which word spells "bed" correctly?', options:['bed','ded','peb','qed'], answer:'bed'},
+    {question:'Which word spells "dog" correctly?', options:['pog','bog','dog','qog'], answer:'dog'},
+    {question:'Which word spells "big" correctly?', options:['dig','big','pig','qig'], answer:'big'},
+    {question:'Which word spells "cup" correctly?', options:['cup','dup','bup','qup'], answer:'cup'},
+    {question:'Which word spells "bad" correctly?', options:['bad','dab','pad','qad'], answer:'bad'},
+    {question:'Which word spells "dip" correctly?', options:['bip','dip','pip','qip'], answer:'dip'},
+    {question:'Which word spells "pub" correctly?', options:['pub','dub','bub','qub'], answer:'pub'},
+    {question:'Which word spells "peg" correctly?', options:['deg','beg','peg','qeg'], answer:'peg'},
+    {question:'Which word spells "nap" correctly?', options:['nap','map','mab','nab'], answer:'nap'},
+    {question:'Which word spells "mud" correctly?', options:['mud','nud','mub','nub'], answer:'mud'},
+  ],
+  type:[
+    {display:'_og', answer:'d', hint:'d-og: a barking pet'},
+    {display:'_all', answer:'b', hint:'b-all: you play with it'},
+    {display:'_ig', answer:'p', hint:'p-ig: a farm animal'},
+    {display:'_ueen', answer:'q', hint:'q-ueen: royalty!'},
+    {display:'_ook', answer:'b', hint:'b-ook: you read it'},
+    {display:'_uck', answer:'d', hint:'d-uck: quack quack!'},
+    {display:'_en', answer:'p', hint:'p-en: you write with it'},
+    {display:'_uiz', answer:'q', hint:'q-uiz: a test!'},
+    {display:'_est', answer:'n', hint:'n-est: birds live here'},
+    {display:'_oon', answer:'m', hint:'m-oon: shines at night'},
+  ],
+  mirror:[
+    {letter:'b', mirror:'d', question:'Which direction does "b" face?', answers:['→ Right (bump right)','← Left (bump left)'], correct:0},
+    {letter:'d', mirror:'b', question:'Which direction does "d" face?', answers:['→ Right (bump right)','← Left (bump left)'], correct:1},
+    {letter:'p', mirror:'q', question:'Which way does "p" hang?', answers:['↘ Down-right tail','↙ Down-left tail'], correct:0},
+    {letter:'q', mirror:'p', question:'Which way does "q" hang?', answers:['↘ Down-right tail','↙ Down-left tail'], correct:1},
+    {letter:'n', mirror:'u', question:'Which letter has bumps going UP?', answers:['n (bumps up)','u (bumps down)'], correct:0},
+    {letter:'u', mirror:'n', question:'Which letter has bumps going DOWN?', answers:['n (bumps up)','u (bumps down)'], correct:1},
+    {letter:'m', mirror:'w', question:'Which letter has 3 bumps UP?', answers:['m (3 bumps up)','w (3 bumps down)'], correct:0},
+    {letter:'w', mirror:'m', question:'Which letter has 3 bumps DOWN?', answers:['m (3 bumps up)','w (3 bumps down)'], correct:1},
+    {letter:'b', mirror:'d', question:'In the word "bed", what is the first letter?', answers:['b','d'], correct:0},
+    {letter:'d', mirror:'b', question:'In the word "dog", what is the first letter?', answers:['b','d'], correct:1},
+  ]
+};
+
+// ── STATE ──
+let gameMode='identify', qIdx=0, correct=0, wrong=0, streak=0, bestStreak=0;
+let sessionCoins=0, startTime=Date.now(), locked=false;
+let coins=Number(localStorage.getItem(COINS_KEY))||0;
+const TOTAL_Q=10;
+
+// ── SET MODE ──
+function setMode(m, btn){
+  document.querySelectorAll('.mode-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  gameMode=m; qIdx=0; correct=0; wrong=0; streak=0; bestStreak=0;
+  sessionCoins=0; startTime=Date.now(); locked=false;
+  loadQ();
+}
+
+// ── LOAD QUESTION ──
+function loadQ(){
+  const gc=document.getElementById('gameCard');
+  gc.className='game-card';
+  document.getElementById('feedback').textContent='';
+  document.getElementById('feedback').className='feedback';
+
+  // HUD
+  document.getElementById('hudRound').textContent=(qIdx+1)+'/'+TOTAL_Q;
+  document.getElementById('hudCorrect').textContent=correct;
+  document.getElementById('hudWrong').textContent=wrong;
+  document.getElementById('hudStreak').textContent=streak;
+  document.getElementById('hudCoins').textContent=coins;
+  document.getElementById('progFill').style.width=(qIdx/TOTAL_Q*100)+'%';
+  document.getElementById('progLabel').textContent=qIdx+'/'+TOTAL_Q;
+
+  // Streak badge
+  if(streak>=2){document.getElementById('streakBar').style.display='flex';document.getElementById('streakTxt').textContent=streak}
+  else document.getElementById('streakBar').style.display='none';
+
+  const data=SETS[gameMode];
+  const item=data[qIdx%data.length];
+
+  if(gameMode==='identify') renderIdentify(item);
+  else if(gameMode==='choose') renderChoose(item);
+  else if(gameMode==='type') renderType(item);
+  else renderMirror(item);
+}
+
+// ── RENDER MODES ──
+function renderIdentify(item){
+  document.getElementById('instruction').textContent='Choose the letter that is: "'+item.letter.toUpperCase()+'"';
+  const options=shuffle([item.letter,...item.distractors]);
+  document.getElementById('gameContent').innerHTML=`
+    <div class="letter-display">${item.letter.toUpperCase()}</div>
+    <div style="color:#8899bb;font-size:.85rem;text-align:center">Hint: ${item.clue}</div>
+    <div class="choices">
+      ${options.map(o=>`<button class="choice-btn" onclick="checkChoice('${o}','${item.letter}',this)">${o.toUpperCase()}</button>`).join('')}
+    </div>`;
+  document.getElementById('actionRow').innerHTML=`
+    <button class="btn btn-speak" onclick="speakCurrent()">🔊 Hear</button>
+    <button class="btn btn-skip" onclick="skipQ()">⏭ Skip</button>`;
+}
+
+function renderChoose(item){
+  document.getElementById('instruction').textContent=item.question;
+  const opts=shuffle([...item.options]);
+  document.getElementById('gameContent').innerHTML=`
+    <div class="choices" style="grid-template-columns:1fr 1fr;max-width:500px">
+      ${opts.map(o=>`<button class="choice-btn" style="font-size:1.4rem;letter-spacing:3px" onclick="checkChoice('${o}','${item.answer}',this)">${o}</button>`).join('')}
+    </div>`;
+  document.getElementById('actionRow').innerHTML=`<button class="btn btn-speak" onclick="speakCurrent()">🔊 Hear</button><button class="btn btn-skip" onclick="skipQ()">⏭ Skip</button>`;
+}
+
+function renderType(item){
+  document.getElementById('instruction').textContent='Type the correct letter to complete the word!';
+  document.getElementById('gameContent').innerHTML=`
+    <div class="word-highlight" style="font-size:3rem;margin:10px 0">
+      <span class="target-letter">_</span>${item.display.slice(1)}
+    </div>
+    <div style="color:#8899bb;font-size:.85rem;text-align:center">💡 ${item.hint}</div>
+    <input class="type-input" id="typeInput" maxlength="1" placeholder="?" autocomplete="off" autocorrect="off" spellcheck="false"/>`;
+  setTimeout(()=>document.getElementById('typeInput')?.focus(),100);
+  document.getElementById('actionRow').innerHTML=`
+    <button class="btn btn-check" onclick="checkType('${item.answer}')">✅ Check</button>
+    <button class="btn btn-skip" onclick="skipQ()">⏭ Skip</button>
+    <button class="btn btn-speak" onclick="speakCurrent()">🔊 Hear</button>`;
+}
+
+function renderMirror(item){
+  document.getElementById('instruction').textContent=item.question;
+  document.getElementById('gameContent').innerHTML=`
+    <div class="letter-display">${item.letter}</div>
+    <div class="choices" style="grid-template-columns:1fr 1fr;max-width:500px">
+      ${item.answers.map((a,i)=>`<button class="choice-btn" style="font-size:1rem;padding:16px 8px" onclick="checkMirror(${i},${item.correct},this)">${a}</button>`).join('')}
+    </div>`;
+  document.getElementById('actionRow').innerHTML=`<button class="btn btn-speak" onclick="speakCurrent()">🔊 Hear</button><button class="btn btn-skip" onclick="skipQ()">⏭ Skip</button>`;
+}
+
+// ── CHECK ANSWERS ──
+function checkChoice(chosen, answer, btn){
+  if(locked)return; locked=true;
+  const ok=chosen===answer;
+  handleResult(ok);
+  document.querySelectorAll('.choice-btn').forEach(b=>{
+    b.disabled=true;
+    if(b===btn) b.classList.add(ok?'correct-choice':'wrong-choice');
+    if(b.textContent.toLowerCase()===answer||b.textContent===answer) b.classList.add('correct-choice');
+  });
+  setTimeout(nextQ,900);
+}
+
+function checkType(answer){
+  if(locked)return;
+  const val=document.getElementById('typeInput')?.value.trim().toLowerCase();
+  if(!val){showFeedback('⚠️ Type a letter first!','');return}
+  locked=true;
+  handleResult(val===answer);
+  setTimeout(nextQ,800);
+}
+
+function checkMirror(chosen, correct, btn){
+  if(locked)return; locked=true;
+  const ok=chosen===correct;
+  handleResult(ok);
+  document.querySelectorAll('.choice-btn').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===correct) b.classList.add('correct-choice');
+    else if(b===btn) b.classList.add('wrong-choice');
+  });
+  setTimeout(nextQ,900);
+}
+
+// ── RESULT HANDLER ──
+function handleResult(ok){
+  const gc=document.getElementById('gameCard');
+  if(ok){
+    correct++;streak++;if(streak>bestStreak)bestStreak=streak;
+    const bonus=streak>=3?10:5;
+    coins+=bonus;sessionCoins+=bonus;
+    showFeedback(streak>=3?`🔥 ${streak}x Streak! +${bonus} coins!`:`✅ Correct! +${bonus} coins!`,'ok');
+    gc.classList.add('correct');
+    spawnConf(12);
+    playTone(true);
+  }else{
+    wrong++;streak=0;
+    showFeedback('❌ Not quite! Look carefully at the shape.','bad');
+    gc.classList.add('wrong');
+    playTone(false);
+  }
+  localStorage.setItem(COINS_KEY,coins);
+  document.getElementById('hudCoins').textContent=coins;
+  document.getElementById('hudStreak').textContent=streak;
+}
+
+function showFeedback(text,cls){
+  const el=document.getElementById('feedback');
+  el.textContent=text; el.className='feedback'+(cls?' '+cls:'');
+}
+
+// ── NEXT Q ──
+function nextQ(){
+  qIdx++;
+  if(qIdx>=TOTAL_Q) showComplete();
+  else{locked=false;loadQ();}
+}
+
+function skipQ(){if(locked)return;wrong++;streak=0;qIdx++;if(qIdx>=TOTAL_Q)showComplete();else{locked=false;loadQ();}}
+
+// ── COMPLETE ──
+function showComplete(){
+  const acc=Math.round((correct/TOTAL_Q)*100);
+  const elapsed=Math.floor((Date.now()-startTime)/1000);
+
+  // save to localStorage
+  const hist=JSON.parse(localStorage.getItem(HIST_KEY)||'[]');
+  hist.push({game:'Letter Confusion',mode:gameMode,accuracy:acc,correct,wrong,coins:sessionCoins,time:elapsed,questions:TOTAL_Q,date:new Date().toLocaleDateString(),ts:Date.now()});
+  localStorage.setItem(HIST_KEY,JSON.stringify(hist));
+  let gp=Number(localStorage.getItem(GAMES_KEY)||0)+1;
+  localStorage.setItem(GAMES_KEY,gp);
+
+  // save to API
+  fetch('http://127.0.0.1:5000/save-progress',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({student_id:sid,game:'letter-confusion',mode:gameMode,accuracy:acc,coins:sessionCoins,session_time:elapsed,questions:TOTAL_Q,correct,wrong}),signal:AbortSignal.timeout(3000)}).catch(()=>{});
+
+  const isPerf=acc>=100;
+  document.getElementById('mEmoji').textContent=isPerf?'🏆':acc>=80?'🎉':'😊';
+  document.getElementById('mTitle').textContent=isPerf?'Perfect!':acc>=80?'Excellent Work!':'Keep Practicing!';
+  document.getElementById('mSub').textContent=`You scored ${acc}% accuracy. ${isPerf?'You nailed every letter!':acc>=80?'You\'re mastering these tricky letters!':'Every practice makes you stronger!'}`;
+  document.getElementById('mAcc').textContent=acc+'%';
+  document.getElementById('mCoins').textContent='+'+sessionCoins+'🪙';
+  document.getElementById('mStreak').textContent=bestStreak;
+  spawnConf(35);
+  document.getElementById('modalWrap').classList.add('open');
+}
+
+function restartGame(){
+  document.getElementById('modalWrap').classList.remove('open');
+  qIdx=0;correct=0;wrong=0;streak=0;bestStreak=0;sessionCoins=0;startTime=Date.now();locked=false;
+  loadQ();
+}
+
+// ── SPEAK ──
+function speakCurrent(){
+  const data=SETS[gameMode];
+  const item=data[qIdx%data.length];
+  window.speechSynthesis.cancel();
+  let text='';
+  if(gameMode==='identify')text=`The letter is ${item.letter}. ${item.clue}`;
+  else if(gameMode==='choose')text=item.question;
+  else if(gameMode==='type')text=`Fill in the blank: ${item.hint}`;
+  else text=item.question;
+  const u=new SpeechSynthesisUtterance(text);
+  u.rate=0.8;u.pitch=1.05;u.lang='en-US';
+  window.speechSynthesis.speak(u);
+}
+
+// ── SOUND ──
+function playTone(ok){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    if(ok){osc.frequency.setValueAtTime(523,ctx.currentTime);osc.frequency.setValueAtTime(784,ctx.currentTime+.1)}
+    else{osc.frequency.setValueAtTime(250,ctx.currentTime);osc.frequency.setValueAtTime(180,ctx.currentTime+.15)}
+    gain.gain.setValueAtTime(.25,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);
+    osc.start();osc.stop(ctx.currentTime+.4);
+  }catch{}
+}
+
+// ── CONFETTI ──
+function spawnConf(n){
+  const w=document.getElementById('confWrap');
+  const clrs=['#00e676','#40c4ff','#ffd740','#ea80fc','#ff7043','#fff'];
+  for(let i=0;i<n;i++){
+    const d=document.createElement('div');d.className='conf-dot';
+    const sz=6+Math.random()*10;
+    Object.assign(d.style,{width:sz+'px',height:sz+'px',left:Math.random()*100+'vw',top:'-20px',background:clrs[Math.floor(Math.random()*clrs.length)],animationDuration:(1.5+Math.random()*2)+'s',animationDelay:Math.random()*.4+'s'});
+    w.appendChild(d);setTimeout(()=>d.remove(),3000);
+  }
+}
+
+// ── UTILS ──
+function shuffle(arr){return [...arr].sort(()=>Math.random()-.5)}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&gameMode==='type') checkType(SETS[gameMode][qIdx%SETS[gameMode].length].answer);
+});
+
+// ── INIT ──
+loadQ();
+</script>
+</body>
+</html>

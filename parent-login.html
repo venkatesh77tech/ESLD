@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ESLD – Parent Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#080d1a;--card:rgba(255,255,255,.07);--border:rgba(255,255,255,.12);
+  --green:#22c55e;--blue:#38bdf8;--teal:#2dd4bf;--purple:#a78bfa;
+  --yellow:#fbbf24;--orange:#fb923c;--red:#ef4444;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Nunito',sans-serif;background:var(--bg);color:#f1f5f9;
+  min-height:100vh;display:grid;place-items:center;padding:20px;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 80% 55% at 15% 15%,rgba(34,197,94,.12),transparent),
+    radial-gradient(ellipse 60% 50% at 85% 85%,rgba(45,212,191,.1),transparent),
+    radial-gradient(ellipse 45% 40% at 70% 5%,rgba(167,139,250,.08),transparent);
+  z-index:0;pointer-events:none;
+}
+
+/* PARTICLES */
+.particles{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.p{position:absolute;border-radius:50%;opacity:.12;animation:drift linear infinite}
+@keyframes drift{from{transform:translateY(100vh) rotate(0deg)}to{transform:translateY(-120px) rotate(360deg)}}
+
+.shell{
+  position:relative;z-index:1;width:min(960px,100%);
+  background:rgba(8,13,26,.88);border:1px solid var(--border);
+  border-radius:32px;padding:40px;backdrop-filter:blur(24px);
+  box-shadow:0 40px 100px rgba(0,0,0,.65);
+  animation:slideUp .6s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}}
+
+.back{
+  position:absolute;top:20px;left:20px;padding:8px 16px;border-radius:999px;
+  border:1px solid var(--border);background:transparent;color:#94a3b8;
+  cursor:pointer;font-weight:700;font-family:'Nunito',sans-serif;transition:.2s;font-size:.85rem;
+}
+.back:hover{background:rgba(255,255,255,.08);color:#f1f5f9}
+
+header{text-align:center;margin-bottom:32px}
+.hero-emoji{font-size:60px;display:block;animation:float 3s ease-in-out infinite;margin-bottom:10px}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+header h1{font-family:'Fredoka One';font-size:2.1rem;background:linear-gradient(135deg,var(--green),var(--teal));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+header p{color:#64748b;margin-top:6px;font-size:.93rem}
+
+.grid{display:grid;grid-template-columns:1fr 1.2fr;gap:24px}
+
+/* INFO CARD */
+.info-card{
+  background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.18);
+  border-radius:24px;padding:26px;
+}
+.info-card h3{font-family:'Fredoka One';font-size:1.2rem;color:var(--green);margin-bottom:16px}
+.feat{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+.feat-ic{font-size:22px;width:30px;flex-shrink:0;margin-top:2px}
+.feat-txt strong{display:block;font-weight:800;font-size:.9rem;margin-bottom:2px}
+.feat-txt span{color:#64748b;font-size:.82rem;line-height:1.4}
+
+.divider{height:1px;background:rgba(34,197,94,.15);margin:18px 0}
+
+/* HOW IT WORKS */
+.step-list{display:flex;flex-direction:column;gap:10px}
+.step{display:flex;align-items:center;gap:10px;font-size:.84rem;color:#94a3b8}
+.step-num{width:26px;height:26px;border-radius:50%;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);
+  display:grid;place-items:center;font-family:'Fredoka One';font-size:.88rem;color:var(--green);flex-shrink:0}
+
+/* FORM CARD */
+.form-card{
+  background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:24px;padding:28px;
+}
+.form-card h3{font-family:'Fredoka One';font-size:1.3rem;margin-bottom:6px}
+.form-card p{color:#64748b;font-size:.85rem;margin-bottom:22px}
+
+/* TABS */
+.tabs{display:flex;gap:6px;margin-bottom:22px;background:rgba(255,255,255,.05);padding:4px;border-radius:999px}
+.tab{flex:1;padding:9px;border-radius:999px;border:none;background:transparent;color:#64748b;
+  font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;transition:.2s;font-size:.88rem}
+.tab.active{background:rgba(8,13,26,.9);color:#f1f5f9;border:1px solid var(--border)}
+
+/* FORM ELEMENTS */
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:.72rem;font-weight:800;color:#64748b;margin-bottom:6px;
+  text-transform:uppercase;letter-spacing:.6px}
+.input-wrap{position:relative}
+input[type="text"],input[type="email"],input[type="password"],input[type="tel"]{
+  width:100%;padding:12px 16px;padding-right:44px;
+  background:rgba(0,0,0,.35);border:1px solid var(--border);
+  border-radius:13px;color:#f1f5f9;font-size:.9rem;
+  font-family:'Nunito',sans-serif;outline:none;transition:.2s;
+}
+input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(34,197,94,.1)}
+input.err{border-color:var(--red)!important;box-shadow:0 0 0 3px rgba(239,68,68,.1)!important}
+input[type="text"].id-input{
+  font-family:'Fredoka One';font-size:1.2rem;letter-spacing:3px;
+  text-transform:uppercase;text-align:center;
+}
+.eye-btn{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;
+  color:#64748b;cursor:pointer;font-size:16px;padding:4px;line-height:1}
+.eye-btn:hover{color:#f1f5f9}
+
+/* ID HINT */
+.id-hint{
+  margin-top:6px;display:flex;align-items:center;gap:6px;
+  font-size:.76rem;color:#64748b;font-weight:700;
+}
+.id-hint .ex{color:var(--blue);font-family:'Fredoka One';letter-spacing:1px}
+
+/* VERIFY BTN */
+.btn{
+  width:100%;padding:13px;border-radius:999px;border:none;font-weight:900;
+  font-size:.95rem;cursor:pointer;font-family:'Nunito',sans-serif;margin-top:4px;
+  transition:.25s;display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-primary{background:linear-gradient(135deg,var(--green),#16a34a);color:#052e16;box-shadow:0 8px 20px rgba(34,197,94,.25)}
+.btn-primary:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 28px rgba(34,197,94,.38)}
+.btn-primary:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.btn-sec{background:rgba(255,255,255,.07);color:#f1f5f9;border:1px solid var(--border);margin-top:8px}
+.btn-sec:hover{background:rgba(255,255,255,.13)}
+
+/* STUDENT PREVIEW CARD */
+.student-preview{
+  display:none;
+  background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(45,212,191,.05));
+  border:1px solid rgba(34,197,94,.25);border-radius:18px;padding:18px;margin-bottom:16px;
+  animation:slideUp .4s cubic-bezier(.34,1.56,.64,1);
+}
+.student-preview.show{display:block}
+.sp-row{display:flex;align-items:center;gap:14px}
+.sp-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--teal));
+  display:grid;place-items:center;font-size:22px;font-weight:900;color:#fff;flex-shrink:0}
+.sp-name{font-weight:800;font-size:1rem;margin-bottom:2px}
+.sp-meta{color:#64748b;font-size:.8rem;display:flex;gap:8px;flex-wrap:wrap}
+.sp-id{font-family:'Fredoka One';font-size:.95rem;color:var(--blue)}
+.sp-check{margin-left:auto;font-size:28px}
+.sp-dis{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;
+  font-size:.73rem;font-weight:800;margin-top:6px}
+.sp-dis.dyslexia{background:rgba(34,197,94,.12);color:var(--green)}
+.sp-dis.dysgraphia{background:rgba(56,189,248,.12);color:var(--blue)}
+.sp-dis.adhd{background:rgba(251,146,60,.12);color:var(--orange)}
+
+/* MSG */
+.msg{padding:10px 14px;border-radius:11px;margin-top:10px;font-size:.82rem;font-weight:700;display:none;align-items:center;gap:8px}
+.msg.show{display:flex}
+.msg.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.22);color:#fca5a5}
+.msg.ok{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86efac}
+.msg.info{background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.22);color:#7dd3fc}
+
+/* LOADER */
+.loader{display:inline-block;width:15px;height:15px;border:2px solid rgba(255,255,255,.25);
+  border-top-color:#fff;border-radius:50%;animation:spin .85s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* PARENT REGISTER */
+.hide{display:none!important}
+
+@media(max-width:640px){
+  .grid{grid-template-columns:1fr}
+  .info-card{display:none}
+  .shell{padding:24px 18px}
+}
+</style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+
+<div class="shell">
+  <button class="back" onclick="window.location.href='/'">← Home</button>
+
+  <header>
+    <span class="hero-emoji">👨‍👩‍👧</span>
+    <h1>Parent Portal</h1>
+    <p>Monitor your child's learning progress on ESLD</p>
+  </header>
+
+  <div class="grid">
+
+    <!-- INFO CARD -->
+    <div class="info-card">
+      <h3>What you can see 👁️</h3>
+      <div class="feat">
+        <span class="feat-ic">📊</span>
+        <div class="feat-txt"><strong>Live Progress</strong><span>Accuracy trends, sessions played, coins earned and more</span></div>
+      </div>
+      <div class="feat">
+        <span class="feat-ic">🎮</span>
+        <div class="feat-txt"><strong>Game Performance</strong><span>Per-game accuracy and time spent learning</span></div>
+      </div>
+      <div class="feat">
+        <span class="feat-ic">📝</span>
+        <div class="feat-txt"><strong>Assignments</strong><span>View all pending, submitted and overdue assignments</span></div>
+      </div>
+      <div class="feat">
+        <span class="feat-ic">💬</span>
+        <div class="feat-txt"><strong>Teacher Contact</strong><span>Send messages directly to your child's teacher</span></div>
+      </div>
+      <div class="feat">
+        <span class="feat-ic">📄</span>
+        <div class="feat-txt"><strong>Download Reports</strong><span>Export CSV reports and print progress summaries</span></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <h3 style="margin-bottom:12px">How to login 📋</h3>
+      <div class="step-list">
+        <div class="step"><span class="step-num">1</span>Ask your child for their Student ID (e.g. ESLD0001ST)</div>
+        <div class="step"><span class="step-num">2</span>Enter the Student ID below to verify</div>
+        <div class="step"><span class="step-num">3</span>Enter your parent name and PIN to login</div>
+        <div class="step"><span class="step-num">4</span>View your child's full learning dashboard</div>
+      </div>
+    </div>
+
+    <!-- FORM CARD -->
+    <div class="form-card">
+
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab active" id="tab-login" onclick="showTab('login')">Parent Login</button>
+        <button class="tab" id="tab-reg" onclick="showTab('reg')">Register</button>
+      </div>
+
+      <!-- ── LOGIN ── -->
+      <div id="sec-login">
+        <h3>Welcome back 👋</h3>
+        <p>Enter your child's Student ID to access the parent portal</p>
+
+        <!-- STEP 1: Student ID -->
+        <div id="step1">
+          <div class="fg">
+            <label>Child's Student ID</label>
+            <div class="input-wrap">
+              <input id="lStudentId" type="text" class="id-input" placeholder="ESLD0001ST" maxlength="10" oninput="formatIdInput(this)" autocomplete="off"/>
+            </div>
+            <div class="id-hint">
+              <span>📋 Format:</span><span class="ex">ESLD0001ST</span>
+              <span style="margin-left:4px">— shown on child's profile</span>
+            </div>
+          </div>
+          <div class="msg" id="step1Msg"></div>
+          <button class="btn btn-primary" id="verifyBtn" onclick="verifyStudentId()">🔍 Find Student</button>
+        </div>
+
+        <!-- STEP 2: Student Preview + PIN -->
+        <div id="step2" class="hide">
+          <div class="student-preview show" id="studentPreview">
+            <div class="sp-row">
+              <div class="sp-avatar" id="spAvatar">A</div>
+              <div>
+                <div class="sp-name" id="spName">—</div>
+                <div class="sp-id" id="spId">—</div>
+                <div class="sp-meta"><span id="spDis">—</span></div>
+                <div class="sp-dis" id="spDisTag">—</div>
+              </div>
+              <div class="sp-check">✅</div>
+            </div>
+          </div>
+          <div class="fg">
+            <label>Your Name (Parent / Guardian)</label>
+            <div class="input-wrap">
+              <input id="lParentName" type="text" placeholder="e.g. Mrs. Lakshmi Kumar"/>
+            </div>
+          </div>
+          <div class="fg">
+            <label>Parent PIN (4–6 digits)</label>
+            <div class="input-wrap">
+              <input id="lPin" type="password" placeholder="••••" maxlength="6"/>
+              <button class="eye-btn" onclick="toggleEye('lPin',this)" tabindex="-1">👁️</button>
+            </div>
+          </div>
+          <div class="msg" id="step2Msg"></div>
+          <button class="btn btn-primary" id="loginBtn" onclick="parentLogin()">🚀 Enter Parent Portal</button>
+          <button class="btn btn-sec" onclick="goBack()">← Change Student ID</button>
+        </div>
+      </div>
+
+      <!-- ── REGISTER ── -->
+      <div id="sec-reg" class="hide">
+        <h3>Register as Parent 📋</h3>
+        <p>Create a parent account to monitor your child's progress</p>
+
+        <div class="fg">
+          <label>Child's Student ID</label>
+          <div class="input-wrap">
+            <input id="rStudentId" type="text" class="id-input" placeholder="ESLD0001ST" maxlength="10" oninput="formatIdInput(this)" autocomplete="off"/>
+          </div>
+          <div class="id-hint"><span>📋 Format:</span><span class="ex">ESLD0001ST</span></div>
+        </div>
+        <div class="fg">
+          <label>Your Full Name</label>
+          <div class="input-wrap">
+            <input id="rParentName" type="text" placeholder="e.g. Mr. Ramesh Sharma"/>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Your Email (optional)</label>
+          <div class="input-wrap">
+            <input id="rEmail" type="email" placeholder="parent@email.com"/>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Create PIN (4–6 digits)</label>
+          <div class="input-wrap">
+            <input id="rPin" type="password" placeholder="••••" maxlength="6"/>
+            <button class="eye-btn" onclick="toggleEye('rPin',this)" tabindex="-1">👁️</button>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Confirm PIN</label>
+          <div class="input-wrap">
+            <input id="rPinConfirm" type="password" placeholder="••••" maxlength="6"/>
+            <button class="eye-btn" onclick="toggleEye('rPinConfirm',this)" tabindex="-1">👁️</button>
+          </div>
+        </div>
+        <div class="msg" id="regMsg"></div>
+        <button class="btn btn-primary" id="regBtn" onclick="parentRegister()">✅ Create Parent Account</button>
+      </div>
+
+    </div><!-- /form-card -->
+  </div><!-- /grid -->
+</div>
+
+<script>
+// ── PARTICLES ──
+(function(){
+  const c=['#22c55e','#2dd4bf','#a78bfa','#fbbf24'];
+  const w=document.getElementById('particles');
+  for(let i=0;i<14;i++){
+    const p=document.createElement('div');p.className='p';
+    const s=5+Math.random()*16;
+    Object.assign(p.style,{width:s+'px',height:s+'px',left:Math.random()*100+'%',bottom:'-20px',
+      background:c[i%c.length],animationDuration:9+Math.random()*10+'s',animationDelay:Math.random()*9+'s'});
+    w.appendChild(p);
+  }
+})();
+
+// ── TABS ──
+function showTab(t){
+  ['login','reg'].forEach(x=>{
+    document.getElementById('sec-'+x).classList.toggle('hide',x!==t);
+    document.getElementById('tab-'+x).classList.toggle('active',x===t);
+  });
+  clearAll();
+}
+
+function clearAll(){
+  document.querySelectorAll('.msg').forEach(m=>{m.className='msg';m.textContent='';});
+  document.querySelectorAll('input').forEach(i=>i.classList.remove('err'));
+}
+
+// ── HELPERS ──
+function showMsg(id,txt,type){const e=document.getElementById(id);e.textContent=txt;e.className='msg '+type+' show';}
+function toggleEye(id,btn){const i=document.getElementById(id);const p=i.type==='password';i.type=p?'text':'password';btn.textContent=p?'🙈':'👁️';}
+function formatIdInput(inp){inp.value=inp.value.toUpperCase().replace(/[^A-Z0-9]/g,'');}
+
+// ── STEP CONTROL ──
+let foundStudent = null;
+
+function verifyStudentId(){
+  clearAll();
+  const raw = document.getElementById('lStudentId').value.trim().toUpperCase();
+  if(!raw){document.getElementById('lStudentId').classList.add('err');showMsg('step1Msg','❌ Please enter the Student ID','err');return;}
+  if(!/^ESLD\d{4}ST$/.test(raw)){showMsg('step1Msg','❌ Invalid format. Use ESLD0001ST format','err');return;}
+
+  const btn=document.getElementById('verifyBtn');
+  btn.disabled=true;btn.innerHTML='<span class="loader"></span> Searching...';
+
+  setTimeout(()=>{
+    // Look up from localStorage (where student profile is saved on registration)
+    const profile = findStudentById(raw);
+    btn.disabled=false;btn.innerHTML='🔍 Find Student';
+
+    if(profile){
+      foundStudent = profile;
+      showStudentPreview(profile);
+      document.getElementById('step1').classList.add('hide');
+      document.getElementById('step2').classList.remove('hide');
+    } else {
+      showMsg('step1Msg','❌ Student ID not found. Ask your child to check their profile.','err');
+    }
+  },800);
+}
+
+function findStudentById(studentId){
+  // Search all localStorage keys for matching student profile
+  for(let i=0;i<localStorage.length;i++){
+    const key=localStorage.key(i);
+    if(key&&key.startsWith('esld_profile_')){
+      try{
+        const data=JSON.parse(localStorage.getItem(key)||'{}');
+        if(data.studentId===studentId || String(data.rawId)===studentId){
+          return {...data, studentId};
+        }
+      }catch{}
+    }
+  }
+  // Also check sessionStorage snapshot (student may still be logged in)
+  const sid=sessionStorage.getItem('studentId');
+  if(sid===studentId){
+    return {
+      studentId,
+      name:sessionStorage.getItem('studentName')||'Student',
+      email:sessionStorage.getItem('studentEmail')||'',
+      disability:sessionStorage.getItem('disability')||'dyslexia',
+      joinDate:new Date().toISOString()
+    };
+  }
+  // DEMO MODE: if ID looks valid, create a mock profile
+  return {
+    studentId,
+    name:'Demo Student',
+    email:'demo@esld.app',
+    disability:'dyslexia',
+    joinDate:new Date().toISOString(),
+    isDemo:true
+  };
+}
+
+function showStudentPreview(p){
+  const disMap={dyslexia:{icon:'📖',label:'Dyslexia',cls:'dyslexia'},dysgraphia:{icon:'✍️',label:'Dysgraphia',cls:'dysgraphia'},adhd:{icon:'⚡',label:'ADHD',cls:'adhd'}};
+  const dis=disMap[p.disability]||disMap.dyslexia;
+  document.getElementById('spAvatar').textContent=(p.name||'S')[0].toUpperCase();
+  document.getElementById('spName').textContent=p.name||'—';
+  document.getElementById('spId').textContent=p.studentId;
+  document.getElementById('spDis').textContent=p.email||'';
+  const tag=document.getElementById('spDisTag');
+  tag.textContent=dis.icon+' '+dis.label;
+  tag.className='sp-dis '+dis.cls;
+}
+
+function goBack(){
+  document.getElementById('step1').classList.remove('hide');
+  document.getElementById('step2').classList.add('hide');
+  foundStudent=null;clearAll();
+}
+
+// ── LOGIN ──
+function parentLogin(){
+  clearAll();
+  const pName=document.getElementById('lParentName').value.trim();
+  const pin=document.getElementById('lPin').value.trim();
+
+  if(!pName){document.getElementById('lParentName').classList.add('err');showMsg('step2Msg','❌ Please enter your name','err');return;}
+  if(!pin||pin.length<4){document.getElementById('lPin').classList.add('err');showMsg('step2Msg','❌ PIN must be 4–6 digits','err');return;}
+  if(!/^\d+$/.test(pin)){document.getElementById('lPin').classList.add('err');showMsg('step2Msg','❌ PIN must be numbers only','err');return;}
+
+  const btn=document.getElementById('loginBtn');
+  btn.disabled=true;btn.innerHTML='<span class="loader"></span> Logging in...';
+
+  setTimeout(()=>{
+    // Check if parent account exists
+    const stored=localStorage.getItem('parent_'+foundStudent.studentId);
+    if(stored){
+      const acc=JSON.parse(stored);
+      if(acc.pin!==pin){btn.disabled=false;btn.innerHTML='🚀 Enter Parent Portal';showMsg('step2Msg','❌ Incorrect PIN. Try again.','err');return;}
+    }
+    // Save session
+    const sessionData={
+      parentName:pName,
+      studentId:foundStudent.studentId,
+      studentName:foundStudent.name,
+      disability:foundStudent.disability,
+      loginTime:new Date().toISOString()
+    };
+    sessionStorage.setItem('parentSession',JSON.stringify(sessionData));
+    sessionStorage.setItem('parentLoggedIn','true');
+
+    showMsg('step2Msg','🎉 Welcome, '+pName+'! Loading dashboard...','ok');
+    setTimeout(()=>location.href='parent-dashboard.html',1200);
+    btn.disabled=false;btn.innerHTML='🚀 Enter Parent Portal';
+  },900);
+}
+
+// ── REGISTER ──
+function parentRegister(){
+  clearAll();
+  const sid=document.getElementById('rStudentId').value.trim().toUpperCase();
+  const name=document.getElementById('rParentName').value.trim();
+  const email=document.getElementById('rEmail').value.trim();
+  const pin=document.getElementById('rPin').value.trim();
+  const pinC=document.getElementById('rPinConfirm').value.trim();
+
+  let ok=true;
+  if(!sid||!/^ESLD\d{4}ST$/.test(sid)){document.getElementById('rStudentId').classList.add('err');ok=false;}
+  if(!name){document.getElementById('rParentName').classList.add('err');ok=false;}
+  if(!pin||pin.length<4){document.getElementById('rPin').classList.add('err');ok=false;}
+  if(!ok){showMsg('regMsg','❌ Please fill all required fields correctly','err');return;}
+  if(!/^\d+$/.test(pin)){showMsg('regMsg','❌ PIN must be digits only','err');return;}
+  if(pin!==pinC){document.getElementById('rPinConfirm').classList.add('err');showMsg('regMsg','❌ PINs do not match','err');return;}
+
+  const btn=document.getElementById('regBtn');
+  btn.disabled=true;btn.innerHTML='<span class="loader"></span> Registering...';
+
+  setTimeout(()=>{
+    const student=findStudentById(sid);
+    if(!student&&!sid){btn.disabled=false;btn.innerHTML='✅ Create Parent Account';showMsg('regMsg','❌ Student ID not found','err');return;}
+
+    localStorage.setItem('parent_'+sid,JSON.stringify({parentName:name,email,pin,studentId:sid,createdAt:new Date().toISOString()}));
+    showMsg('regMsg','🎉 Account created! Switching to login...','ok');
+    setTimeout(()=>{
+      showTab('login');
+      document.getElementById('lStudentId').value=sid;
+      document.getElementById('lParentName').value=name;
+    },1400);
+    btn.disabled=false;btn.innerHTML='✅ Create Parent Account';
+  },800);x`
+}
+
+// Enter key
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter')return;
+  const step2=document.getElementById('step2');
+  if(!step2.classList.contains('hide')) parentLogin();
+  else if(!document.getElementById('sec-reg').classList.contains('hide')) parentRegister();
+  else verifyStudentId();
+});
+</script>
+</body>
+</html>

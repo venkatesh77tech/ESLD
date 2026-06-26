@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ESLD – My Assignments</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0b1120;--sidebar:#0f172a;--card:rgba(255,255,255,.07);--border:rgba(255,255,255,.12);--radius:18px;--green:#22c55e;--blue:#38bdf8;--purple:#a78bfa;--yellow:#fbbf24;--orange:#fb923c;--red:#ef4444}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:#f1f5f9;min-height:100vh;display:grid;grid-template-columns:240px 1fr;grid-template-rows:auto 1fr}
+.sidebar{grid-row:1/-1;background:var(--sidebar);border-right:1px solid var(--border);padding:18px 12px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidebar-logo{font-family:'Fredoka One';font-size:1.4rem;padding:8px 8px 16px;border-bottom:1px solid var(--border);margin-bottom:8px;background:linear-gradient(90deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;cursor:pointer;transition:.2s;font-weight:700;font-size:.86rem;color:#64748b;border:none;background:none;width:100%;text-align:left;font-family:'Nunito',sans-serif}
+.nav-item:hover{background:rgba(255,255,255,.07);color:#f1f5f9}
+.nav-item.active{background:rgba(167,139,250,.12);color:var(--purple)}
+.nav-item span:first-child{font-size:18px}
+.sidebar-coins{margin-top:auto;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.2);border-radius:14px;padding:14px;text-align:center}
+.coins-num{font-family:'Fredoka One';font-size:2rem;color:var(--yellow)}
+.coins-label{font-size:.78rem;color:#64748b;margin-top:2px}
+.topbar{grid-column:2;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(15,23,42,.65);backdrop-filter:blur(12px);position:sticky;top:0;z-index:10}
+.topbar h2{font-family:'Fredoka One';font-size:1.35rem}
+main{grid-column:2;padding:20px 24px;overflow-y:auto;max-height:calc(100vh - 60px)}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center;transition:.2s}
+.stat:hover{transform:translateY(-3px);background:rgba(255,255,255,.09)}
+.stat-n{font-family:'Fredoka One';font-size:1.8rem}
+.stat-l{color:#64748b;font-size:.75rem;margin-top:2px}
+
+/* FILTER */
+.filter-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.filter-btn{padding:7px 16px;border-radius:999px;border:1px solid var(--border);background:transparent;color:#64748b;cursor:pointer;font-weight:700;font-size:.8rem;font-family:'Nunito',sans-serif;transition:.2s}
+.filter-btn:hover,.filter-btn.active{background:rgba(167,139,250,.15);border-color:var(--purple);color:var(--purple)}
+.search-input{padding:7px 14px;border-radius:999px;border:1px solid var(--border);background:rgba(0,0,0,.3);color:#f1f5f9;font-family:'Nunito',sans-serif;font-size:.82rem;outline:none;width:200px;margin-left:auto}
+.search-input:focus{border-color:var(--purple)}
+
+/* ASSIGN CARDS */
+.assign-grid{display:flex;flex-direction:column;gap:10px}
+.assign-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;display:flex;align-items:center;gap:14px;transition:.25s;cursor:pointer;position:relative;overflow:hidden}
+.assign-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:2px 0 0 2px}
+.assign-card:hover{background:rgba(255,255,255,.09);transform:translateX(4px)}
+.assign-card.new::before{background:var(--purple)}
+.assign-card.due::before{background:var(--red)}
+.assign-card.active-s::before{background:var(--blue)}
+.assign-card.done::before{background:var(--green)}
+.assign-card.done{opacity:.72}
+.assign-card.new{border-color:rgba(167,139,250,.3);background:rgba(167,139,250,.06)}
+.assign-card.due{border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.05)}
+.assign-icon{font-size:34px;flex-shrink:0}
+.assign-info{flex:1;min-width:0}
+.assign-title{font-family:'Fredoka One';font-size:1rem;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.assign-meta{color:#64748b;font-size:.78rem;display:flex;gap:12px;flex-wrap:wrap}
+.assign-meta span{display:flex;align-items:center;gap:3px}
+.assign-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.badge-pill{padding:3px 11px;border-radius:999px;font-size:.72rem;font-weight:800}
+.badge-pill.new{background:rgba(167,139,250,.2);color:var(--purple)}
+.badge-pill.due{background:rgba(239,68,68,.18);color:var(--red)}
+.badge-pill.done{background:rgba(34,197,94,.18);color:var(--green)}
+.badge-pill.active-s{background:rgba(56,189,248,.18);color:var(--blue)}
+.coins-pill{font-family:'Fredoka One';color:var(--yellow);font-size:.9rem}
+.play-btn{padding:7px 15px;border-radius:999px;border:none;background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff;font-weight:800;font-family:'Nunito',sans-serif;font-size:.78rem;cursor:pointer;transition:.25s;white-space:nowrap}
+.play-btn:hover{transform:scale(1.06);box-shadow:0 4px 16px rgba(167,139,250,.3)}
+.done-label{color:var(--green);font-size:.78rem;font-weight:800}
+.empty{text-align:center;padding:50px;color:#64748b}
+.empty .big{font-size:52px;margin-bottom:12px}
+
+/* TIMER BADGE */
+.timer-badge{font-size:.72rem;font-weight:800;color:var(--orange);background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.2);padding:3px 9px;border-radius:999px}
+
+/* ── GAME MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(2,6,23,.92);backdrop-filter:blur(14px);z-index:1000;display:none;place-items:center}
+.overlay.open{display:grid}
+.modal{background:#0f172a;border:1px solid var(--border);border-radius:24px;padding:28px;width:min(620px,96vw);max-height:92vh;overflow-y:auto}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.modal-header h3{font-family:'Fredoka One';font-size:1.35rem}
+.close-btn{background:none;border:none;color:#64748b;cursor:pointer;font-size:20px;padding:4px;transition:.2s}
+.close-btn:hover{color:#f1f5f9}
+.modal-desc{color:#64748b;font-size:.85rem;margin-bottom:12px;line-height:1.5}
+/* progress */
+.prog-wrap{margin-bottom:6px}
+.prog-bar{width:100%;background:rgba(255,255,255,.08);border-radius:999px;height:8px;overflow:hidden}
+.prog-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--purple),var(--blue));transition:width .5s ease}
+.prog-labels{display:flex;justify-content:space-between;font-size:.75rem;color:#64748b;margin-top:3px}
+/* score */
+.score-row{display:flex;gap:12px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}
+.score-pill{padding:6px 14px;border-radius:999px;font-family:'Fredoka One';font-size:.95rem}
+.sp-correct{background:rgba(34,197,94,.15);color:var(--green)}
+.sp-wrong{background:rgba(239,68,68,.15);color:var(--red)}
+.sp-coins{background:rgba(251,191,36,.15);color:var(--yellow)}
+/* question timer */
+.q-timer-bar{width:100%;background:rgba(255,255,255,.07);border-radius:3px;height:5px;margin-bottom:10px;overflow:hidden}
+.q-timer-fill{height:100%;border-radius:3px;background:var(--orange);transition:width .1s linear}
+/* game area */
+.game-area{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:14px;display:flex;flex-direction:column;align-items:center;gap:14px;min-height:180px;justify-content:center}
+.q-label{font-size:.78rem;font-weight:800;color:#64748b;letter-spacing:.5px;text-transform:uppercase}
+.q-num{font-family:'Fredoka One';font-size:.9rem;color:var(--purple)}
+.game-word{font-family:'Fredoka One';font-size:min(2.4rem,8vw);letter-spacing:6px;color:var(--blue);text-align:center;line-height:1.2}
+.hint-text{font-size:.82rem;color:#8899bb;text-align:center}
+.game-options{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;width:100%}
+.game-opt{padding:10px 18px;border-radius:12px;border:2px solid var(--border);background:rgba(255,255,255,.06);cursor:pointer;font-weight:800;font-size:.95rem;font-family:'Nunito',sans-serif;color:#f1f5f9;transition:.25s;min-width:80px;text-align:center}
+.game-opt:hover:not(:disabled){border-color:var(--purple);background:rgba(167,139,250,.12);transform:translateY(-2px)}
+.game-opt.correct{border-color:var(--green)!important;background:rgba(34,197,94,.15)!important;color:var(--green)!important}
+.game-opt.wrong{border-color:var(--red)!important;background:rgba(239,68,68,.1)!important;color:var(--red)!important}
+.game-opt:disabled{cursor:not-allowed}
+/* feedback */
+.q-feedback{font-family:'Fredoka One';font-size:1.05rem;text-align:center;min-height:24px;transition:.3s}
+.q-feedback.ok{color:var(--green)}
+.q-feedback.bad{color:var(--red)}
+/* modal btns */
+.btn-row{display:flex;gap:9px;flex-wrap:wrap}
+.btn{padding:9px 18px;border-radius:999px;border:1px solid var(--border);background:transparent;color:#94a3b8;cursor:pointer;font-weight:700;font-family:'Nunito',sans-serif;font-size:.85rem;transition:.2s}
+.btn:hover{background:rgba(255,255,255,.1);color:#f1f5f9}
+.btn.primary{background:linear-gradient(135deg,var(--green),#16a34a);border:none;color:#fff}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(34,197,94,.3)}
+.btn.purple-btn{background:linear-gradient(135deg,var(--purple),var(--blue));border:none;color:#fff}
+/* result screen */
+.result-screen{text-align:center;padding:10px}
+.result-emoji{font-size:64px;display:block;animation:pop .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.result-title{font-family:'Fredoka One';font-size:1.8rem;margin:8px 0 4px}
+.result-sub{color:#64748b;font-size:.9rem;margin-bottom:16px}
+.result-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.rs{background:rgba(255,255,255,.05);border-radius:12px;padding:12px}
+.rs-n{font-family:'Fredoka One';font-size:1.7rem}
+.rs-l{font-size:.7rem;color:#64748b;font-weight:700}
+/* confetti */
+.conf-wrap{position:fixed;inset:0;pointer-events:none;z-index:2000}
+.conf-dot{position:absolute;animation:confFall linear forwards}
+@keyframes confFall{0%{opacity:1;transform:translateY(-10px) rotate(0deg)}100%{opacity:0;transform:translateY(110vh) rotate(720deg)}}
+
+@media(max-width:900px){body{grid-template-columns:1fr}.sidebar{display:none}.topbar{grid-column:1}main{grid-column:1;padding:14px}.stats-row{grid-template-columns:1fr 1fr 1fr}}
+@media(max-width:500px){.stats-row{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">🦋 ESLD</div>
+  <button class="nav-item" onclick="location.href='student-dashboard.html'"><span>🏠</span><span>Dashboard</span></button>
+  <button class="nav-item" onclick="location.href='student-games.html'"><span>🎮</span><span>Games</span></button>
+  <button class="nav-item active"><span>📋</span><span>My Assignments</span></button>
+  <button class="nav-item" onclick="location.href='student-messages.html'"><span>💬</span><span>Messages</span></button>
+  <button class="nav-item" onclick="location.href='student-progress.html'"><span>📊</span><span>My Progress</span></button>
+  <button class="nav-item" onclick="location.href='leaderboard.html'"><span>🏆</span><span>Leaderboard</span></button>
+  <button class="nav-item" onclick="logout()"><span>🚪</span><span>Logout</span></button>
+  <div class="sidebar-coins">
+    <div class="coins-num" id="sideCoins">0</div>
+    <div class="coins-label">🪙 Coins Earned</div>
+  </div>
+</aside>
+
+<div class="topbar">
+  <h2>📋 My Assignments</h2>
+  <span style="color:#64748b;font-size:.85rem" id="stuLabel"></span>
+</div>
+
+<main>
+  <div class="stats-row">
+    <div class="stat"><div class="stat-n" id="stTotal" style="color:var(--blue)">0</div><div class="stat-l">Total</div></div>
+    <div class="stat"><div class="stat-n" id="stNew" style="color:var(--purple)">0</div><div class="stat-l">New</div></div>
+    <div class="stat"><div class="stat-n" id="stDue" style="color:var(--red)">0</div><div class="stat-l">Due Today</div></div>
+    <div class="stat"><div class="stat-n" id="stDone" style="color:var(--green)">0</div><div class="stat-l">Completed</div></div>
+    <div class="stat"><div class="stat-n" id="stCoinsEarned" style="color:var(--yellow)">0</div><div class="stat-l">Coins Earned</div></div>
+  </div>
+
+  <div class="filter-row">
+    <button class="filter-btn active" onclick="applyFilter('all',this)">All</button>
+    <button class="filter-btn" onclick="applyFilter('new',this)">🆕 New</button>
+    <button class="filter-btn" onclick="applyFilter('active-s',this)">🔵 Active</button>
+    <button class="filter-btn" onclick="applyFilter('due',this)">🔴 Due Today</button>
+    <button class="filter-btn" onclick="applyFilter('done',this)">✅ Completed</button>
+    <input class="search-input" placeholder="🔍 Search assignments…" oninput="applySearch(this.value)"/>
+  </div>
+
+  <div class="assign-grid" id="assignGrid"></div>
+</main>
+
+<!-- CONFETTI -->
+<div class="conf-wrap" id="confWrap"></div>
+
+<!-- GAME MODAL -->
+<div class="overlay" id="gameModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="gTitle">Assignment</h3>
+      <button class="close-btn" onclick="closeGame()">✕</button>
+    </div>
+    <p class="modal-desc" id="gDesc">Complete all questions to earn coins!</p>
+
+    <div class="prog-wrap">
+      <div class="prog-bar"><div class="prog-fill" id="gProg" style="width:0%"></div></div>
+      <div class="prog-labels"><span id="gProgLabel">Question 1 of 5</span><span id="gTime">⏱ 0s</span></div>
+    </div>
+
+    <div class="score-row">
+      <div class="score-pill sp-correct">✅ <span id="gCorrect">0</span></div>
+      <div class="score-pill sp-wrong">❌ <span id="gWrong">0</span></div>
+      <div class="score-pill sp-coins">🪙 <span id="gCoins">0</span></div>
+    </div>
+
+    <div class="q-timer-bar"><div class="q-timer-fill" id="qTimerFill" style="width:100%"></div></div>
+
+    <div class="game-area" id="gArea">
+      <div class="q-label">Loading…</div>
+    </div>
+
+    <div class="q-feedback" id="qFeedback"></div>
+
+    <div class="btn-row" style="margin-top:12px">
+      <button class="btn primary" id="nextBtn" onclick="nextQ()" style="display:none">Next →</button>
+      <button class="btn" onclick="speakQuestion()">🔊 Read Aloud</button>
+      <button class="btn" onclick="closeGame()">✕ Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── AUTH ──
+const sid  = sessionStorage.getItem('studentId')  || 'STU-DEMO-001';
+const sname= sessionStorage.getItem('studentName')|| 'Student';
+document.getElementById('stuLabel').textContent = '👤 ' + sname + ' • ' + sid;
+const COINS_KEY = 'coins-'+sid;
+const HIST_KEY  = 'ml-history-'+sid;
+let totalCoins  = Number(localStorage.getItem(COINS_KEY))||0;
+document.getElementById('sideCoins').textContent = totalCoins;
+
+// ── GAME QUESTIONS DB ──
+const GAME_DB = {
+  'Missing Letter Game':[
+    {q:'C_T',  hint:'A pet that meows',      ans:'A', opts:['A','O','E','U']},
+    {q:'D_G',  hint:'A pet that barks',      ans:'O', opts:['A','O','E','I']},
+    {q:'B_D',  hint:'You sleep on it',       ans:'E', opts:['E','A','O','U']},
+    {q:'H_T',  hint:'Wear it on your head',  ans:'A', opts:['A','E','I','O']},
+    {q:'R_N',  hint:'Done in a race',        ans:'U', opts:['A','O','U','E']},
+    {q:'S_N',  hint:'Shines in the sky',     ans:'U', opts:['A','U','I','O']},
+    {q:'P_N',  hint:'You write with it',     ans:'E', opts:['E','A','I','O']},
+    {q:'C_P',  hint:'You drink from it',     ans:'U', opts:['A','U','O','E']},
+  ],
+  'Letter Confusion':[
+    {q:'Which word spells "bed"?',    hint:'Think b vs d', ans:'bed',  opts:['bed','ded','beb','deb']},
+    {q:'Which word spells "dog"?',    hint:'d comes first', ans:'dog',  opts:['bog','dog','dob','gob']},
+    {q:'Which word spells "pig"?',    hint:'p is tall with tail', ans:'pig',  opts:['big','dig','pig','qig']},
+    {q:'Which word spells "put"?',    hint:'p not q', ans:'put',  opts:['but','qut','gut','put']},
+    {q:'Which word spells "ball"?',   hint:'b faces right', ans:'ball', opts:['dall','ball','pall','gall']},
+    {q:'Which word spells "queen"?',  hint:'q has tail left', ans:'queen',opts:['bueen','dueen','pueen','queen']},
+  ],
+  'Word Builder':[
+    {q:'Arrange: T-A-C',   hint:'A furry pet',       ans:'CAT', opts:['CAT','ACT','TAC','TCA']},
+    {q:'Arrange: O-D-G',   hint:'Woof woof!',        ans:'DOG', opts:['DOG','GOD','OGD','GDO']},
+    {q:'Arrange: T-A-H',   hint:'On your head',      ans:'HAT', opts:['HAT','TAH','ATH','HTA']},
+    {q:'Arrange: P-A-M',   hint:'Read a __ daily!',  ans:'MAP', opts:['MAP','PAM','AMP','MPA']},
+    {q:'Arrange: U-S-B',   hint:'Travels on roads',  ans:'BUS', opts:['BUS','USB','SUB','BSU']},
+    {q:'Arrange: E-P-N',   hint:'Write with it',     ans:'PEN', opts:['PEN','NEP','ENP','NPE']},
+  ],
+  'Focus Training':[
+    {q:'What colour was shown? 🔴',          hint:'Look carefully', ans:'Red',   opts:['Red','Blue','Green','Yellow']},
+    {q:'Count the stars: ⭐⭐⭐⭐',          hint:'Count one by one', ans:'4',    opts:['3','4','5','6']},
+    {q:'What comes next: 2 4 6 __?',        hint:'Even numbers',  ans:'8',    opts:['7','8','9','10']},
+    {q:'Odd one out: 🐶 🐱 🐟 🐕',          hint:'One is different', ans:'🐟',  opts:['🐶','🐱','🐟','🐕']},
+    {q:'What comes next: A B C __?',        hint:'Alphabet order', ans:'D',    opts:['D','E','F','G']},
+    {q:'How many circles: ⭕⭕⭕⭕⭕',     hint:'Count carefully', ans:'5',    opts:['4','5','6','7']},
+  ],
+  'Sound Match':[
+    {q:'"cat" starts with which sound?',    hint:'The first letter', ans:'C',  opts:['C','K','S','T']},
+    {q:'"ball" ends with which sound?',     hint:'The last letter',  ans:'L',  opts:['B','A','L','E']},
+    {q:'"dog" has how many sounds?',        hint:'Count the letters', ans:'3', opts:['2','3','4','5']},
+    {q:'Which word rhymes with "hat"?',     hint:'Same ending sound', ans:'bat',opts:['cat','bat','dog','cup']},
+    {q:'Which word starts like "sun"?',     hint:'Same first sound',  ans:'sit',opts:['sit','top','bin','map']},
+  ],
+};
+
+// ── ASSIGNMENTS ──
+const storedDone= JSON.parse(localStorage.getItem('assign-done-'+sid)||'{}');
+const teacherA  = JSON.parse(localStorage.getItem('teacher-assignments')||'[]');
+
+const DEFAULT_ASSIGNS = [
+  {id:'a1',title:'Missing Letter – Easy',   game:'Missing Letter Game', to:'All Students', due:'2026-05-22',coins:20,status:'new',     icon:'📖',difficulty:'Easy',   questions:5},
+  {id:'a2',title:'Letter Confusion Practice',game:'Letter Confusion',   to:'All Students', due:today(),     coins:15,status:'due',     icon:'🔤',difficulty:'Medium', questions:5},
+  {id:'a3',title:'Word Builder Challenge',   game:'Word Builder',       to:'All Students', due:'2026-05-14',coins:25,status:'done',    icon:'🧩',difficulty:'Medium', questions:6},
+  {id:'a4',title:'Focus Training Set 1',     game:'Focus Training',     to:'ADHD Group',   due:'2026-05-28',coins:30,status:'active-s',icon:'⚡',difficulty:'Easy',   questions:5},
+  {id:'a5',title:'Sound Match Beginner',     game:'Sound Match',        to:'Dyslexia Group',due:'2026-05-24',coins:18,status:'new',   icon:'🔊',difficulty:'Easy',   questions:5},
+];
+const allAssigns = [
+  ...DEFAULT_ASSIGNS.map(a=>({...a, status: storedDone[a.id] ? 'done' : a.status})),
+  ...teacherA.map((a,i)=>({...a, id:'ta'+i, status: storedDone['ta'+i]?'done':'new', icon:'📝', questions:5}))
+];
+
+function today(){return new Date().toISOString().split('T')[0]}
+
+// Stats
+function calcStats(){
+  const counts={new:0,due:0,'active-s':0,done:0};
+  let ce=0;
+  allAssigns.forEach(a=>{if(counts[a.status]!==undefined)counts[a.status]++;if(a.status==='done')ce+=(a.coins||10)});
+  document.getElementById('stTotal').textContent=allAssigns.length;
+  document.getElementById('stNew').textContent=counts.new;
+  document.getElementById('stDue').textContent=counts.due;
+  document.getElementById('stDone').textContent=counts.done;
+  document.getElementById('stCoinsEarned').textContent=ce;
+}
+calcStats();
+
+let currentFilter='all', currentSearch='';
+function applyFilter(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+function applySearch(q){currentSearch=q.toLowerCase();render()}
+
+function render(){
+  let list=allAssigns.filter(a=>{
+    if(currentFilter!=='all'&&a.status!==currentFilter)return false;
+    if(currentSearch&&!a.title.toLowerCase().includes(currentSearch)&&!a.game.toLowerCase().includes(currentSearch))return false;
+    return true;
+  });
+  if(!list.length){
+    document.getElementById('assignGrid').innerHTML=`<div class="empty"><div class="big">📭</div><p>No assignments found!</p></div>`;
+    return;
+  }
+  document.getElementById('assignGrid').innerHTML=list.map(a=>{
+    const isDue=a.due&&a.due===today()&&a.status!=='done';
+    const daysLeft=a.due?Math.ceil((new Date(a.due)-new Date())/(86400000)):null;
+    const timerBadge=isDue?`<span class="timer-badge">🔴 Due Today</span>`:daysLeft&&daysLeft>0&&daysLeft<=3?`<span class="timer-badge">⏰ ${daysLeft}d left</span>`:'';
+    return`<div class="assign-card ${a.status}" onclick="openAssign('${a.id}')">
+      <div class="assign-icon">${a.icon||'📝'}</div>
+      <div class="assign-info">
+        <div class="assign-title">${a.title}</div>
+        <div class="assign-meta">
+          <span>🎮 ${a.game}</span>
+          <span>❓ ${a.questions||5} Questions</span>
+          <span>📅 ${a.due||'TBD'}</span>
+          <span>⚙️ ${a.difficulty||'Easy'}</span>
+          ${timerBadge}
+        </div>
+      </div>
+      <div class="assign-right">
+        <span class="badge-pill ${a.status}">${
+          a.status==='new'?'🆕 New':
+          a.status==='due'?'🔴 Due Today':
+          a.status==='done'?'✅ Done':'🔵 Active'
+        }</span>
+        <span class="coins-pill">🪙 ${a.coins||10}</span>
+        ${a.status!=='done'
+          ?`<button class="play-btn" onclick="event.stopPropagation();openAssign('${a.id}')">▶ Start</button>`
+          :`<span class="done-label">Completed ✓</span>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+render();
+
+// ── GAME ENGINE ──
+let gAssign=null,gQuestions=[],gQ=0,gCorrect=0,gWrong=0,gCoinsEarned=0;
+let gLocked=false,gTimer=null,gTotalSecs=0,gTimerInterval=null,gQTimer=null;
+const Q_TIME=15; // seconds per question
+
+function openAssign(aid){
+  const a=allAssigns.find(x=>x.id===aid);
+  if(!a||a.status==='done')return;
+  gAssign=a; gQ=0; gCorrect=0; gWrong=0; gCoinsEarned=0; gLocked=false; gTotalSecs=0;
+  const pool=GAME_DB[a.game]||GAME_DB['Missing Letter Game'];
+  gQuestions=shuffle(pool).slice(0,a.questions||5);
+  document.getElementById('gTitle').textContent=a.icon+' '+a.title;
+  document.getElementById('gDesc').textContent=`🎮 ${a.game} • ${a.difficulty||'Easy'} • ${gQuestions.length} Questions • Earn 🪙${a.coins}`;
+  document.getElementById('nextBtn').style.display='none';
+  clearInterval(gTimerInterval);
+  gTimerInterval=setInterval(()=>{gTotalSecs++;document.getElementById('gTime').textContent='⏱ '+gTotalSecs+'s'},1000);
+  renderQ();
+  document.getElementById('gameModal').classList.add('open');
+}
+
+function renderQ(){
+  gLocked=false;
+  clearTimeout(gQTimer);
+  const q=gQuestions[gQ];
+  const total=gQuestions.length;
+  // progress
+  document.getElementById('gProg').style.width=(gQ/total*100)+'%';
+  document.getElementById('gProgLabel').textContent=`Question ${gQ+1} of ${total}`;
+  document.getElementById('gCorrect').textContent=gCorrect;
+  document.getElementById('gWrong').textContent=gWrong;
+  document.getElementById('gCoins').textContent=gCoinsEarned;
+  document.getElementById('qFeedback').textContent='';
+  document.getElementById('qFeedback').className='q-feedback';
+  document.getElementById('nextBtn').style.display='none';
+
+  // Question timer
+  let qSec=Q_TIME;
+  const fill=document.getElementById('qTimerFill');
+  fill.style.background='var(--orange)';
+  fill.style.width='100%';
+  gQTimer=setInterval(()=>{
+    qSec--;
+    fill.style.width=(qSec/Q_TIME*100)+'%';
+    if(qSec<=3)fill.style.background='var(--red)';
+    if(qSec<=0){clearInterval(gQTimer);if(!gLocked)autoSkip()}
+  },1000);
+
+  // Render question
+  document.getElementById('gArea').innerHTML=`
+    <div class="q-num">Question ${gQ+1} / ${total}</div>
+    <div class="game-word">${q.q}</div>
+    <div class="hint-text">💡 ${q.hint}</div>
+    <div class="game-options">
+      ${shuffle(q.opts).map(o=>`<button class="game-opt" onclick="checkAns('${o}','${q.ans}',this)">${o}</button>`).join('')}
+    </div>`;
+}
+
+function checkAns(chosen,correct,btn){
+  if(gLocked)return;
+  gLocked=true;
+  clearInterval(gQTimer);
+  document.querySelectorAll('.game-opt').forEach(b=>{b.disabled=true});
+
+  const fb=document.getElementById('qFeedback');
+  if(chosen===correct){
+    gCorrect++;
+    const bonus=3; gCoinsEarned+=bonus;
+    btn.classList.add('correct');
+    fb.textContent=`✅ Correct! +${bonus} coins`;
+    fb.className='q-feedback ok';
+    spawnConf(8);
+    playTone(true);
+  }else{
+    gWrong++;
+    btn.classList.add('wrong');
+    document.querySelectorAll('.game-opt').forEach(b=>{if(b.textContent===correct)b.classList.add('correct')});
+    fb.textContent=`❌ Answer: ${correct}`;
+    fb.className='q-feedback bad';
+    playTone(false);
+  }
+  document.getElementById('gCorrect').textContent=gCorrect;
+  document.getElementById('gCoins').textContent=gCoinsEarned;
+  document.getElementById('gProg').style.width=((gQ+1)/gQuestions.length*100)+'%';
+
+  if(gQ<gQuestions.length-1){
+    document.getElementById('nextBtn').style.display='inline-flex';
+  }else{
+    setTimeout(()=>finishGame(),900);
+  }
+}
+
+function autoSkip(){
+  gLocked=true; gWrong++;
+  document.querySelectorAll('.game-opt').forEach(b=>{b.disabled=true});
+  const correct=gQuestions[gQ].ans;
+  document.querySelectorAll('.game-opt').forEach(b=>{if(b.textContent===correct)b.classList.add('correct')});
+  document.getElementById('qFeedback').textContent='⏰ Time up! '+correct+' was correct.';
+  document.getElementById('qFeedback').className='q-feedback bad';
+  document.getElementById('gWrong').textContent=gWrong;
+  if(gQ<gQuestions.length-1)document.getElementById('nextBtn').style.display='inline-flex';
+  else setTimeout(()=>finishGame(),900);
+}
+
+function nextQ(){gQ++;renderQ()}
+
+function finishGame(){
+  clearInterval(gTimerInterval);clearInterval(gQTimer);
+  const total=gQuestions.length;
+  const acc=Math.round((gCorrect/total)*100);
+  const reward=Math.round((gCorrect/total)*gAssign.coins);
+  gCoinsEarned=reward;
+
+  // Save coins
+  totalCoins+=reward;
+  localStorage.setItem(COINS_KEY,totalCoins);
+  document.getElementById('sideCoins').textContent=totalCoins;
+
+  // Save history
+  const hist=JSON.parse(localStorage.getItem(HIST_KEY)||'[]');
+  hist.push({game:gAssign.game,mode:'assignment',accuracy:acc,correct:gCorrect,wrong:gWrong,coins:reward,time:gTotalSecs,questions:total,date:new Date().toLocaleDateString(),ts:Date.now()});
+  localStorage.setItem(HIST_KEY,JSON.stringify(hist));
+
+  // Mark done
+  const done=JSON.parse(localStorage.getItem('assign-done-'+sid)||'{}');
+  done[gAssign.id]=true;
+  localStorage.setItem('assign-done-'+sid,JSON.stringify(done));
+  const a=allAssigns.find(x=>x.id===gAssign.id);
+  if(a)a.status='done';
+
+  spawnConf(acc>=80?40:20);
+
+  const em=acc===100?'🏆':acc>=80?'🎉':acc>=60?'😊':'💪';
+  const title=acc===100?'Perfect Score!':acc>=80?'Excellent Work!':acc>=60?'Good Job!':'Keep Practicing!';
+  document.getElementById('gArea').innerHTML=`
+    <div class="result-screen">
+      <span class="result-emoji">${em}</span>
+      <div class="result-title" style="color:${acc>=80?'var(--green)':'var(--yellow)'}">${title}</div>
+      <div class="result-sub">${acc}% accuracy in ${gTotalSecs}s</div>
+      <div class="result-stats">
+        <div class="rs"><div class="rs-n" style="color:var(--green)">${gCorrect}</div><div class="rs-l">Correct</div></div>
+        <div class="rs"><div class="rs-n" style="color:var(--red)">${gWrong}</div><div class="rs-l">Wrong</div></div>
+        <div class="rs"><div class="rs-n" style="color:var(--yellow)">+${reward}</div><div class="rs-l">🪙 Coins</div></div>
+      </div>
+    </div>`;
+  document.getElementById('nextBtn').style.display='none';
+  calcStats();render();
+  setTimeout(()=>{if(acc>=80)document.getElementById('gameModal').classList.remove('open')},3000);
+}
+
+function closeGame(){
+  clearInterval(gTimerInterval);clearInterval(gQTimer);
+  document.getElementById('gameModal').classList.remove('open');
+}
+
+// ── SPEAK ──
+function speakQuestion(){
+  if(!gQuestions[gQ])return;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(gQuestions[gQ].q+'. Hint: '+gQuestions[gQ].hint);
+  u.rate=0.8;u.pitch=1.05;u.lang='en-US';
+  window.speechSynthesis.speak(u);
+}
+
+// ── SOUNDS ──
+function playTone(ok){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    if(ok){o.frequency.setValueAtTime(523,ctx.currentTime);o.frequency.setValueAtTime(784,ctx.currentTime+.1)}
+    else{o.frequency.setValueAtTime(250,ctx.currentTime);o.frequency.setValueAtTime(180,ctx.currentTime+.15)}
+    g.gain.setValueAtTime(.22,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);
+    o.start();o.stop(ctx.currentTime+.4);
+  }catch{}
+}
+
+// ── CONFETTI ──
+function spawnConf(n){
+  const w=document.getElementById('confWrap');
+  const clrs=['#22c55e','#38bdf8','#fbbf24','#a78bfa','#fb923c','#fff'];
+  for(let i=0;i<n;i++){
+    const d=document.createElement('div');d.className='conf-dot';
+    const sz=6+Math.random()*10;
+    Object.assign(d.style,{width:sz+'px',height:sz+'px',left:Math.random()*100+'vw',top:'-10px',background:clrs[Math.floor(Math.random()*clrs.length)],borderRadius:Math.random()>.5?'50%':'2px',animationDuration:(1.5+Math.random()*2)+'s',animationDelay:Math.random()*.5+'s'});
+    w.appendChild(d);setTimeout(()=>d.remove(),3500);
+  }
+}
+
+function shuffle(arr){return[...arr].sort(()=>Math.random()-.5)}
+function logout(){sessionStorage.clear();location.href='student-login.html'}
+</script>
+</body>
+</html>

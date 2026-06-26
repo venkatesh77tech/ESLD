@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ESLD – Word Builder 🧩</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0b1120;--card:rgba(255,255,255,.07);--border:rgba(255,255,255,.12);--orange:#fb923c;--green:#22c55e;--blue:#38bdf8;--red:#ef4444;--yellow:#fbbf24;--purple:#a78bfa}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:#f1f5f9;min-height:100vh;padding-bottom:60px}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 20% 10%,rgba(251,146,60,.08),transparent),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(56,189,248,.07),transparent);z-index:0;pointer-events:none}
+
+.topbar{position:relative;z-index:10;display:flex;align-items:center;gap:14px;padding:16px 28px;background:rgba(11,17,32,.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.back-btn{padding:8px 16px;border-radius:999px;border:1px solid var(--border);background:transparent;color:#94a3b8;cursor:pointer;font-weight:800;font-family:'Nunito',sans-serif;font-size:.83rem;transition:.2s}
+.back-btn:hover{color:#f1f5f9;background:rgba(255,255,255,.08)}
+.game-title{font-family:'Fredoka One';font-size:1.5rem;background:linear-gradient(135deg,var(--orange),var(--yellow));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.top-right{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.score-pill{padding:7px 16px;border-radius:999px;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.25);font-weight:800;color:var(--yellow);font-size:.85rem}
+.xp-pill{padding:7px 16px;border-radius:999px;background:rgba(251,146,60,.12);border:1px solid rgba(251,146,60,.25);font-weight:800;color:var(--orange);font-size:.85rem}
+
+/* MAIN AREA */
+.game-area{position:relative;z-index:1;max-width:700px;margin:32px auto;padding:0 20px;display:flex;flex-direction:column;align-items:center;gap:22px}
+
+/* LEVEL SELECTOR */
+.level-bar{display:flex;gap:8px;background:rgba(255,255,255,.05);padding:5px;border-radius:999px}
+.lv-btn{padding:9px 22px;border-radius:999px;border:none;background:transparent;color:#64748b;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.88rem;transition:.2s}
+.lv-btn.active{background:var(--orange);color:#fff}
+.lv-btn:hover{background:rgba(251,146,60,.15);color:var(--orange)}
+
+/* WORD CARD */
+.word-card{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:28px 32px;text-align:center;width:100%;max-width:560px;animation:slideIn .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes slideIn{from{transform:scale(.92);opacity:0}}
+.word-emoji{font-size:80px;line-height:1;margin-bottom:8px;display:block;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.word-hint{font-family:'Fredoka One';font-size:1.1rem;color:#64748b;letter-spacing:6px;margin-bottom:4px}
+.word-level{font-size:.75rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.5px}
+
+/* SLOTS */
+.slots-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:4px 0}
+.slot{width:58px;height:66px;border-radius:14px;border:2.5px dashed rgba(251,146,60,.4);background:rgba(251,146,60,.04);display:flex;align-items:center;justify-content:center;font-family:'Fredoka One';font-size:1.7rem;transition:.2s;cursor:pointer}
+.slot:hover{border-color:rgba(251,146,60,.7);background:rgba(251,146,60,.1)}
+.slot.filled{border-style:solid;border-color:var(--orange);background:rgba(251,146,60,.12)}
+.slot.correct{border-color:var(--green)!important;background:rgba(34,197,94,.15)!important;color:var(--green);animation:correctPop .4s}
+.slot.wrong{border-color:var(--red)!important;background:rgba(239,68,68,.12)!important;animation:shake .35s}
+@keyframes correctPop{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+
+/* LETTER POOL */
+.letters-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.letter-tile{width:54px;height:62px;border-radius:12px;background:linear-gradient(135deg,var(--orange),#e85d00);display:flex;align-items:center;justify-content:center;font-family:'Fredoka One';font-size:1.5rem;cursor:grab;user-select:none;transition:.2s;box-shadow:0 4px 14px rgba(251,146,60,.25);border:none;color:#fff}
+.letter-tile:active{cursor:grabbing;transform:scale(1.15) rotate(-5deg);box-shadow:0 8px 24px rgba(251,146,60,.4)}
+.letter-tile.used{opacity:.28;cursor:not-allowed;pointer-events:none;transform:scale(.95)}
+.letter-tile.dragging{opacity:.5;transform:scale(1.15) rotate(-4deg)}
+
+/* CONTROLS */
+.controls-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.ctrl-btn{padding:11px 24px;border-radius:999px;border:none;font-family:'Nunito',sans-serif;font-weight:800;font-size:.9rem;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:6px}
+.ctrl-btn:hover{transform:translateY(-2px)}
+.btn-clear{background:rgba(255,255,255,.1);color:#f1f5f9}
+.btn-check{background:linear-gradient(135deg,var(--orange),#e85d00);color:#fff}
+.btn-speak{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff}
+.btn-next{background:linear-gradient(135deg,var(--green),#16a34a);color:#fff}
+.btn-hint{background:rgba(251,191,36,.15);color:var(--yellow);border:1px solid rgba(251,191,36,.3)}
+
+/* FEEDBACK */
+.feedback{font-weight:800;font-size:1rem;min-height:32px;text-align:center;transition:.3s}
+
+/* SCORE SECTION */
+.score-section{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.score-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 22px;text-align:center;min-width:100px}
+.sbn{font-family:'Fredoka One';font-size:1.8rem}
+.sbl{font-size:.72rem;color:#64748b;font-weight:700}
+
+/* RESULT OVERLAY */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:100;display:none;place-items:center}
+.overlay.show{display:grid}
+.result-box{background:rgba(11,17,32,.98);border:2px solid rgba(251,146,60,.3);border-radius:28px;padding:40px;text-align:center;animation:popIn .4s cubic-bezier(.34,1.56,.64,1);max-width:400px;width:90%}
+@keyframes popIn{from{transform:scale(.85);opacity:0}}
+.res-icon{font-size:72px;display:block;margin-bottom:12px}
+.res-title{font-family:'Fredoka One';font-size:2rem;margin-bottom:6px}
+.res-sub{color:#64748b;margin-bottom:20px;font-size:.9rem}
+.res-stats{display:flex;gap:12px;justify-content:center;margin-bottom:20px;flex-wrap:wrap}
+.rs{background:rgba(255,255,255,.06);border-radius:12px;padding:10px 16px}
+.rn{font-family:'Fredoka One';font-size:1.5rem}
+.rl{font-size:.7rem;color:#64748b}
+.res-btns{display:flex;gap:10px;justify-content:center}
+.res-btn{padding:12px 26px;border-radius:999px;border:none;font-weight:900;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.9rem;transition:.2s}
+.res-btn:hover{transform:translateY(-2px)}
+.res-primary{background:linear-gradient(135deg,var(--orange),#e85d00);color:#fff}
+.res-sec{background:rgba(255,255,255,.08);color:#f1f5f9;border:1px solid var(--border)}
+
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(60px);background:linear-gradient(135deg,var(--green),var(--blue));color:#fff;padding:12px 26px;border-radius:999px;font-weight:800;font-size:.88rem;z-index:200;opacity:0;transition:.35s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.conf{position:fixed;width:9px;height:9px;top:-10px;border-radius:2px;animation:fall linear forwards;pointer-events:none;z-index:300}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:0}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="back-btn" onclick="location.href='dysgraphia-games.html'">← Games</button>
+  <div class="game-title">🧩 Word Builder</div>
+  <div class="top-right">
+    <div class="score-pill">🏆 <span id="topScore">0</span></div>
+    <div class="xp-pill">⚡ <span id="navXp">0</span> XP</div>
+  </div>
+</div>
+
+<div class="game-area">
+
+  <!-- Level selector -->
+  <div class="level-bar">
+    <button class="lv-btn active" onclick="setLevel(1,this)">🌱 Easy</button>
+    <button class="lv-btn" onclick="setLevel(2,this)">🌿 Medium</button>
+    <button class="lv-btn" onclick="setLevel(3,this)">🔥 Hard</button>
+  </div>
+
+  <!-- Score row -->
+  <div class="score-section">
+    <div class="score-box"><div class="sbn" style="color:var(--yellow)" id="scoreVal">0</div><div class="sbl">Score</div></div>
+    <div class="score-box"><div class="sbn" style="color:var(--green)" id="correctVal">0</div><div class="sbl">Correct</div></div>
+    <div class="score-box"><div class="sbn" style="color:var(--blue)" id="totalVal">0</div><div class="sbl">Total</div></div>
+    <div class="score-box"><div class="sbn" style="color:var(--orange)" id="streakVal">0</div><div class="sbl">Streak</div></div>
+  </div>
+
+  <!-- Word card -->
+  <div class="word-card" id="wordCard">
+    <span class="word-emoji" id="wordEmoji">🍎</span>
+    <div class="word-level" id="wordLevel">EASY · 3 LETTERS</div>
+    <div class="word-hint" id="wordHint">_ _ _</div>
+  </div>
+
+  <!-- Slots -->
+  <div class="slots-row" id="slotsRow"></div>
+
+  <!-- Letters -->
+  <div class="letters-row" id="lettersRow"></div>
+
+  <!-- Feedback -->
+  <div class="feedback" id="feedback">👆 Tap a letter tile to place it!</div>
+
+  <!-- Controls -->
+  <div class="controls-row">
+    <button class="ctrl-btn btn-hint" onclick="showHint()">💡 Hint</button>
+    <button class="ctrl-btn btn-speak" onclick="speakWord()">🔊 Hear</button>
+    <button class="ctrl-btn btn-clear" onclick="clearSlots()">🗑️ Clear</button>
+    <button class="ctrl-btn btn-check" onclick="checkWord()">✅ Check</button>
+    <button class="ctrl-btn btn-next" onclick="newWord()">⏭️ Next</button>
+  </div>
+
+</div>
+
+<!-- RESULT -->
+<div class="overlay" id="resultOverlay">
+  <div class="result-box">
+    <span class="res-icon" id="resIcon">🏆</span>
+    <div class="res-title" id="resTitle">Great Job!</div>
+    <div class="res-sub" id="resSub">You completed the session!</div>
+    <div class="res-stats">
+      <div class="rs"><div class="rn" style="color:var(--yellow)" id="resXp">0</div><div class="rl">XP Earned</div></div>
+      <div class="rs"><div class="rn" style="color:var(--green)" id="resCorrect">0</div><div class="rl">Correct</div></div>
+      <div class="rs"><div class="rn" style="color:var(--blue)" id="resAcc">0%</div><div class="rl">Accuracy</div></div>
+    </div>
+    <div class="res-btns">
+      <button class="res-btn res-primary" onclick="restart()">🔄 Play Again</button>
+      <button class="res-btn res-sec" onclick="location.href='dysgraphia-games.html'">🎮 All Games</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const sid = sessionStorage.getItem('studentId') || 'guest';
+const WORDS = {
+  1:[{word:'CAT',emoji:'🐱'},{word:'DOG',emoji:'🐶'},{word:'SUN',emoji:'☀️'},{word:'BUS',emoji:'🚌'},{word:'CUP',emoji:'🥤'},{word:'HAT',emoji:'🎩'},{word:'PEN',emoji:'🖊️'},{word:'HEN',emoji:'🐔'},{word:'ANT',emoji:'🐜'},{word:'EGG',emoji:'🥚'}],
+  2:[{word:'BIRD',emoji:'🐦'},{word:'FISH',emoji:'🐟'},{word:'FROG',emoji:'🐸'},{word:'CAKE',emoji:'🎂'},{word:'STAR',emoji:'⭐'},{word:'BOAT',emoji:'⛵'},{word:'BOOK',emoji:'📚'},{word:'MILK',emoji:'🥛'},{word:'RAIN',emoji:'🌧️'},{word:'TREE',emoji:'🌳'}],
+  3:[{word:'TIGER',emoji:'🐯'},{word:'APPLE',emoji:'🍎'},{word:'PLANT',emoji:'🌱'},{word:'HOUSE',emoji:'🏠'},{word:'TRAIN',emoji:'🚂'},{word:'BEACH',emoji:'🏖️'},{word:'CLOCK',emoji:'🕐'},{word:'BREAD',emoji:'🍞'},{word:'CHAIR',emoji:'🪑'},{word:'GRAPE',emoji:'🍇'}]
+};
+
+let level=1, score=0, correct=0, total=0, wbStreak=0;
+let currentWord='', slots=[], usedIdx=new Set();
+let xpEarned=0, dragLetter='', dragFromSlot=-1;
+let globalXP=Number(localStorage.getItem('dysgraphia-xp-'+sid))||0;
+document.getElementById('navXp').textContent=globalXP;
+
+function setLevel(l,btn){
+  level=l;
+  document.querySelectorAll('.lv-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  newWord();
+}
+
+function newWord(){
+  const pool=WORDS[level];
+  const item=pool[Math.floor(Math.random()*pool.length)];
+  currentWord=item.word;
+  slots=Array(currentWord.length).fill('');
+  usedIdx=new Set();
+  document.getElementById('wordEmoji').textContent=item.emoji;
+  document.getElementById('wordHint').textContent=currentWord.split('').map(()=>'_').join('  ');
+  document.getElementById('wordLevel').textContent=(level===1?'EASY':level===2?'MEDIUM':'HARD')+' · '+currentWord.length+' LETTERS';
+  renderSlots();renderLetters();
+  setFeedback('👆 Tap a letter to place it in the slot!','#64748b');
+}
+
+function renderSlots(){
+  const row=document.getElementById('slotsRow');row.innerHTML='';
+  slots.forEach((l,i)=>{
+    const d=document.createElement('div');
+    d.className='slot'+(l?' filled':'');
+    d.textContent=l;
+    d.dataset.idx=i;
+    d.addEventListener('dragover',e=>{e.preventDefault();d.style.background='rgba(251,146,60,.2)';});
+    d.addEventListener('dragleave',()=>d.style.background='');
+    d.addEventListener('drop',e=>{
+      e.preventDefault();d.style.background='';
+      const letter=e.dataTransfer.getData('letter');
+      const fromSlotIdx=parseInt(e.dataTransfer.getData('fromSlot'));
+      if(!isNaN(fromSlotIdx)&&fromSlotIdx>=0){slots[fromSlotIdx]='';}
+      else{const li=parseInt(e.dataTransfer.getData('letterIdx'));usedIdx.add(li);}
+      slots[i]=letter;
+      renderSlots();renderLetters();
+    });
+    d.addEventListener('click',()=>{
+      if(l){slots[i]='';renderSlots();renderLetters();}
+    });
+    // Make slot draggable
+    if(l){
+      d.draggable=true;
+      d.addEventListener('dragstart',e=>{e.dataTransfer.setData('letter',l);e.dataTransfer.setData('fromSlot',i);e.dataTransfer.setData('letterIdx','-1');});
+    }
+    row.appendChild(d);
+  });
+}
+
+function renderLetters(){
+  const shuffled=[...currentWord].map((l,i)=>({l,i})).sort(()=>Math.random()-.5);
+  const row=document.getElementById('lettersRow');row.innerHTML='';
+  shuffled.forEach(({l,i})=>{
+    const t=document.createElement('div');
+    t.className='letter-tile'+(usedIdx.has(i)?' used':'');
+    t.textContent=l;t.dataset.idx=i;
+    t.draggable=true;
+    t.addEventListener('dragstart',e=>{
+      if(usedIdx.has(i))return;
+      e.dataTransfer.setData('letter',l);
+      e.dataTransfer.setData('letterIdx',i);
+      e.dataTransfer.setData('fromSlot','-1');
+      t.classList.add('dragging');
+    });
+    t.addEventListener('dragend',()=>t.classList.remove('dragging'));
+    t.addEventListener('click',()=>{
+      if(usedIdx.has(i))return;
+      const emptyIdx=slots.indexOf('');
+      if(emptyIdx>=0){slots[emptyIdx]=l;usedIdx.add(i);renderSlots();renderLetters();}
+    });
+    row.appendChild(t);
+  });
+}
+
+function clearSlots(){slots=Array(currentWord.length).fill('');usedIdx=new Set();renderSlots();renderLetters();setFeedback('👆 Tap a letter to start!','#64748b');}
+
+function checkWord(){
+  total++;
+  const formed=slots.join('');
+  if(formed.length<currentWord.length){setFeedback('⚠️ Fill all the slots first!','var(--yellow)');return;}
+  if(formed===currentWord){
+    correct++;wbStreak++;
+    const earned=(level*10)+(wbStreak>=3?5:0);
+    score+=earned;xpEarned+=earned;
+    globalXP+=earned;localStorage.setItem('dysgraphia-xp-'+sid,globalXP);
+    document.getElementById('navXp').textContent=globalXP;
+    // Mark slots correct
+    document.querySelectorAll('.slot').forEach(s=>s.classList.add('correct'));
+    const msgs=['🎉 Perfect! "'+currentWord+'" is correct!','🌟 Excellent spelling!','💎 Amazing! You got it!','🚀 Brilliant word building!'];
+    setFeedback(msgs[Math.floor(Math.random()*msgs.length)]+(wbStreak>=3?' 🔥 '+wbStreak+' streak!':''),'var(--green)');
+    updateScores();confetti();showToast('+'+earned+' XP ⚡');
+    if(total>=10)endSession();
+    else setTimeout(()=>newWord(),1600);
+  } else {
+    wbStreak=0;
+    document.querySelectorAll('.slot').forEach((s,i)=>{
+      s.classList.add(slots[i]&&slots[i]===currentWord[i]?'correct':'wrong');
+    });
+    setFeedback('🔄 Not quite! The word is "'+currentWord+'"','var(--red)');
+    setTimeout(()=>newWord(),1800);
+    if(total>=10)endSession();
+  }
+}
+
+function showHint(){
+  const firstEmpty=slots.indexOf('');
+  if(firstEmpty>=0){
+    slots[firstEmpty]=currentWord[firstEmpty];
+    const li=[...currentWord].findIndex((l,i)=>!usedIdx.has(i)&&l===currentWord[firstEmpty]);
+    if(li>=0)usedIdx.add(li);
+    renderSlots();renderLetters();
+    setFeedback('💡 Here\'s a hint — letter "'+currentWord[firstEmpty]+'" placed!','var(--yellow)');
+  }
+}
+
+function speakWord(){
+  if(!('speechSynthesis' in window))return;
+  const u=new SpeechSynthesisUtterance(currentWord.toLowerCase());
+  u.rate=0.75;u.pitch=1.1;speechSynthesis.speak(u);
+}
+
+function updateScores(){
+  document.getElementById('scoreVal').textContent=score;
+  document.getElementById('correctVal').textContent=correct;
+  document.getElementById('totalVal').textContent=total;
+  document.getElementById('streakVal').textContent=wbStreak;
+  document.getElementById('topScore').textContent=score;
+}
+
+function setFeedback(msg,color){
+  const el=document.getElementById('feedback');
+  el.textContent=msg;el.style.color=color;
+}
+
+function endSession(){
+  const acc=total>0?Math.round((correct/total)*100):0;
+  document.getElementById('resIcon').textContent=acc>=80?'🏆':acc>=50?'🌟':'💪';
+  document.getElementById('resTitle').textContent=acc>=80?'Word Master!':acc>=50?'Good Job!':'Keep Practicing!';
+  document.getElementById('resSub').textContent='You finished '+total+' word challenges!';
+  document.getElementById('resXp').textContent=xpEarned;
+  document.getElementById('resCorrect').textContent=correct;
+  document.getElementById('resAcc').textContent=acc+'%';
+  document.getElementById('resultOverlay').classList.add('show');
+  // Save
+  const hist=JSON.parse(localStorage.getItem('ml-history-'+sid)||'[]');
+  hist.unshift({date:new Date().toISOString().split('T')[0],game:'Word Builder',mode:level===1?'easy':level===2?'medium':'hard',accuracy:acc,correct,wrong:total-correct,coins:xpEarned});
+  localStorage.setItem('ml-history-'+sid,JSON.stringify(hist.slice(0,50)));
+  const gp=Number(localStorage.getItem('gamesPlayed-'+sid)||0)+1;
+  localStorage.setItem('gamesPlayed-'+sid,gp);
+  const totalCoins=Number(localStorage.getItem('coins-'+sid)||0)+xpEarned;
+  localStorage.setItem('coins-'+sid,totalCoins);
+}
+
+function restart(){
+  document.getElementById('resultOverlay').classList.remove('show');
+  score=0;correct=0;total=0;wbStreak=0;xpEarned=0;
+  updateScores();newWord();
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function confetti(){const cols=['#fbbf24','#22c55e','#38bdf8','#a78bfa','#fb923c'];for(let i=0;i<35;i++){const c=document.createElement('div');c.className='conf';c.style.cssText=`left:${Math.random()*100}vw;background:${cols[i%cols.length]};animation-duration:${1.4+Math.random()*1.5}s;animation-delay:${Math.random()*.4}s;border-radius:${Math.random()>.5?'50%':'2px'}`;document.body.appendChild(c);setTimeout(()=>c.remove(),3000);}}
+
+newWord();
+</script>
+</body>
+</html>

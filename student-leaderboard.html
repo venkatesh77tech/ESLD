@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ESLD – Leaderboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0b1120;--sidebar:#0f172a;--card:rgba(255,255,255,.07);--border:rgba(255,255,255,.12);--radius:20px;--green:#22c55e;--blue:#38bdf8;--purple:#a78bfa;--yellow:#fbbf24;--orange:#fb923c;--red:#ef4444}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:#f1f5f9;min-height:100vh;display:grid;grid-template-columns:260px 1fr;grid-template-rows:auto 1fr}
+.sidebar{grid-row:1/-1;background:var(--sidebar);border-right:1px solid var(--border);padding:20px 16px;display:flex;flex-direction:column;gap:8px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidebar-logo{font-family:'Fredoka One';font-size:1.5rem;padding:10px 8px 18px;border-bottom:1px solid var(--border);margin-bottom:8px;background:linear-gradient(90deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;cursor:pointer;transition:.2s;font-weight:700;font-size:.9rem;color:#64748b;border:none;background:none;width:100%;text-align:left;font-family:'Nunito',sans-serif}
+.nav-item:hover{background:rgba(255,255,255,.08);color:#f1f5f9}
+.nav-item.active{background:rgba(167,139,250,.12);color:var(--purple)}
+.sidebar-coins{margin-top:auto;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.2);border-radius:14px;padding:14px;text-align:center}
+.coins-num{font-family:'Fredoka One';font-size:2rem;color:var(--yellow)}
+.coins-label{font-size:.8rem;color:#64748b}
+.topbar{grid-column:2;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(15,23,42,.6);backdrop-filter:blur(12px);position:sticky;top:0;z-index:10}
+.topbar h2{font-family:'Fredoka One';font-size:1.4rem}
+main{grid-column:2;padding:24px 28px;overflow-y:auto}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:center}
+.stat-n{font-family:'Fredoka One';font-size:1.8rem}
+.stat-l{color:#64748b;font-size:.78rem;margin-top:2px}
+/* PODIUM */
+.podium-section{text-align:center;margin-bottom:28px}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:16px;margin-bottom:6px}
+.podium-slot{display:flex;flex-direction:column;align-items:center;gap:6px}
+.podium-av{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font-size:20px;font-weight:900;border:3px solid transparent;position:relative}
+.podium-av.rank1{border-color:var(--yellow);background:linear-gradient(135deg,rgba(251,191,36,.3),rgba(251,191,36,.1));width:70px;height:70px;font-size:24px}
+.podium-av.rank2{border-color:#94a3b8;background:linear-gradient(135deg,rgba(148,163,184,.25),rgba(148,163,184,.1))}
+.podium-av.rank3{border-color:var(--orange);background:linear-gradient(135deg,rgba(251,146,60,.25),rgba(251,146,60,.1))}
+.podium-crown{position:absolute;top:-16px;font-size:18px}
+.podium-name{font-weight:800;font-size:.82rem}
+.podium-coins{color:var(--yellow);font-family:'Fredoka One';font-size:.9rem}
+.podium-bar{border-radius:10px 10px 0 0;display:flex;align-items:flex-end;justify-content:center;padding:6px}
+.bar1{background:linear-gradient(180deg,rgba(251,191,36,.3),rgba(251,191,36,.1));border:1px solid rgba(251,191,36,.3);height:90px;width:88px}
+.bar2{background:linear-gradient(180deg,rgba(148,163,184,.2),rgba(148,163,184,.05));border:1px solid rgba(148,163,184,.2);height:65px;width:78px}
+.bar3{background:linear-gradient(180deg,rgba(251,146,60,.2),rgba(251,146,60,.05));border:1px solid rgba(251,146,60,.2);height:48px;width:78px}
+.rank-badge{font-family:'Fredoka One';font-size:1.2rem}
+/* MY RANK */
+.my-rank-card{background:linear-gradient(135deg,rgba(167,139,250,.15),rgba(56,189,248,.1));border:1px solid rgba(167,139,250,.35);border-radius:16px;padding:18px 24px;display:flex;align-items:center;gap:16px;margin-bottom:24px}
+.my-rank-num{font-family:'Fredoka One';font-size:2.5rem;color:var(--purple);min-width:60px;text-align:center}
+.my-rank-info{flex:1}
+.my-rank-name{font-family:'Fredoka One';font-size:1.1rem}
+.my-rank-sub{color:#64748b;font-size:.8rem;margin-top:3px}
+.my-rank-coins{font-family:'Fredoka One';font-size:1.5rem;color:var(--yellow)}
+/* FILTER */
+.filter-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.filter-btn{padding:7px 16px;border-radius:999px;border:1px solid var(--border);background:transparent;color:#64748b;cursor:pointer;font-weight:700;font-size:.8rem;font-family:'Nunito',sans-serif;transition:.2s}
+.filter-btn:hover,.filter-btn.active{background:rgba(167,139,250,.15);border-color:var(--purple);color:var(--purple)}
+/* TABLE */
+.lb-table{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;margin-bottom:24px}
+.lb-row{display:grid;grid-template-columns:60px 1fr auto auto;align-items:center;padding:13px 18px;border-bottom:1px solid rgba(255,255,255,.04);transition:.2s;gap:12px}
+.lb-row:hover{background:rgba(255,255,255,.04)}
+.lb-row:last-child{border-bottom:none}
+.lb-row.me{background:rgba(167,139,250,.08);border-left:3px solid var(--purple)}
+.lb-row.top1{background:rgba(251,191,36,.05)}
+.lb-row.top2{background:rgba(148,163,184,.03)}
+.lb-row.top3{background:rgba(251,146,60,.04)}
+.lb-rank{font-family:'Fredoka One';font-size:1.2rem;text-align:center}
+.lb-rank.r1{color:var(--yellow)}.lb-rank.r2{color:#94a3b8}.lb-rank.r3{color:var(--orange)}
+.lb-info{display:flex;align-items:center;gap:10px}
+.lb-av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:900;flex-shrink:0}
+.lb-name{font-weight:800;font-size:.87rem}
+.lb-sub{color:#64748b;font-size:.73rem;margin-top:2px;display:flex;gap:8px;align-items:center}
+.lb-coins{font-family:'Fredoka One';color:var(--yellow);font-size:.92rem;white-space:nowrap}
+.tag{padding:3px 8px;border-radius:999px;font-size:.67rem;font-weight:800;display:inline-block}
+.tag.dyslexia{background:rgba(34,197,94,.13);color:var(--green)}
+.tag.dysgraphia{background:rgba(56,189,248,.13);color:var(--blue)}
+.tag.adhd{background:rgba(251,146,60,.13);color:var(--orange)}
+.loading{text-align:center;padding:80px;color:#64748b;font-size:1rem}
+.loading .spin{font-size:48px;animation:spin 1s linear infinite;display:block;margin-bottom:16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:60px 20px;color:#64748b}
+.badge-tag{padding:3px 9px;border-radius:999px;font-size:.67rem;font-weight:800}
+.school-info{background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);border-radius:12px;padding:10px 16px;margin-bottom:18px;font-size:.85rem;color:var(--blue);font-weight:700;display:flex;align-items:center;gap:8px}
+@media(max-width:900px){body{grid-template-columns:1fr}.sidebar{display:none}.topbar{grid-column:1}main{grid-column:1;padding:14px}.stats-row{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">🦋 ESLD</div>
+  <button class="nav-item" onclick="go('student-dashboard.html')"><span>🏠</span><span>Dashboard</span></button>
+  <button class="nav-item" onclick="go('student-games.html')"><span>🎮</span><span>Games</span></button>
+  <button class="nav-item" onclick="go('student-assignments.html')"><span>📋</span><span>My Assignments</span></button>
+  <button class="nav-item" onclick="go('student-messages.html')"><span>💬</span><span>Messages</span></button>
+  <button class="nav-item" onclick="go('student-progress.html')"><span>📊</span><span>My Progress</span></button>
+  <button class="nav-item" onclick="go('student-audio-stories.html')"><span>🎧</span><span>Audio Stories</span></button>
+  <button class="nav-item active"><span>🏆</span><span>Leaderboard</span></button>
+  <button class="nav-item" onclick="logout()"><span>🚪</span><span>Logout</span></button>
+  <div class="sidebar-coins"><div class="coins-num" id="sideCoins">0</div><div class="coins-label">🪙 My Coins</div></div>
+</aside>
+
+<div class="topbar">
+  <h2>🏆 Leaderboard</h2>
+  <span style="color:#64748b;font-size:.85rem" id="stuLabel"></span>
+</div>
+
+<main>
+  <div class="stats-row">
+    <div class="stat"><div class="stat-n" id="myRankStat" style="color:var(--purple)">--</div><div class="stat-l">My Rank</div></div>
+    <div class="stat"><div class="stat-n" id="myCoinsStat" style="color:var(--yellow)">0</div><div class="stat-l">My Coins</div></div>
+    <div class="stat"><div class="stat-n" id="totalPlayersStat" style="color:var(--blue)">--</div><div class="stat-l">Total Players</div></div>
+    <div class="stat"><div class="stat-n" id="topScoreStat" style="color:var(--green)">--</div><div class="stat-l">Top Score</div></div>
+  </div>
+
+  <div class="my-rank-card" id="myRankCard" style="display:none">
+    <div class="my-rank-num" id="myRankNum">#--</div>
+    <div class="my-rank-info">
+      <div class="my-rank-name" id="myRankName">--</div>
+      <div class="my-rank-sub" id="myRankSub"></div>
+    </div>
+    <div class="my-rank-coins" id="myRankCoins">🪙 0</div>
+  </div>
+
+  <div class="podium-section">
+    <div style="font-family:'Fredoka One';font-size:1rem;color:#64748b;margin-bottom:18px">🏅 Top 3 Champions</div>
+    <div class="podium" id="podium"></div>
+  </div>
+
+  <div class="filter-row">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="filter-btn active" onclick="filterLB('all',this)">🌐 All</button>
+      <button class="filter-btn" onclick="filterLB('dyslexia',this)">📖 Dyslexia</button>
+      <button class="filter-btn" onclick="filterLB('dysgraphia',this)">✍️ Dysgraphia</button>
+      <button class="filter-btn" onclick="filterLB('adhd',this)">⚡ ADHD</button>
+    </div>
+  </div>
+
+  <div id="lbContainer">
+    <div class="loading"><span class="spin">🏆</span>Loading leaderboard...</div>
+  </div>
+</main>
+
+<script>
+const API = 'http://localhost:5000';
+const myId   = sessionStorage.getItem('studentId');
+const myName = sessionStorage.getItem('studentName') || 'Student';
+const myDisability = sessionStorage.getItem('disability') || '';
+
+if(!myId) location.href = 'student-login.html';
+
+document.getElementById('stuLabel').textContent = '👤 ' + myName;
+
+let allPlayers   = [];
+let currentFilter = 'all';
+
+function go(url){ location.href = url; }
+function logout(){ sessionStorage.clear(); location.href = 'student-login.html'; }
+
+const avatarColors = ['#22c55e','#38bdf8','#a78bfa','#f472b6','#fbbf24','#fb923c','#e879f9','#34d399','#60a5fa','#f87171','#a3e635','#4ade80'];
+
+async function loadLeaderboard(){
+  try{
+    const r    = await fetch(`${API}/all-students-progress`);
+    const data = await r.json();
+    allPlayers = data.students || [];
+
+    // Find my own data and set sidebar coins
+    const me = allPlayers.find(p => p.student_id === myId);
+    const myCoins = me ? me.total_coins : 0;
+    document.getElementById('sideCoins').textContent  = myCoins;
+    document.getElementById('myCoinsStat').textContent = myCoins;
+
+    renderLeaderboard();
+  } catch(e){
+    document.getElementById('lbContainer').innerHTML = `<div class="empty-state"><div style="font-size:48px">⚠️</div><p style="margin-top:10px">Cannot connect to server.</p></div>`;
+  }
+}
+
+function filterLB(f, btn){
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLeaderboard();
+}
+
+function renderLeaderboard(){
+  let players = currentFilter === 'all'
+    ? [...allPlayers]
+    : allPlayers.filter(p => p.disability === currentFilter);
+
+  // Sort by total_coins descending
+  players.sort((a,b) => b.total_coins - a.total_coins);
+
+  document.getElementById('totalPlayersStat').textContent = players.length;
+  document.getElementById('topScoreStat').textContent     = players.length ? (players[0].total_coins + '🪙') : '--';
+
+  const myRank = players.findIndex(p => p.student_id === myId) + 1;
+  const me     = players.find(p => p.student_id === myId);
+
+  document.getElementById('myRankStat').textContent = myRank ? '#' + myRank : '--';
+
+  if(me && myRank){
+    document.getElementById('myRankCard').style.display = 'flex';
+    document.getElementById('myRankNum').textContent    = '#' + myRank;
+    document.getElementById('myRankName').textContent   = me.name + ' (You)';
+    document.getElementById('myRankSub').textContent    = (me.disability||'') + ' • ' + me.sessions + ' sessions • avg ' + me.avg_accuracy + '%';
+    document.getElementById('myRankCoins').textContent  = '🪙 ' + me.total_coins;
+  }
+
+  renderPodium(players.slice(0, 3));
+
+  if(!players.length){
+    document.getElementById('lbContainer').innerHTML = `<div class="empty-state"><div style="font-size:48px">😴</div><p style="margin-top:10px">No players yet in this category.</p></div>`;
+    return;
+  }
+
+  document.getElementById('lbContainer').innerHTML = `
+    <div class="lb-table">
+      ${players.map((p,i) => {
+        const rank     = i + 1;
+        const isMe     = p.student_id === myId;
+        const rankIcon = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'#'+rank;
+        const rankCls  = rank===1?'r1':rank===2?'r2':rank===3?'r3':'';
+        const rowCls   = isMe?'me':rank===1?'top1':rank===2?'top2':rank===3?'top3':'';
+        const clr      = avatarColors[i % avatarColors.length];
+        const badge    = rank===1?`<span class="badge-tag" style="background:rgba(251,191,36,.15);color:var(--yellow)">👑 Champion</span>`
+                        :rank===2?`<span class="badge-tag" style="background:rgba(148,163,184,.15);color:#94a3b8">🥈 Runner Up</span>`
+                        :rank===3?`<span class="badge-tag" style="background:rgba(251,146,60,.15);color:var(--orange)">🥉 3rd Place</span>`
+                        :rank<=5?`<span class="badge-tag" style="background:rgba(56,189,248,.1);color:var(--blue)">Top 5</span>`
+                        :isMe?`<span class="badge-tag" style="background:rgba(167,139,250,.15);color:var(--purple)">You</span>`:'';
+        return `<div class="lb-row ${rowCls}">
+          <div class="lb-rank ${rankCls}">${rankIcon}</div>
+          <div class="lb-info">
+            <div class="lb-av" style="background:linear-gradient(135deg,${clr}44,${clr}18);color:${clr}">${p.name?p.name[0]:'?'}</div>
+            <div>
+              <div class="lb-name">${p.name||'Unknown'}${isMe?' 👈 You':''}</div>
+              <div class="lb-sub">
+                ${p.disability?`<span class="tag ${p.disability}">${p.disability}</span>`:''}
+                <span>${p.sessions} sessions</span>
+                <span style="color:#94a3b8">${p.avg_accuracy}% avg</span>
+              </div>
+            </div>
+          </div>
+          <div class="lb-coins">🪙 ${p.total_coins}</div>
+          <div>${badge}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function renderPodium(top3){
+  if(!top3.length){ document.getElementById('podium').innerHTML = '<p style="color:#64748b">No data yet</p>'; return; }
+  const order   = [1,0,2]; // visual: 2nd | 1st | 3rd
+  const bars    = ['bar2','bar1','bar3'];
+  const avRanks = ['rank2','rank1','rank3'];
+  const crowns  = ['','👑',''];
+  const medals  = ['🥈','🥇','🥉'];
+  const clrs    = ['#94a3b8','#fbbf24','#fb923c'];
+
+  document.getElementById('podium').innerHTML = order.map((pi,vi) => {
+    const p = top3[pi];
+    if(!p) return '';
+    const isMe = p.student_id === myId;
+    return `<div class="podium-slot">
+      <div class="podium-av ${avRanks[vi]}" style="border-color:${clrs[vi]}">
+        ${crowns[vi]?`<span class="podium-crown">${crowns[vi]}</span>`:''}
+        ${p.name?p.name[0]:'?'}
+      </div>
+      <div class="podium-name">${(p.name||'').split(' ')[0]}${isMe?' 👈':''}</div>
+      <div class="podium-coins">🪙 ${p.total_coins}</div>
+      <div class="podium-bar ${bars[vi]}"><span class="rank-badge">${medals[vi]}</span></div>
+    </div>`;
+  }).join('');
+}
+
+loadLeaderboard();
+</script>
+</body>
+</html>
