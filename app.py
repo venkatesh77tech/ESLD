@@ -26,11 +26,11 @@ app = Flask(__name__)
 CORS(app)  # handles OPTIONS preflight for every route automatically
 
 # ─── MYSQL CONFIG ───
-app.config['MYSQL_HOST']     = 'localhost'
-app.config['MYSQL_USER']     = 'root'
-app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB']       = 'esld'
-app.config['MYSQL_PORT']     = 3306
+app.config['MYSQL_HOST'] = 'reseau.proxy.rlwy.net'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'YOUR_RAILWAY_PASSWORD'
+app.config['MYSQL_DB'] = 'railway'
+app.config['MYSQL_PORT'] = 56465
 
 mysql = MySQL(app)
 
