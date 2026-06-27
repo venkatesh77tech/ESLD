@@ -134,7 +134,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
   border:2px solid var(--v2);box-shadow:0 0 50px rgba(139,92,246,.25)}
 .cam-wrap::before{content:'';position:absolute;inset:0;z-index:5;pointer-events:none;
   background:linear-gradient(to bottom,rgba(0,0,0,.08) 0%,transparent 8%,transparent 92%,rgba(0,0,0,.08) 100%)}
-.cam-wrap::after{display:none}
 #videoEl{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);
   filter:brightness(1.25) contrast(1.1) saturate(1.1)}
 #drawCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:8;pointer-events:none}
@@ -185,6 +184,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 .ctrl-speak{background:linear-gradient(135deg,rgba(6,182,212,.8),rgba(16,185,129,.7));color:#fff}
 .ctrl-hint{background:linear-gradient(135deg,rgba(236,72,153,.7),rgba(139,92,246,.6));color:#fff}
 .ctrl-skip{background:rgba(239,68,68,.15);color:var(--rd);border:1px solid rgba(239,68,68,.3)}
+.ctrl-demo{background:linear-gradient(135deg,rgba(245,158,11,.8),rgba(249,115,22,.7));color:#000;font-weight:800}
 .manual-wrap{position:relative;border-radius:13px;overflow:hidden}
 #manualCanvas{display:block;width:100%;background:rgba(139,92,246,.03);border:1px solid rgba(139,92,246,.2);border-radius:13px;cursor:crosshair;touch-action:none}
 .ghost-letter{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
@@ -239,6 +239,33 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 .hint-txt{font-family:'Orbitron',sans-serif;font-size:.7rem;color:var(--muted);letter-spacing:2px;margin-top:8px}
 .hint-close{margin-top:14px;padding:8px 22px;border-radius:999px;border:1px solid var(--v2);background:rgba(139,92,246,.15);
   color:var(--v2);cursor:pointer;font-family:'Exo 2',sans-serif;font-weight:700;font-size:.78rem}
+
+/* ═══════════════════════════════════════════
+   DEMO OVERLAY — shows animated letter trace
+   before student writes
+   ═══════════════════════════════════════════ */
+.demo-overlay{position:absolute;inset:0;z-index:20;border-radius:16px;
+  background:rgba(3,5,15,.93);display:none;flex-direction:column;align-items:center;justify-content:center;gap:0}
+.demo-overlay.show{display:flex}
+.demo-stage-label{font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:3px;
+  padding:5px 18px;border-radius:999px;margin-bottom:12px;font-weight:700}
+.demo-stage-label.watch{border:1px solid rgba(245,158,11,.4);color:var(--yw);background:rgba(245,158,11,.08)}
+.demo-stage-label.yourturn{border:1px solid rgba(16,185,129,.4);color:var(--gr);background:rgba(16,185,129,.08)}
+#demoCanvas{border-radius:12px;border:1px solid rgba(139,92,246,.3);background:rgba(0,0,0,.4)}
+.demo-info{font-family:'Orbitron',sans-serif;font-size:.65rem;color:var(--muted);margin-top:10px;letter-spacing:1.5px;text-align:center}
+.demo-skip-btn{margin-top:14px;padding:9px 28px;border-radius:999px;border:1px solid rgba(139,92,246,.4);
+  background:rgba(139,92,246,.15);color:var(--v2);cursor:pointer;
+  font-family:'Exo 2',sans-serif;font-weight:800;font-size:.8rem;transition:.2s}
+.demo-skip-btn:hover{background:rgba(139,92,246,.3);color:#fff}
+.demo-countdown{font-family:'Orbitron',sans-serif;font-size:2.4rem;font-weight:900;
+  color:var(--gr);margin-top:6px;animation:countPulse .8s ease infinite}
+@keyframes countPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+/* Dot tracer inside demo */
+#demoDot{position:absolute;width:20px;height:20px;border-radius:50%;pointer-events:none;display:none;
+  background:rgba(6,182,212,.7);border:2px solid var(--c2);
+  box-shadow:0 0 16px var(--c2),0 0 32px rgba(6,182,212,.5);
+  transform:translate(-50%,-50%);transition:left .06s linear,top .06s linear}
+
 .result-overlay{position:fixed;inset:0;z-index:200;background:rgba(3,5,15,.92);backdrop-filter:blur(14px);display:none;place-items:center}
 .result-overlay.show{display:grid}
 .result-card{background:var(--panel);border:1px solid rgba(139,92,246,.4);border-radius:26px;padding:40px 44px;
@@ -386,6 +413,17 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
       <div class="cam-ph" id="camPh"><div class="ph-icon">✋</div><div class="ph-text">START CAMERA TO WRITE IN THE AIR</div></div>
       <div class="fps-counter" id="fpsDis">-- FPS</div>
       <div class="write-progress"><div class="write-prog-bar" id="writeProgBar"></div></div>
+
+      <!-- DEMO OVERLAY — shows before each new letter -->
+      <div class="demo-overlay" id="demoOverlay">
+        <div class="demo-stage-label watch" id="demoStageLabel">👀 WATCH HOW TO WRITE</div>
+        <canvas id="demoCanvas" width="400" height="300"></canvas>
+        <div id="demoDot"></div>
+        <div class="demo-info" id="demoInfo">Watch the letter being traced…</div>
+        <div class="demo-countdown" id="demoCountdown" style="display:none"></div>
+        <button class="demo-skip-btn" id="demoSkipBtn" onclick="skipDemo()">Skip Demo ⏭</button>
+      </div>
+
       <div class="hint-overlay" id="hintOverlay">
         <div class="hint-inner">
           <div class="hint-letter" id="hintLetter">A</div>
@@ -403,6 +441,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
     <div class="controls-bar" style="margin-top:10px">
       <button class="ctrl ctrl-start" onclick="startCamera()">📷 Camera</button>
       <button class="ctrl ctrl-stop"  onclick="stopCamera()">⏹ Stop</button>
+      <button class="ctrl ctrl-demo"  onclick="triggerDemo()">🎬 Demo</button>
       <button class="ctrl ctrl-hint"  onclick="showHint()">💡 Hint</button>
       <button class="ctrl ctrl-clear" onclick="clearAll()">🗑️ Clear</button>
       <button class="ctrl ctrl-check" onclick="recognize()">🤖 AI Check</button>
@@ -416,6 +455,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
       <canvas id="manualCanvas" width="640" height="380"></canvas>
     </div>
     <div class="controls-bar" style="margin-top:10px">
+      <button class="ctrl ctrl-demo"  onclick="triggerManualDemo()">🎬 Demo</button>
       <button class="ctrl ctrl-hint"  onclick="showHint()">💡 Hint</button>
       <button class="ctrl ctrl-clear" onclick="clearManual()">🗑️ Clear</button>
       <button class="ctrl ctrl-check" onclick="recognizeManual()">🤖 AI Check</button>
@@ -506,6 +546,114 @@ const ACHIEVEMENTS=[
   {id:'combo',ico:'🎰',name:'Combo King',desc:'Hit ×5 combo',cond:s=>s.bestCombo>=5},
 ];
 
+/* ══════════════════════════════════════════════════
+   LETTER STROKE PATHS  — normalized 0–1 coords
+   Each letter is a list of strokes; each stroke is
+   a list of {x,y} control points (drawn as bezier).
+   These are representative shapes, not font-exact.
+   ══════════════════════════════════════════════════ */
+const LETTER_PATHS = {
+  A:[
+    [{x:.5,y:.05},{x:.18,y:.95}],           // left diagonal
+    [{x:.5,y:.05},{x:.82,y:.95}],           // right diagonal
+    [{x:.28,y:.6},{x:.72,y:.6}],            // crossbar
+  ],
+  B:[
+    [{x:.2,y:.05},{x:.2,y:.95}],            // vertical
+    [{x:.2,y:.05},{x:.6,y:.05},{x:.75,y:.18},{x:.75,y:.28},{x:.6,y:.48},{x:.2,y:.48}], // top bump
+    [{x:.2,y:.48},{x:.65,y:.48},{x:.8,y:.62},{x:.8,y:.75},{x:.65,y:.95},{x:.2,y:.95}], // bottom bump
+  ],
+  C:[
+    [{x:.8,y:.18},{x:.6,y:.05},{x:.35,y:.05},{x:.15,y:.2},{x:.15,y:.8},{x:.35,y:.95},{x:.6,y:.95},{x:.8,y:.82}],
+  ],
+  D:[
+    [{x:.2,y:.05},{x:.2,y:.95}],
+    [{x:.2,y:.05},{x:.55,y:.05},{x:.82,y:.25},{x:.82,y:.75},{x:.55,y:.95},{x:.2,y:.95}],
+  ],
+  E:[
+    [{x:.75,y:.05},{x:.2,y:.05},{x:.2,y:.95},{x:.75,y:.95}],
+    [{x:.2,y:.5},{x:.65,y:.5}],
+  ],
+  F:[
+    [{x:.75,y:.05},{x:.2,y:.05},{x:.2,y:.95}],
+    [{x:.2,y:.5},{x:.65,y:.5}],
+  ],
+  G:[
+    [{x:.8,y:.18},{x:.6,y:.05},{x:.35,y:.05},{x:.15,y:.2},{x:.15,y:.8},{x:.35,y:.95},{x:.65,y:.95},{x:.82,y:.78},{x:.82,y:.55},{x:.5,y:.55}],
+  ],
+  H:[
+    [{x:.2,y:.05},{x:.2,y:.95}],
+    [{x:.8,y:.05},{x:.8,y:.95}],
+    [{x:.2,y:.5},{x:.8,y:.5}],
+  ],
+  I:[
+    [{x:.35,y:.05},{x:.65,y:.05}],
+    [{x:.5,y:.05},{x:.5,y:.95}],
+    [{x:.35,y:.95},{x:.65,y:.95}],
+  ],
+  J:[
+    [{x:.35,y:.05},{x:.65,y:.05}],
+    [{x:.5,y:.05},{x:.5,y:.78},{x:.38,y:.92},{x:.22,y:.88},{x:.18,y:.75}],
+  ],
+  K:[
+    [{x:.2,y:.05},{x:.2,y:.95}],
+    [{x:.78,y:.05},{x:.2,y:.5}],
+    [{x:.2,y:.5},{x:.78,y:.95}],
+  ],
+  L:[
+    [{x:.2,y:.05},{x:.2,y:.95},{x:.78,y:.95}],
+  ],
+  M:[
+    [{x:.12,y:.95},{x:.12,y:.05},{x:.5,y:.6},{x:.88,y:.05},{x:.88,y:.95}],
+  ],
+  N:[
+    [{x:.2,y:.95},{x:.2,y:.05},{x:.8,y:.95},{x:.8,y:.05}],
+  ],
+  O:[
+    [{x:.5,y:.05},{x:.82,y:.2},{x:.82,y:.8},{x:.5,y:.95},{x:.18,y:.8},{x:.18,y:.2},{x:.5,y:.05}],
+  ],
+  P:[
+    [{x:.2,y:.05},{x:.2,y:.95}],
+    [{x:.2,y:.05},{x:.62,y:.05},{x:.78,y:.2},{x:.78,y:.42},{x:.62,y:.55},{x:.2,y:.55}],
+  ],
+  Q:[
+    [{x:.5,y:.05},{x:.82,y:.2},{x:.82,y:.78},{x:.5,y:.93},{x:.18,y:.78},{x:.18,y:.2},{x:.5,y:.05}],
+    [{x:.6,y:.7},{x:.85,y:.95}],
+  ],
+  R:[
+    [{x:.2,y:.05},{x:.2,y:.95}],
+    [{x:.2,y:.05},{x:.62,y:.05},{x:.78,y:.2},{x:.78,y:.42},{x:.62,y:.55},{x:.2,y:.55}],
+    [{x:.42,y:.55},{x:.78,y:.95}],
+  ],
+  S:[
+    [{x:.78,y:.15},{x:.58,y:.05},{x:.3,y:.05},{x:.15,y:.2},{x:.15,y:.42},{x:.5,y:.52},{x:.85,y:.62},{x:.85,y:.82},{x:.68,y:.95},{x:.38,y:.95},{x:.18,y:.82}],
+  ],
+  T:[
+    [{x:.12,y:.05},{x:.88,y:.05}],
+    [{x:.5,y:.05},{x:.5,y:.95}],
+  ],
+  U:[
+    [{x:.2,y:.05},{x:.2,y:.75},{x:.35,y:.92},{x:.65,y:.92},{x:.8,y:.75},{x:.8,y:.05}],
+  ],
+  V:[
+    [{x:.15,y:.05},{x:.5,y:.95},{x:.85,y:.05}],
+  ],
+  W:[
+    [{x:.1,y:.05},{x:.3,y:.95},{x:.5,y:.55},{x:.7,y:.95},{x:.9,y:.05}],
+  ],
+  X:[
+    [{x:.15,y:.05},{x:.85,y:.95}],
+    [{x:.85,y:.05},{x:.15,y:.95}],
+  ],
+  Y:[
+    [{x:.15,y:.05},{x:.5,y:.52}],
+    [{x:.85,y:.05},{x:.5,y:.52},{x:.5,y:.95}],
+  ],
+  Z:[
+    [{x:.15,y:.05},{x:.85,y:.05},{x:.15,y:.95},{x:.85,y:.95}],
+  ],
+};
+
 /* ── STATE ── */
 const SID=sessionStorage.getItem('studentId')||'guest';
 let globalXP=Number(localStorage.getItem('aw_xp2_'+SID))||0;
@@ -519,6 +667,242 @@ let airTrail=[],isDrawingAir=false;
 let fpsFrames=0,fpsLast=performance.now();
 let timerInterval=null,timerSecs=0,timerMax=30;
 let wordIdx=0,wordChallengeWord='';
+let demoAnimFrame=null,demoPhase='idle'; // 'watch'|'countdown'|'yourturn'|'idle'
+let demoShownForLetter=new Set(); // auto-demo shown once per letter
+
+/* ══════════════════════════════════════════════════
+   DEMO SYSTEM
+   ══════════════════════════════════════════════════ */
+function triggerDemo(auto=false){
+  if(demoPhase!=='idle')return;
+  demoPhase='watch';
+  const overlay=document.getElementById('demoOverlay');
+  const stageLabel=document.getElementById('demoStageLabel');
+  const info=document.getElementById('demoInfo');
+  const cntEl=document.getElementById('demoCountdown');
+  const skipBtn=document.getElementById('demoSkipBtn');
+  overlay.classList.add('show');
+  stageLabel.className='demo-stage-label watch';
+  stageLabel.textContent='👀 WATCH HOW TO WRITE: '+currentLetter;
+  info.textContent='Study the stroke order carefully…';
+  cntEl.style.display='none';
+  skipBtn.style.display='block';
+
+  // Speak the letter name
+  speakLetter(true);
+
+  // Draw demo animation
+  playLetterAnimation(currentLetter, ()=>{
+    // Animation done → countdown phase
+    if(demoPhase==='idle')return; // was skipped
+    demoPhase='countdown';
+    stageLabel.className='demo-stage-label yourturn';
+    stageLabel.textContent='✋ YOUR TURN IN…';
+    info.textContent='Get ready to write!';
+    skipBtn.style.display='none';
+    cntEl.style.display='block';
+    let cnt=3;
+    cntEl.textContent=cnt;
+    const cdTimer=setInterval(()=>{
+      cnt--;
+      if(cnt<=0){
+        clearInterval(cdTimer);
+        closeDemoStartWrite();
+      } else {
+        cntEl.textContent=cnt;
+      }
+    },800);
+  });
+}
+
+function triggerManualDemo(){
+  // Show demo on the manual canvas itself
+  const mc=document.getElementById('manualCanvas');
+  const ctx=mc.getContext('2d');
+  ctx.clearRect(0,0,mc.width,mc.height);
+  updateManualCtx();
+  const paths=LETTER_PATHS[currentLetter]||[];
+  const W=mc.width,H=mc.height;
+  const pts=flattenPaths(paths,W*0.7,H*0.75,W*0.15,H*0.1);
+  animateManualDemo(ctx,pts,W,H,()=>{
+    setFeedback('info','✏️','YOUR TURN!',`Now draw "${currentLetter}" yourself!`);
+    showToast('✍️ Now YOU write it!');
+  });
+}
+
+function flattenPaths(paths,scaleW,scaleH,offX,offY){
+  // Returns all stroke point arrays with canvas coords
+  return paths.map(stroke=>stroke.map(p=>({x:offX+p.x*scaleW,y:offY+p.y*scaleH})));
+}
+
+function animateManualDemo(ctx,strokes,W,H,onDone){
+  ctx.clearRect(0,0,W,H);
+  // Draw ghost first
+  ctx.save();
+  ctx.font='bold 160px Orbitron,monospace';
+  ctx.fillStyle='rgba(139,92,246,.06)';
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  ctx.fillText(currentLetter,W/2,H/2);
+  ctx.restore();
+
+  let si=0,pi=0;
+  const strokeColor2='#22d3ee',glowColor='rgba(6,182,212,.7)';
+  function drawNext(){
+    if(si>=strokes.length){if(onDone)onDone();return;}
+    const stroke=strokes[si];
+    if(pi>=stroke.length-1){si++;pi=0;setTimeout(drawNext,180);return;}
+    const p0=stroke[pi],p1=stroke[pi+1];
+    ctx.beginPath();ctx.moveTo(p0.x,p0.y);ctx.lineTo(p1.x,p1.y);
+    ctx.strokeStyle=strokeColor2;ctx.lineWidth=10;ctx.lineCap='round';
+    ctx.shadowBlur=18;ctx.shadowColor=glowColor;ctx.stroke();
+    pi++;setTimeout(drawNext,40);
+  }
+  drawNext();
+}
+
+function playLetterAnimation(letter, onDone){
+  const dc=document.getElementById('demoCanvas');
+  const ctx=dc.getContext('2d');
+  const W=dc.width,H=dc.height;
+  ctx.clearRect(0,0,W,H);
+
+  // Draw ghost letter
+  ctx.save();
+  ctx.font='bold 220px Orbitron,monospace';
+  ctx.fillStyle='rgba(139,92,246,.07)';
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  ctx.fillText(letter,W/2,H/2);
+  ctx.restore();
+
+  // Draw grid lines (subtle)
+  ctx.save();
+  ctx.strokeStyle='rgba(139,92,246,.07)';
+  ctx.lineWidth=1;
+  for(let y=0.25;y<1;y+=0.25){ctx.beginPath();ctx.moveTo(0,H*y);ctx.lineTo(W,H*y);ctx.stroke();}
+  for(let x=0.25;x<1;x+=0.25){ctx.beginPath();ctx.moveTo(W*x,0);ctx.lineTo(W*x,H);ctx.stroke();}
+  ctx.restore();
+
+  const paths=LETTER_PATHS[letter]||[
+    [{x:.3,y:.1},{x:.5,y:.1},{x:.7,y:.1}],
+    [{x:.5,y:.1},{x:.5,y:.9}]
+  ];
+  const scaleW=W*0.68,scaleH=H*0.76,offX=W*0.16,offY=H*0.12;
+  const strokes=flattenPaths(paths,scaleW,scaleH,offX,offY);
+
+  let allPts=[];
+  strokes.forEach(s=>s.forEach(p=>allPts.push(p)));
+
+  // Dot
+  const dot=document.getElementById('demoDot');
+  dot.style.display='none';
+
+  let si=0,pi=0,drawnPoints=[];
+
+  function step(){
+    if(demoPhase==='idle'){dot.style.display='none';return;}
+    if(si>=strokes.length){
+      // done — redraw completed letter brightly then callback
+      dot.style.display='none';
+      ctx.clearRect(0,0,W,H);
+      // ghost
+      ctx.save();ctx.font='bold 220px Orbitron,monospace';ctx.fillStyle='rgba(139,92,246,.07)';
+      ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(letter,W/2,H/2);ctx.restore();
+      // redraw all strokes bright
+      strokes.forEach((stroke,si2)=>{
+        for(let i=1;i<stroke.length;i++){
+          const p0=stroke[i-1],p1=stroke[i];
+          ctx.beginPath();ctx.moveTo(p0.x,p0.y);ctx.lineTo(p1.x,p1.y);
+          ctx.strokeStyle='#22d3ee';ctx.lineWidth=8;ctx.lineCap='round';
+          ctx.shadowBlur=16;ctx.shadowColor='rgba(6,182,212,.8)';ctx.stroke();
+        }
+        // stroke number label
+        if(stroke.length>0){
+          const sp=stroke[0];
+          ctx.save();ctx.font='bold 12px Exo 2,sans-serif';ctx.fillStyle='rgba(245,158,11,.85)';
+          ctx.fillText('S'+(si2+1),sp.x-14,sp.y-8);ctx.restore();
+        }
+      });
+      setTimeout(onDone,700);
+      return;
+    }
+
+    const stroke=strokes[si];
+
+    // Move to new stroke — lift dot briefly
+    if(pi===0 && si>0){
+      dot.style.display='none';
+      // Show stroke separator flash
+      ctx.save();
+      ctx.font='bold 11px Exo 2,sans-serif';ctx.fillStyle='rgba(245,158,11,.7)';
+      const sp=stroke[0];ctx.fillText('S'+(si+1),sp.x-14,sp.y-10);
+      ctx.restore();
+      setTimeout(()=>{ step(); }, 200);
+      return;
+    }
+
+    if(pi>=stroke.length-1){
+      si++;pi=0;
+      setTimeout(step,120);
+      return;
+    }
+
+    const p0=stroke[pi],p1=stroke[pi+1];
+    const t=pi/(stroke.length-1);
+
+    // Update dot position relative to canvas
+    const camWrap=document.getElementById('camWrap');
+    const dcRect=dc.getBoundingClientRect();
+    dot.style.display='block';
+    dot.style.left=(dcRect.left-camWrap.getBoundingClientRect().left+p1.x)+'px';
+    dot.style.top=(dcRect.top-camWrap.getBoundingClientRect().top+p1.y)+'px';
+
+    // Draw segment
+    ctx.beginPath();ctx.moveTo(p0.x,p0.y);ctx.lineTo(p1.x,p1.y);
+    ctx.strokeStyle='rgba(6,182,212,'+(0.6+t*0.4)+')';
+    ctx.lineWidth=7+t*3;ctx.lineCap='round';
+    ctx.shadowBlur=14+t*10;ctx.shadowColor='rgba(6,182,212,.7)';
+    ctx.stroke();
+
+    // Arrow dot at current position
+    ctx.beginPath();ctx.arc(p1.x,p1.y,5,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,.9)';ctx.shadowBlur=0;ctx.fill();
+
+    // Start dot for this stroke
+    if(pi===0){
+      ctx.beginPath();ctx.arc(p0.x,p0.y,7,0,Math.PI*2);
+      ctx.fillStyle='rgba(245,158,11,.9)';ctx.fill();
+      ctx.save();ctx.font='bold 11px Exo 2,sans-serif';ctx.fillStyle='rgba(245,158,11,.9)';
+      ctx.fillText('S'+(si+1),p0.x-14,p0.y-10);ctx.restore();
+    }
+
+    pi++;
+    const delay=40+Math.abs(p1.x-p0.x)+Math.abs(p1.y-p0.y)*0.3;
+    demoAnimFrame=setTimeout(step,Math.min(delay,80));
+  }
+
+  step();
+}
+
+function skipDemo(){
+  demoPhase='idle';
+  if(demoAnimFrame)clearTimeout(demoAnimFrame);
+  document.getElementById('demoOverlay').classList.remove('show');
+  document.getElementById('demoDot').style.display='none';
+  setFeedback('info','✍️','YOUR TURN!',`Now write "${currentLetter}" in the air!`);
+  showToast('✍️ Write '+currentLetter+' now!');
+}
+
+function closeDemoStartWrite(){
+  demoPhase='idle';
+  if(demoAnimFrame)clearTimeout(demoAnimFrame);
+  document.getElementById('demoOverlay').classList.remove('show');
+  document.getElementById('demoDot').style.display='none';
+  clearAll();
+  setFeedback('good','✍️','YOUR TURN!',`Now write "${currentLetter}" just like the demo!`);
+  showToast('✍️ Go! Write '+currentLetter+'!');
+}
 
 /* ── WORD MODE ── */
 function startWordMode(){
@@ -597,7 +981,17 @@ function selectLetter(l,silent=false){
   document.getElementById('tgtWord').textContent=LETTER_WORDS[l]||'';
   document.getElementById('ghostLetter').textContent=l;
   document.getElementById('hintLetter').textContent=l;
-  if(!silent){clearAll();clearManual();setFeedback('idle','✋','READY',`Write "${l}" in the air or on the canvas!`);}
+  if(!silent){
+    clearAll();clearManual();
+    // Auto-show demo for the first time each letter is selected
+    if(!demoShownForLetter.has(l)){
+      demoShownForLetter.add(l);
+      setFeedback('info','🎬','WATCH THE DEMO',`See how to write "${l}"!`);
+      setTimeout(()=>triggerDemo(true),300);
+    } else {
+      setFeedback('idle','✋','READY',`Write "${l}" in the air or on the canvas!`);
+    }
+  }
   document.getElementById('progBar').style.width=Math.round((doneSet.size/26)*100)+'%';
   if(currentMode==='speed'){clearInterval(timerInterval);startTimer();}
 }
@@ -672,6 +1066,11 @@ async function startCamera(){
     });
     await mpCamera.start();handRunning=true;
     setFeedback('info','📷','CAMERA ACTIVE','Raise your ☝️ index finger to start writing!');
+    // Show demo when camera starts for current letter
+    if(!demoShownForLetter.has(currentLetter)){
+      demoShownForLetter.add(currentLetter);
+      setTimeout(()=>triggerDemo(true),800);
+    }
   }catch(err){
     handRunning=true;startFallback(drawCanvas,drawCtx,fingerDot);
     setFeedback('info','🎮','DRAW MODE','Using mouse/touch draw on camera overlay.');
@@ -679,6 +1078,9 @@ async function startCamera(){
 }
 
 function onHandResults(results,drawCanvas,drawCtx,lmCanvas,lmCtx,fingerDot){
+  // Block hand drawing while demo is showing
+  if(demoPhase==='watch'||demoPhase==='countdown')return;
+
   const W=drawCanvas.width,H=drawCanvas.height,dpr=devicePixelRatio||1;
   lmCtx.clearRect(0,0,W,H);lmCtx.save();lmCtx.scale(dpr,dpr);
   if(!results.multiHandLandmarks?.length){
@@ -711,23 +1113,12 @@ function onHandResults(results,drawCanvas,drawCtx,lmCanvas,lmCtx,fingerDot){
   renderAirTrail(drawCtx,W/dpr,H/dpr);
 }
 
-/* ════════════════════════════════════════════
-   BUG FIX: renderAirTrail
-   OLD code used:
-     ctx.fillStyle='rgba(0,0,0,.05)'; ctx.fillRect(...)
-   which slowly ERASED the canvas each frame.
-
-   NEW code uses ctx.clearRect() then redraws ALL
-   stored trail points — so your letter STAYS visible.
-   ════════════════════════════════════════════ */
 function renderAirTrail(ctx,W,H){
   const dpr=devicePixelRatio||1;
   const canvas=ctx.canvas;
-  // Fully clear canvas — no fade/erase effect
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.save();
   ctx.scale(dpr,dpr);
-  // Draw thick white outline first (so strokes pop on any background)
   for(let i=1;i<airTrail.length;i++){
     const p0=airTrail[i-1],p1=airTrail[i];
     if(!p0||!p1)continue;
@@ -738,7 +1129,6 @@ function renderAirTrail(ctx,W,H){
     ctx.strokeStyle='rgba(255,255,255,0.9)';
     ctx.shadowBlur=0;ctx.stroke();
   }
-  // Draw colored stroke on top
   for(let i=1;i<airTrail.length;i++){
     const p0=airTrail[i-1],p1=airTrail[i];
     if(!p0||!p1)continue;
@@ -750,14 +1140,11 @@ function renderAirTrail(ctx,W,H){
     ctx.shadowBlur=22*t;ctx.shadowColor=strokeGlow;
     ctx.stroke();
   }
-  // Glowing dot at current fingertip position
   if(isDrawingAir&&airTrail.length){
     const last=airTrail[airTrail.length-1];
     if(last){
-      // White halo
       ctx.beginPath();ctx.arc(last.x,last.y,(brushSize*1.8)+4,0,Math.PI*2);
       ctx.fillStyle='rgba(255,255,255,0.9)';ctx.shadowBlur=0;ctx.fill();
-      // Color dot
       ctx.beginPath();ctx.arc(last.x,last.y,brushSize*1.8,0,Math.PI*2);
       ctx.fillStyle=strokeColor;ctx.shadowBlur=32;ctx.shadowColor=strokeGlow;ctx.fill();
     }
@@ -769,16 +1156,16 @@ function startFallback(canvas,ctx,fingerDot){
   fingerDot.style.display='block';
   const getXY=e=>{const r=canvas.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:t.clientX-r.left,y:t.clientY-r.top}};
   canvas.style.pointerEvents='auto';canvas.style.cursor='crosshair';
-  canvas.addEventListener('mousedown',e=>{isDrawingAir=true;airTrail.push(getXY(e));lastWriteTime=Date.now()});
+  canvas.addEventListener('mousedown',e=>{if(demoPhase!=='idle')return;isDrawingAir=true;airTrail.push(getXY(e));lastWriteTime=Date.now()});
   canvas.addEventListener('mousemove',e=>{
     const p=getXY(e);fingerDot.style.left=(p.x/canvas.offsetWidth*100)+'%';fingerDot.style.top=(p.y/canvas.offsetHeight*100)+'%';
-    if(!isDrawingAir)return;airTrail.push(p);if(airTrail.length>trailLength)airTrail.shift();
+    if(!isDrawingAir||demoPhase!=='idle')return;airTrail.push(p);if(airTrail.length>trailLength)airTrail.shift();
     renderAirTrail(ctx,canvas.offsetWidth,canvas.offsetHeight);
   });
   canvas.addEventListener('mouseup',()=>{isDrawingAir=false;airTrail.push(null)});
-  canvas.addEventListener('touchstart',e=>{e.preventDefault();isDrawingAir=true;airTrail.push(getXY(e));lastWriteTime=Date.now()},{passive:false});
+  canvas.addEventListener('touchstart',e=>{e.preventDefault();if(demoPhase!=='idle')return;isDrawingAir=true;airTrail.push(getXY(e));lastWriteTime=Date.now()},{passive:false});
   canvas.addEventListener('touchmove',e=>{
-    e.preventDefault();if(!isDrawingAir)return;const p=getXY(e);airTrail.push(p);
+    e.preventDefault();if(!isDrawingAir||demoPhase!=='idle')return;const p=getXY(e);airTrail.push(p);
     if(airTrail.length>trailLength)airTrail.shift();renderAirTrail(ctx,canvas.offsetWidth,canvas.offsetHeight);
   },{passive:false});
   canvas.addEventListener('touchend',()=>{isDrawingAir=false;airTrail.push(null)});
@@ -787,6 +1174,7 @@ function startFallback(canvas,ctx,fingerDot){
 
 function stopCamera(){
   handRunning=false;clearInterval(timerInterval);
+  if(demoPhase!=='idle')skipDemo();
   if(mpCamera){try{mpCamera.stop()}catch(e){}mpCamera=null}
   if(mpHands){try{mpHands.close()}catch(e){}mpHands=null}
   if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null}
@@ -822,34 +1210,6 @@ async function runAIRecognition(targetLetter,points,source){
   const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
   const normPoints=points.map(p=>({x:Math.round((p.x-minX)/(maxX-minX+1)*100),y:Math.round((p.y-minY)/(maxY-minY+1)*100)}));
   const timeTaken=lastWriteTime?Math.round((Date.now()-lastWriteTime)/1000):null;
-  const prompt=`You are an AI letter recognition system for a children's handwriting game.
-A child tried to write the letter "${targetLetter}" using air writing or a touch canvas.
-The letter was written as ${points.length} points across a canvas.
-Stroke data (normalized 0-100): ${JSON.stringify(normPoints.slice(0,60))}
-Canvas dimensions hint: width=100, height=100. Top-left is (0,0).
-Target letter: "${targetLetter}"
-Difficulty: ${currentDiff}
-Time taken: ${timeTaken?timeTaken+'s':'unknown'}
-
-Analyze the stroke pattern and respond ONLY with valid JSON (no markdown, no backticks):
-{
-  "recognized": "LETTER",
-  "confidence": 85,
-  "isCorrect": true,
-  "topGuesses": [
-    {"letter": "${targetLetter}", "confidence": 85},
-    {"letter": "X", "confidence": 10},
-    {"letter": "Y", "confidence": 5}
-  ],
-  "feedback": "Short encouraging feedback for a child in 1 sentence.",
-  "strokeQuality": "good",
-  "tipForImprovement": "One specific tip about stroke shape in 1 sentence."
-}
-"recognized" must be one uppercase English letter A-Z.
-"confidence" is 0-100.
-"isCorrect" is true if recognized matches target.
-"strokeQuality" is "excellent", "good", "fair", or "needs work".
-Be generous with children — if the stroke is somewhat similar to "${targetLetter}", say it's correct with moderate confidence. Hard difficulty requires stricter matching.`;
   let result=null;
   try{
     const resp=await fetch('http://127.0.0.1:5000/recognize-letter',{
@@ -857,9 +1217,9 @@ Be generous with children — if the stroke is somewhat similar to "${targetLett
       body:JSON.stringify({targetLetter,points:normPoints,difficulty:currentDiff,timeTaken}),
       signal:AbortSignal.timeout(10000)
     });
-    if(!resp.ok) throw new Error('backend recognition unavailable');
+    if(!resp.ok)throw new Error('backend unavailable');
     result=await resp.json();
-    if(result.error) throw new Error(result.error);
+    if(result.error)throw new Error(result.error);
   }catch(e){
     const hitChance={easy:.78,medium:.65,hard:.5}[currentDiff];
     const roll=Math.random(),isOK=roll<hitChance;
@@ -892,6 +1252,10 @@ function processResult(result,targetLetter,timeTaken){
   }else{
     streak=0;combo=1;totalWrong++;
     setFeedback('bad','❌','NOT QUITE',`AI saw "${result.recognized}" (${result.confidence}%). ${result.tipForImprovement}`);
+    // Auto show demo again on wrong
+    setTimeout(()=>{
+      if(demoPhase==='idle')triggerDemo(true);
+    },1200);
   }
   updateCombo();recordAttempt(targetLetter,result.recognized,isOK,result.confidence,earned);
   checkAchievements();updateStats();lastWriteTime=Date.now();
@@ -940,11 +1304,13 @@ async function recognizeManual(){
 }
 
 /* ── SPEAK ── */
-function speakLetter(){
+function speakLetter(nameOnly=false){
   if(!window.speechSynthesis)return;window.speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(currentLetter.toLowerCase());u.rate=0.75;u.pitch=1.2;u.lang='en-US';window.speechSynthesis.speak(u);
-  const word=(LETTER_WORDS[currentLetter]||'').replace(/^[^\s]+\s/,'');
-  setTimeout(()=>{const u2=new SpeechSynthesisUtterance(`${word} starts with ${currentLetter}`);u2.rate=.8;u2.lang='en-US';window.speechSynthesis.speak(u2);},750);
+  if(!nameOnly){
+    const word=(LETTER_WORDS[currentLetter]||'').replace(/^[^\s]+\s/,'');
+    setTimeout(()=>{const u2=new SpeechSynthesisUtterance(`${word} starts with ${currentLetter}`);u2.rate=.8;u2.lang='en-US';window.speechSynthesis.speak(u2);},750);
+  }
 }
 
 /* ── TABS ── */
@@ -953,6 +1319,10 @@ function switchTab(t){
   document.getElementById('manualView').style.display=t==='manual'?'block':'none';
   document.getElementById('tabCam').classList.toggle('on',t==='cam');
   document.getElementById('tabManual').classList.toggle('on',t==='manual');
+  if(t==='manual'&&!demoShownForLetter.has('manual_'+currentLetter)){
+    demoShownForLetter.add('manual_'+currentLetter);
+    setTimeout(triggerManualDemo,400);
+  }
 }
 
 /* ── COMBO ── */
@@ -1041,15 +1411,17 @@ function endSession(){
   document.getElementById('resultOverlay').classList.add('show');
   if(acc>=80)confetti();
   const hist=JSON.parse(localStorage.getItem('ml-history-'+SID)||'[]');
-  hist.unshift({date:new Date().toISOString().split('T')[0],game:'Air Write Pro',mode:currentMode,diff:currentDiff,accuracy:acc,correct,wrong:total-correct,coins:xpSession,grade});
+  hist.unshift({date:new Date().toISOString().split('T')[0],game:'Air Write Pro',module:'dysgraphia',mode:currentMode,diff:currentDiff,accuracy:acc,correct,wrong:total-correct,coins:xpSession,grade});
   localStorage.setItem('ml-history-'+SID,JSON.stringify(hist.slice(0,60)));
   localStorage.setItem('coins-'+SID,Number(localStorage.getItem('coins-'+SID)||0)+xpSession);
+  localStorage.setItem('aw_xp2_'+SID,globalXP);
 }
 
 function restartSession(){
   document.getElementById('resultOverlay').classList.remove('show');
   score=0;correct=0;total=0;totalWrong=0;xpSession=0;streak=0;bestCombo=1;combo=1;
   doneSet=new Set();skipSet=new Set();attemptHistory=[];unlockedAch=new Set();
+  demoShownForLetter=new Set();
   sessionStartTime=Date.now();
   document.querySelectorAll('.ch').forEach(b=>b.classList.remove('done','skip'));
   document.querySelectorAll('.ach').forEach(b=>b.classList.remove('unlocked'));
