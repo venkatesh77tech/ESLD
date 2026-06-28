@@ -177,6 +177,7 @@ canvas{max-height:200px}
       <button class="filter-btn" id="fWeek"  onclick="setFilter('week',this)">This Week</button>
       <button class="filter-btn" id="fToday" onclick="setFilter('today',this)">Today</button>
     </div>
+    <button class="filter-btn" onclick="location.reload()" title="Reload the latest saved data">🔄 Refresh</button>
     <button class="pdf-btn" onclick="window.print()">📄 Print</button>
   </div>
 </div>
@@ -202,11 +203,25 @@ if (!sid) { location.href = 'student-login.html'; }
 function logout() { sessionStorage.clear(); location.href = 'student-login.html'; }
 
 // ══════════════════════════════════
+// LOCAL DATE HELPER
+// ══════════════════════════════════
+// now.toISOString() returns the UTC date. For IST users (UTC+5:30) that's
+// the WRONG calendar day between midnight and ~5:30am local time, which
+// made the "Today" filter miss sessions played late at night / early
+// morning. Every date comparison below now goes through this helper, and
+// air-writing.html (and any other game) saves sessions using the same
+// local-date format, so they always line up.
+function localDateStr(d) {
+  const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+
+// ══════════════════════════════════
 // LOAD DATA FROM localStorage
 // ══════════════════════════════════
 function findKey(id) {
   if (localStorage.getItem('coins-' + id) !== null) return id;
-  const m = String(id).match(/ESLD0*(\d+)ST/);
+  const m = String(id).match(/ST0*(\d+)$/);
   if (m) {
     const n = String(parseInt(m[1], 10));
     if (localStorage.getItem('coins-' + n) !== null) return n;
@@ -215,7 +230,13 @@ function findKey(id) {
 }
 const SKEY = findKey(sid);
 
-const ALL_HIST = JSON.parse(localStorage.getItem('ml-history-' + SKEY) || '[]');
+let ALL_HIST = [];
+try {
+  ALL_HIST = JSON.parse(localStorage.getItem('ml-history-' + SKEY) || '[]');
+  if (!Array.isArray(ALL_HIST)) ALL_HIST = [];
+} catch (e) {
+  ALL_HIST = [];
+}
 const COINS    = Number(localStorage.getItem('coins-' + SKEY)) || 0;
 const STREAK   = Number(localStorage.getItem('streak-' + SKEY)) || 1;
 const DYS_PROG = Number(localStorage.getItem('dysgraphia-progress-' + SKEY)) || 0;
@@ -240,13 +261,13 @@ function setFilter(f, btn) {
 function applyFilter() {
   const now = new Date();
   if (currentFilter === 'today') {
-    const t = now.toISOString().slice(0,10);
+    const t = localDateStr(now);
     filtered = ALL_HIST.filter(h => h.date === t);
   } else if (currentFilter === 'week') {
-    const cut = new Date(now - 7*86400000).toISOString().slice(0,10);
+    const cut = localDateStr(new Date(now - 7*86400000));
     filtered = ALL_HIST.filter(h => h.date >= cut);
   } else if (currentFilter === 'month') {
-    const cut = new Date(now - 30*86400000).toISOString().slice(0,10);
+    const cut = localDateStr(new Date(now - 30*86400000));
     filtered = ALL_HIST.filter(h => h.date >= cut);
   } else {
     filtered = [...ALL_HIST];
@@ -259,12 +280,17 @@ function applyFilter() {
 // ══════════════════════════════════
 const CHARTS = {};
 function mkChart(id, cfg) {
+  // If the Chart.js CDN failed to load (offline, blocked, etc.), don't
+  // throw and take down the rest of the page — just skip the chart.
+  if (typeof Chart === 'undefined') return;
   if (CHARTS[id]) CHARTS[id].destroy();
   const el = document.getElementById(id);
   if (el) CHARTS[id] = new Chart(el, cfg);
 }
-Chart.defaults.color       = '#94a3b8';
-Chart.defaults.borderColor = 'rgba(255,255,255,.07)';
+if (typeof Chart !== 'undefined') {
+  Chart.defaults.color       = '#94a3b8';
+  Chart.defaults.borderColor = 'rgba(255,255,255,.07)';
+}
 
 // ══════════════════════════════════
 // RENDER
@@ -482,7 +508,6 @@ function render() {
           <div style="color:#64748b;font-size:.75rem">${h.date || '—'}</div>
         </div>`;
       }).join('')}
-      ${filtered.length === 0 ? '<div style="padding:20px;text-align:center;color:#64748b">No sessions yet</div>' : ''}
     </div>
 
     <!-- MILESTONES -->
@@ -500,7 +525,6 @@ function render() {
 
   // Build charts
   const clr = acClr;
-  const CLRS = ['#22c55e','#38bdf8','#a78bfa','#fbbf24','#fb923c','#f472b6','#2dd4bf'];
 
   mkChart('dayAccChart', {
     type:'line',
