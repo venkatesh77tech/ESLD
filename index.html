@@ -16,14 +16,11 @@
 html{scroll-behavior:smooth}
 body{font-family:'Nunito',sans-serif;background:var(--bg);color:#f1f5f9;overflow-x:hidden}
 
-/* ══ CANVAS BG ══ */
 #bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
 
-/* ══ SCROLL REVEAL ══ */
 .reveal{opacity:0;transform:translateY(40px);transition:.75s cubic-bezier(.4,0,.2,1)}
 .reveal.visible{opacity:1;transform:none}
 
-/* ══ NAV ══ */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:200;
   display:flex;justify-content:space-between;align-items:center;
@@ -56,7 +53,6 @@ nav.scrolled{box-shadow:0 4px 40px rgba(0,0,0,.5)}
 }
 .nav-cta:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(34,197,94,.4)}
 
-/* ══ HERO ══ */
 .hero{
   position:relative;z-index:1;
   min-height:100vh;display:flex;flex-direction:column;
@@ -101,6 +97,7 @@ nav.scrolled{box-shadow:0 4px 40px rgba(0,0,0,.5)}
   background:linear-gradient(135deg,var(--green),#16a34a);
   color:#052e16;box-shadow:0 16px 40px rgba(34,197,94,.35);
   transition:.3s cubic-bezier(.34,1.56,.64,1);display:inline-flex;align-items:center;gap:8px;
+  text-decoration:none;
 }
 .btn-primary:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 24px 50px rgba(34,197,94,.45)}
 .btn-ghost{
@@ -112,7 +109,6 @@ nav.scrolled{box-shadow:0 4px 40px rgba(0,0,0,.5)}
 }
 .btn-ghost:hover{background:rgba(255,255,255,.13);transform:translateY(-3px)}
 
-/* HERO MASCOTS */
 .mascot-strip{
   display:flex;gap:24px;justify-content:center;flex-wrap:wrap;
   margin-top:10px;
@@ -130,7 +126,6 @@ nav.scrolled{box-shadow:0 4px 40px rgba(0,0,0,.5)}
 .mc-name{font-family:'Fredoka One';font-size:.95rem;color:var(--mc-clr)}
 .mc-sub{font-size:.72rem;color:#64748b;font-weight:700}
 
-/* SCROLL INDICATOR */
 .scroll-hint{
   position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
   display:flex;flex-direction:column;align-items:center;gap:6px;
@@ -140,7 +135,6 @@ nav.scrolled{box-shadow:0 4px 40px rgba(0,0,0,.5)}
 @keyframes scrollHintBounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-8px)}}
 .scroll-arrow{width:28px;height:28px;border-right:2px solid #334155;border-bottom:2px solid #334155;transform:rotate(45deg);margin-bottom:-6px}
 
-/* ══ STATS BAND ══ */
 .stats-band{
   position:relative;z-index:1;
   background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(56,189,248,.06));
@@ -156,14 +150,12 @@ nav.scrolled{box-shadow:0 4px 40px rgba(0,0,0,.5)}
 .stat-l{font-size:.82rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
 .stat-icon{font-size:28px;margin-bottom:8px;display:block}
 
-/* ══ SECTION SHARED ══ */
 .section{position:relative;z-index:1;max-width:1160px;margin:0 auto;padding:80px 24px}
 .sec-eyebrow{display:inline-block;padding:5px 14px;border-radius:999px;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;border:1px solid}
 .sec-title{font-family:'Fredoka One';font-size:clamp(2rem,5vw,2.8rem);margin-bottom:10px}
 .sec-sub{color:#64748b;font-size:1rem;max-width:540px;line-height:1.7;margin-bottom:48px}
 .center{text-align:center}.center .sec-sub{margin-left:auto;margin-right:auto}
 
-/* ══ LEARNING PATHS ══ */
 .paths-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px}
 .path-card{
   border-radius:28px;padding:0;overflow:hidden;
@@ -212,7 +204,6 @@ nav.scrolled{box-shadow:0 4px 40px rgba(0,0,0,.5)}
 }
 @keyframes newPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 
-/* ══ FEATURES BENTO ══ */
 .bento{display:grid;grid-template-columns:repeat(6,1fr);grid-auto-rows:minmax(180px,auto);gap:16px}
 .bento-cell{
   background:var(--card);border:1.5px solid var(--border);
@@ -229,7 +220,6 @@ nav.scrolled{box-shadow:0 4px 40px rgba(0,0,0,.5)}
 .bento-accent{position:absolute;bottom:-20px;right:-20px;font-size:80px;opacity:.06;pointer-events:none}
 .bento-big-num{font-family:'Fredoka One';font-size:3.5rem;color:var(--bc-clr,var(--green));line-height:1;margin-bottom:6px}
 
-/* ══ HOW IT WORKS ══ */
 .steps-flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:0;position:relative}
 .steps-flow::before{content:'';position:absolute;top:56px;left:10%;right:10%;height:2px;background:linear-gradient(90deg,var(--green),var(--blue),var(--purple),var(--pink));border-radius:1px;z-index:0}
 .step-box{text-align:center;padding:24px 16px;position:relative;z-index:1}
@@ -245,7 +235,6 @@ nav.scrolled{box-shadow:0 4px 40px rgba(0,0,0,.5)}
 .step-box h4{font-family:'Fredoka One';font-size:1.1rem;margin-bottom:6px}
 .step-box p{color:#64748b;font-size:.84rem;line-height:1.55}
 
-/* ══ TESTIMONIALS ══ */
 .testi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
 .testi-card{
   background:var(--card);border:1.5px solid var(--border);
@@ -259,7 +248,6 @@ nav.scrolled{box-shadow:0 4px 40px rgba(0,0,0,.5)}
 .testi-name{font-weight:800;font-size:.9rem}
 .testi-role{font-size:.75rem;color:#475569;font-weight:700;margin-top:1px}
 
-/* ══ CTA BAND ══ */
 .cta-band{
   position:relative;z-index:1;
   background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(56,189,248,.08),rgba(167,139,250,.1));
@@ -282,7 +270,6 @@ nav.scrolled{box-shadow:0 4px 40px rgba(0,0,0,.5)}
 .cta-band p{color:#64748b;font-size:1.05rem;margin-bottom:36px}
 .cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1}
 
-/* ══ FOOTER ══ */
 footer{
   position:relative;z-index:1;
   border-top:1px solid var(--border);padding:40px 24px 30px;
@@ -298,69 +285,6 @@ footer{
 .footer-badges{display:flex;gap:8px;flex-wrap:wrap}
 .fb{padding:4px 12px;border-radius:999px;border:1px solid var(--border);color:#475569;font-size:.72rem;font-weight:700}
 
-/* ══ ROLE MODAL ══ */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(16px);z-index:1000;display:none;place-items:center;padding:20px}
-.overlay.open{display:grid}
-.modal{
-  background:#0a0f23;border:1.5px solid var(--border);
-  border-radius:32px;padding:36px;width:min(900px,95vw);
-  animation:modalPop .4s cubic-bezier(.34,1.56,.64,1);
-  position:relative;overflow:hidden;
-}
-@keyframes modalPop{from{transform:scale(.82);opacity:0}}
-.modal::before{
-  content:'';position:absolute;top:-80px;right:-80px;
-  width:300px;height:300px;border-radius:50%;
-  background:radial-gradient(circle,rgba(34,197,94,.08),transparent 70%);
-  pointer-events:none;
-}
-.modal-close-x{
-  position:absolute;top:16px;right:16px;width:36px;height:36px;
-  border-radius:50%;border:1px solid var(--border);background:rgba(255,255,255,.06);
-  color:#f1f5f9;font-size:1.1rem;cursor:pointer;display:grid;place-items:center;
-  transition:.2s;
-}
-.modal-close-x:hover{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.3)}
-.modal-title{font-family:'Fredoka One';font-size:2.2rem;text-align:center;margin-bottom:6px}
-.modal-sub{text-align:center;color:#64748b;margin-bottom:32px;font-size:.95rem}
-.role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.role-card{
-  background:rgba(255,255,255,.05);border:1.5px solid var(--border);
-  border-radius:22px;padding:28px 20px;text-align:center;cursor:pointer;
-  transition:.3s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden;
-}
-.role-card::before{content:'';position:absolute;inset:0;opacity:0;transition:.3s;border-radius:22px}
-.role-card.rc-student::before{background:linear-gradient(135deg,rgba(34,197,94,.1),transparent)}
-.role-card.rc-teacher::before{background:linear-gradient(135deg,rgba(56,189,248,.1),transparent)}
-.role-card.rc-parent::before{background:linear-gradient(135deg,rgba(251,191,36,.1),transparent)}
-.role-card:hover::before{opacity:1}
-.role-card:hover{transform:translateY(-8px) scale(1.03)}
-.role-card.rc-student{border-color:rgba(34,197,94,.25)}
-.role-card.rc-teacher{border-color:rgba(56,189,248,.25)}
-.role-card.rc-parent{border-color:rgba(251,191,36,.25)}
-.rc-emoji{font-size:54px;display:block;margin-bottom:14px;animation:rcFloat 3s ease-in-out infinite}
-@keyframes rcFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.role-card h3{font-family:'Fredoka One';font-size:1.35rem;margin-bottom:6px}
-.role-card.rc-student h3{color:var(--green)}
-.role-card.rc-teacher h3{color:var(--blue)}
-.role-card.rc-parent h3{color:var(--yellow)}
-.role-card p{color:#64748b;font-size:.83rem;line-height:1.55;margin-bottom:16px}
-.rc-btn{
-  padding:9px 22px;border-radius:999px;border:none;font-family:'Nunito',sans-serif;
-  font-weight:800;font-size:.85rem;cursor:pointer;width:100%;transition:.2s;
-}
-.rc-student .rc-btn{background:linear-gradient(135deg,var(--green),#16a34a);color:#052e16}
-.rc-teacher .rc-btn{background:linear-gradient(135deg,var(--blue),#0369a1);color:#fff}
-.rc-parent .rc-btn{background:linear-gradient(135deg,var(--yellow),#d97706);color:#000}
-.rc-btn:hover{transform:scale(1.04)}
-.modal-back{
-  display:block;margin:24px auto 0;padding:9px 24px;border-radius:999px;
-  border:1px solid var(--border);background:transparent;color:#64748b;
-  cursor:pointer;font-weight:700;font-family:'Nunito',sans-serif;font-size:.85rem;transition:.2s;
-}
-.modal-back:hover{color:#f1f5f9}
-
-/* ══ VOICE FAB ══ */
 .voice-fab{
   position:fixed;bottom:28px;right:28px;z-index:500;
   width:58px;height:58px;border-radius:50%;border:none;
@@ -370,10 +294,9 @@ footer{
   transition:.25s;display:flex;align-items:center;justify-content:center;
 }
 .voice-fab:hover{transform:scale(1.12)}
-.voice-fab.active{animation:voicePulse 1s infinite;box-shadow:0 0 0 0 rgba(167,139,250,.5)}
+.voice-fab.active{animation:voicePulse 1s infinite}
 @keyframes voicePulse{0%{box-shadow:0 0 0 0 rgba(167,139,250,.5)}70%{box-shadow:0 0 0 20px rgba(167,139,250,0)}100%{box-shadow:0 0 0 0 rgba(167,139,250,0)}}
 
-/* ══ ACCESSIBILITY TOOLBAR ══ */
 .a11y-bar{
   position:fixed;bottom:28px;left:28px;z-index:500;
   display:flex;flex-direction:column;gap:8px;
@@ -387,7 +310,6 @@ footer{
 .a11y-btn:hover{background:rgba(255,255,255,.12);transform:scale(1.08)}
 .a11y-btn.on{background:rgba(34,197,94,.2);border-color:rgba(34,197,94,.4)}
 
-/* ══ TOAST ══ */
 .toast{
   position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);
   background:linear-gradient(135deg,rgba(34,197,94,.95),rgba(56,189,248,.9));
@@ -396,10 +318,6 @@ footer{
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* ══ MISC ══ */
-.tag-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:999px;border:1px solid var(--border);font-size:.72rem;font-weight:800;color:#475569;margin-right:6px}
-
-/* ══ RESPONSIVE ══ */
 @media(max-width:900px){
   .bento{grid-template-columns:1fr 1fr}
   .bento-cell.span2,.bento-cell.span3,.bento-cell.span4{grid-column:span 2}
@@ -409,7 +327,6 @@ footer{
 @media(max-width:640px){
   nav{padding:12px 16px}
   .nav-link:not(.nav-cta){display:none}
-  .role-grid{grid-template-columns:1fr}
   .bento{grid-template-columns:1fr}
   .bento-cell.span2,.bento-cell.span3,.bento-cell.span4{grid-column:span 1}
   .footer-inner{grid-template-columns:1fr}
@@ -421,7 +338,7 @@ footer{
 <body>
 <canvas id="bgCanvas"></canvas>
 
-<!-- ══ NAV ══ -->
+<!-- NAV — "Get Started" goes directly to role-select.html -->
 <nav id="mainNav">
   <div class="nav-logo">
     <span class="butterfly">🦋</span> ESLD
@@ -430,11 +347,11 @@ footer{
     <a class="nav-link" href="#about">About</a>
     <a class="nav-link" href="#features">Features</a>
     <a class="nav-link" href="#how">How It Works</a>
-    <button class="nav-link nav-cta" onclick="openModal()">Get Started ✨</button>
+    <a class="nav-link nav-cta" href="role-select.html">Get Started ✨</a>
   </div>
 </nav>
 
-<!-- ══ HERO ══ -->
+<!-- HERO -->
 <section class="hero">
   <div class="hero-eyebrow">🌟 AI-Powered • Child-Safe • Free to Start</div>
   <h1 class="hero-h1">
@@ -446,11 +363,11 @@ footer{
     with intelligent games, voice support, and joyful progress tracking built for every child.
   </p>
   <div class="hero-btns">
-    <button class="btn-primary" onclick="openModal()">🚀 Start Learning Free</button>
+    <!-- direct link, no modal -->
+    <a class="btn-primary" href="role-select.html">🚀 Start Learning Free</a>
     <button class="btn-ghost" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">See How It Works ↓</button>
   </div>
 
-  <!-- MASCOT CARDS -->
   <div class="mascot-strip">
     <div class="mascot-card" style="--mc-clr:var(--green);--mc-delay:3s" onclick="speakIt('Hi! I help with reading and spelling. You can do it!')">
       <span class="mc-emoji">📖</span>
@@ -480,7 +397,7 @@ footer{
   </div>
 </section>
 
-<!-- ══ STATS BAND ══ -->
+<!-- STATS -->
 <div class="stats-band reveal">
   <div class="stats-inner">
     <div class="stat-item">
@@ -511,31 +428,27 @@ footer{
   </div>
 </div>
 
-<!-- ══ LEARNING PATHS ══ -->
+<!-- LEARNING PATHS -->
 <div id="about" class="section">
   <div class="reveal">
     <div class="center">
       <div class="sec-eyebrow" style="background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.25);color:var(--green)">🧠 Learning Modules</div>
       <h2 class="sec-title">Choose Your Learning Path</h2>
-      <p class="sec-sub">Three specialized modules designed by educators and child psychologists, built for every learning style.</p>
+      <p class="sec-sub">Three specialised modules designed by educators and child psychologists, built for every learning style.</p>
     </div>
   </div>
   <div class="paths-grid reveal">
-
-    <a class="path-card" href="student-login.html"
+    <a class="path-card" href="role-select.html"
        style="--pc-clr:var(--green);--pc-bg:linear-gradient(135deg,rgba(34,197,94,.18),rgba(11,17,32,.7))">
       <div class="path-new">⭐ POPULAR</div>
       <div class="path-glow"></div>
-      <div class="path-header">
-        📖
-        <div class="path-shine"></div>
-      </div>
+      <div class="path-header">📖<div class="path-shine"></div></div>
       <div class="path-body">
         <div class="path-label">Module 01 — Reading</div>
         <h3>Dyslexia</h3>
         <p>Phonics training, letter recognition, word matching and reading games with dyslexia-friendly fonts and spacing for confident readers.</p>
         <div class="path-tags">
-          <span class="ptag">📖 Read & Match</span>
+          <span class="ptag">📖 Read &amp; Match</span>
           <span class="ptag">🔤 Letter Confusion</span>
           <span class="ptag">🔊 Sound Match</span>
         </div>
@@ -546,13 +459,10 @@ footer{
       </div>
     </a>
 
-    <a class="path-card" href="student-login.html"
+    <a class="path-card" href="role-select.html"
        style="--pc-clr:var(--purple);--pc-bg:linear-gradient(135deg,rgba(167,139,250,.18),rgba(11,17,32,.7))">
       <div class="path-glow"></div>
-      <div class="path-header">
-        ✍️
-        <div class="path-shine"></div>
-      </div>
+      <div class="path-header">✍️<div class="path-shine"></div></div>
       <div class="path-body">
         <div class="path-label">Module 02 — Writing</div>
         <h3>Dysgraphia</h3>
@@ -569,13 +479,10 @@ footer{
       </div>
     </a>
 
-    <a class="path-card" href="student-login.html"
+    <a class="path-card" href="role-select.html"
        style="--pc-clr:var(--orange);--pc-bg:linear-gradient(135deg,rgba(251,146,60,.18),rgba(11,17,32,.7))">
       <div class="path-glow"></div>
-      <div class="path-header">
-        ⚡
-        <div class="path-shine"></div>
-      </div>
+      <div class="path-header">⚡<div class="path-shine"></div></div>
       <div class="path-body">
         <div class="path-label">Module 03 — Focus</div>
         <h3>ADHD</h3>
@@ -591,11 +498,10 @@ footer{
         </div>
       </div>
     </a>
-
   </div>
 </div>
 
-<!-- ══ BENTO FEATURES ══ -->
+<!-- BENTO FEATURES -->
 <div id="features" class="section">
   <div class="reveal">
     <div class="center">
@@ -614,12 +520,12 @@ footer{
     <div class="bento-cell span3" style="background:linear-gradient(135deg,rgba(167,139,250,.1),rgba(244,114,182,.06))">
       <span class="bento-icon">🤖</span>
       <h4>AI-Powered Feedback</h4>
-      <p>Our AI analyzes every stroke, word and answer to give personalized hints, encouragement and next steps. Every child gets their own path.</p>
+      <p>Our AI analyses every stroke, word and answer to give personalised hints, encouragement and next steps. Every child gets their own path.</p>
       <div class="bento-accent">🤖</div>
     </div>
     <div class="bento-cell span2">
       <div class="bento-big-num" style="--bc-clr:var(--yellow)">🪙</div>
-      <h4>Coins & Rewards</h4>
+      <h4>Coins &amp; Rewards</h4>
       <p>Earn coins every game, unlock badges and climb the leaderboard!</p>
     </div>
     <div class="bento-cell span2">
@@ -635,7 +541,7 @@ footer{
     <div class="bento-cell span3">
       <span class="bento-icon">✋</span>
       <h4>Air Writing with Webcam</h4>
-      <p>Write letters in the air using just your index finger! Our AI uses computer vision to recognize your hand gestures — no special hardware needed.</p>
+      <p>Write letters in the air using just your index finger! Our AI uses computer vision to recognise your hand gestures — no special hardware needed.</p>
       <div class="bento-accent">✋</div>
     </div>
     <div class="bento-cell span3">
@@ -646,7 +552,7 @@ footer{
     </div>
     <div class="bento-cell span2">
       <span class="bento-icon">🔒</span>
-      <h4>Safe & Secure</h4>
+      <h4>Safe &amp; Secure</h4>
       <p>Role-based access for students, parents and teachers. Child data is always protected.</p>
     </div>
     <div class="bento-cell span2">
@@ -662,7 +568,7 @@ footer{
   </div>
 </div>
 
-<!-- ══ HOW IT WORKS ══ -->
+<!-- HOW IT WORKS -->
 <div id="how" class="section">
   <div class="reveal">
     <div class="center">
@@ -684,7 +590,7 @@ footer{
     </div>
     <div class="step-box" style="--sc-clr:var(--purple);--sc-glow:rgba(167,139,250,.3)">
       <div class="step-circle">🎮</div>
-      <h4>Play & Earn</h4>
+      <h4>Play &amp; Earn</h4>
       <p>Complete fun games, earn coins, unlock badges and level up every day.</p>
     </div>
     <div class="step-box" style="--sc-clr:var(--pink);--sc-glow:rgba(244,114,182,.3)">
@@ -695,7 +601,7 @@ footer{
   </div>
 </div>
 
-<!-- ══ TESTIMONIALS ══ -->
+<!-- TESTIMONIALS -->
 <div class="section">
   <div class="reveal center">
     <div class="sec-eyebrow" style="background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.25);color:var(--yellow)">💬 Real Stories</div>
@@ -705,7 +611,7 @@ footer{
   <div class="testi-grid reveal">
     <div class="testi-card">
       <div class="testi-stars">⭐⭐⭐⭐⭐</div>
-      <p class="testi-text">"My daughter used to cry about reading. Now she asks to play her ESLD games every evening. The letter tracing and Read & Match games made all the difference."</p>
+      <p class="testi-text">"My daughter used to cry about reading. Now she asks to play her ESLD games every evening. The letter tracing and Read &amp; Match games made all the difference."</p>
       <div class="testi-author">
         <div class="testi-avatar" style="background:rgba(34,197,94,.2)">👩</div>
         <div>
@@ -739,17 +645,17 @@ footer{
   </div>
 </div>
 
-<!-- ══ CTA BAND ══ -->
+<!-- CTA -->
 <div class="cta-band reveal">
   <h2>Ready to Unlock<br>Your Superpower? 🚀</h2>
   <p>Join over 1,200 students already learning with ESLD — free forever, no credit card needed</p>
   <div class="cta-btns">
-    <button class="btn-primary" onclick="openModal()">🎓 Start as Student</button>
-    <button class="btn-ghost" onclick="openModal()">👨‍👩‍👧 I'm a Parent</button>
+    <a class="btn-primary" href="role-select.html">🎓 Choose My Role</a>
+    <a class="btn-ghost" href="role-select.html">👨‍👩‍👧 I'm a Parent</a>
   </div>
 </div>
 
-<!-- ══ FOOTER ══ -->
+<!-- FOOTER -->
 <footer>
   <div class="footer-inner">
     <div class="footer-brand">
@@ -758,16 +664,16 @@ footer{
     </div>
     <div class="footer-col">
       <h5>Platform</h5>
-      <a href="student-login.html">Student Login</a>
-      <a href="parent-login.html">Parent Portal</a>
-      <a href="teacher-login.html">Teacher Portal</a>
+      <a href="role-select.html">Student Login</a>
+      <a href="role-select.html">Parent Portal</a>
+      <a href="role-select.html">Teacher Portal</a>
       <a href="student-games.html">Games Hub</a>
     </div>
     <div class="footer-col">
       <h5>Learning</h5>
-      <a href="student-login.html">Dyslexia Module</a>
-      <a href="student-login.html">Dysgraphia Module</a>
-      <a href="student-login.html">ADHD Module</a>
+      <a href="role-select.html">Dyslexia Module</a>
+      <a href="role-select.html">Dysgraphia Module</a>
+      <a href="role-select.html">ADHD Module</a>
       <a href="audio-stories.html">Audio Stories</a>
     </div>
     <div class="footer-col">
@@ -789,269 +695,124 @@ footer{
   </div>
 </footer>
 
-<!-- ══ ROLE MODAL ══ -->
-<div class="overlay" id="roleModal">
-  <div class="modal">
-    <button class="modal-close-x" onclick="closeModal()">✕</button>
-    <h2 class="modal-title">Who are you? 👋</h2>
-    <p class="modal-sub">Choose your role to get started — takes under 60 seconds!</p>
-    <div class="role-grid">
-      <div class="role-card rc-student" onclick="goTo('student-login.html')">
-        <span class="rc-emoji" style="animation-delay:0s">🎓</span>
-        <h3>Student</h3>
-        <p>Play games, earn coins & badges, and track your amazing learning journey!</p>
-        <button class="rc-btn">Start Playing →</button>
-      </div>
-      <div class="role-card rc-teacher" onclick="goTo('teacher-login.html')">
-        <span class="rc-emoji" style="animation-delay:.4s">👩‍🏫</span>
-        <h3>Teacher</h3>
-        <p>Monitor students, assign activities, view class analytics and download reports.</p>
-        <button class="rc-btn">Teacher Portal →</button>
-      </div>
-      <div class="role-card rc-parent" onclick="goTo('parent-login.html')">
-        <span class="rc-emoji" style="animation-delay:.8s">👨‍👩‍👧</span>
-        <h3>Parent</h3>
-        <p>Track your child's progress, see their milestones, and message their teacher.</p>
-        <button class="rc-btn">Parent Portal →</button>
-      </div>
-    </div>
-    <button class="modal-back" onclick="closeModal()">← Go Back</button>
-  </div>
-</div>
+<!-- VOICE FAB -->
+<button class="voice-fab" id="voiceBtn" onclick="toggleVoice()" title="Voice Assistant">🎤</button>
 
-<!-- ══ VOICE FAB ══ -->
-<button class="voice-fab" id="voiceBtn" onclick="toggleVoice()" title="Voice Assistant — Click me!">🎤</button>
-
-<!-- ══ ACCESSIBILITY BAR ══ -->
+<!-- ACCESSIBILITY BAR -->
 <div class="a11y-bar">
   <button class="a11y-btn" onclick="toggleLargeFonts()" title="Large Text">🔤</button>
   <button class="a11y-btn" onclick="toggleHighContrast()" title="High Contrast">🌓</button>
   <button class="a11y-btn" onclick="toggleSlowAnim()" title="Reduce Motion">🐢</button>
 </div>
 
-<!-- ══ TOAST ══ -->
+<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ════════════════════════════════
-// BG CANVAS — Floating particles
-// ════════════════════════════════
+// BG CANVAS
 const canvas = document.getElementById('bgCanvas');
 const ctx    = canvas.getContext('2d');
 let W, H, particles = [];
-
-function resize() {
-  W = canvas.width  = window.innerWidth;
+function resize(){
+  W = canvas.width = window.innerWidth;
   H = canvas.height = window.innerHeight;
   makeParticles();
 }
-
-function makeParticles() {
+function makeParticles(){
   particles = [];
   const cols = ['#22c55e','#38bdf8','#a78bfa','#f472b6','#fbbf24','#fb923c','#2dd4bf'];
   const count = Math.floor(W * H / 14000);
-  for (let i = 0; i < count; i++) {
-    particles.push({
-      x: Math.random() * W, y: Math.random() * H,
-      r: Math.random() * 1.8 + .3,
-      dx: (Math.random() - .5) * .35,
-      dy: -(Math.random() * .5 + .15),
-      opacity: Math.random() * .45 + .05,
-      color: cols[i % cols.length],
-      pulse: Math.random() * Math.PI * 2,
-    });
+  for(let i = 0; i < count; i++){
+    particles.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.8+.3,dx:(Math.random()-.5)*.35,dy:-(Math.random()*.5+.15),opacity:Math.random()*.45+.05,color:cols[i%cols.length],pulse:Math.random()*Math.PI*2});
   }
-  // Stars
-  for (let i = 0; i < 120; i++) {
-    particles.push({
-      x: Math.random() * W, y: Math.random() * H,
-      r: Math.random() * .9 + .2,
-      dx: 0, dy: -(Math.random() * .2 + .05),
-      opacity: Math.random() * .6 + .1,
-      color: '#ffffff',
-      pulse: Math.random() * Math.PI * 2,
-      isStar: true,
-    });
+  for(let i = 0; i < 120; i++){
+    particles.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*.9+.2,dx:0,dy:-(Math.random()*.2+.05),opacity:Math.random()*.6+.1,color:'#ffffff',pulse:Math.random()*Math.PI*2,isStar:true});
   }
 }
-
-function drawBG() {
-  ctx.clearRect(0, 0, W, H);
-  particles.forEach(p => {
-    p.pulse += 0.015;
-    const op = p.isStar
-      ? Math.max(.05, Math.min(.8, p.opacity + Math.sin(p.pulse) * .25))
-      : p.opacity;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    ctx.fillStyle = p.color.startsWith('#')
-      ? p.color + Math.floor(op * 255).toString(16).padStart(2,'0')
-      : p.color;
+function drawBG(){
+  ctx.clearRect(0,0,W,H);
+  particles.forEach(p=>{
+    p.pulse+=.015;
+    const op=p.isStar?Math.max(.05,Math.min(.8,p.opacity+Math.sin(p.pulse)*.25)):p.opacity;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=p.color+Math.floor(op*255).toString(16).padStart(2,'0');
     ctx.fill();
-    p.x += p.dx; p.y += p.dy;
-    if (p.y < -5)  { p.y = H + 5; p.x = Math.random() * W; }
-    if (p.x < -5)  p.x = W + 5;
-    if (p.x > W+5) p.x = -5;
+    p.x+=p.dx;p.y+=p.dy;
+    if(p.y<-5){p.y=H+5;p.x=Math.random()*W}
+    if(p.x<-5)p.x=W+5;if(p.x>W+5)p.x=-5;
   });
   requestAnimationFrame(drawBG);
 }
-resize();
-drawBG();
-window.addEventListener('resize', resize);
+resize();drawBG();
+window.addEventListener('resize',resize);
 
-// ════════════════
-// SCROLL EFFECTS
-// ════════════════
-const nav = document.getElementById('mainNav');
-window.addEventListener('scroll', () => {
-  nav.classList.toggle('scrolled', scrollY > 40);
-  document.querySelectorAll('.reveal').forEach(el => {
-    const rect = el.getBoundingClientRect();
-    if (rect.top < window.innerHeight - 80) el.classList.add('visible');
+// SCROLL
+const nav=document.getElementById('mainNav');
+window.addEventListener('scroll',()=>{
+  nav.classList.toggle('scrolled',scrollY>40);
+  document.querySelectorAll('.reveal').forEach(el=>{
+    if(el.getBoundingClientRect().top<window.innerHeight-80) el.classList.add('visible');
   });
 });
-// Trigger once on load
-setTimeout(() => {
-  document.querySelectorAll('.reveal').forEach(el => {
-    const rect = el.getBoundingClientRect();
-    if (rect.top < window.innerHeight) el.classList.add('visible');
+setTimeout(()=>{
+  document.querySelectorAll('.reveal').forEach(el=>{
+    if(el.getBoundingClientRect().top<window.innerHeight) el.classList.add('visible');
   });
-}, 100);
+},100);
 
-// ════════════════
-// COUNTER ANIM
-// ════════════════
-function animCount(el, target) {
-  let n = 0;
-  const isPercent = el.closest('.stat-item')?.querySelector('.stat-l')?.textContent?.includes('%');
-  const duration  = 1800;
-  const step      = Math.ceil(target / (duration / 16));
-  const timer = setInterval(() => {
-    n = Math.min(n + step, target);
-    el.textContent = n + (isPercent ? '%' : '+');
-    if (n >= target) clearInterval(timer);
-  }, 16);
+// COUNTERS
+function animCount(el,target){
+  let n=0;
+  const isPercent=el.closest('.stat-item')?.querySelector('.stat-l')?.textContent?.includes('%');
+  const step=Math.ceil(target/(1800/16));
+  const timer=setInterval(()=>{n=Math.min(n+step,target);el.textContent=n+(isPercent?'%':'+');if(n>=target)clearInterval(timer);},16);
 }
-const counterObs = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      document.querySelectorAll('[data-target]').forEach(el => {
-        animCount(el, parseInt(el.dataset.target));
-        el.removeAttribute('data-target');
-      });
+const counterObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      document.querySelectorAll('[data-target]').forEach(el=>{animCount(el,parseInt(el.dataset.target));el.removeAttribute('data-target');});
       counterObs.disconnect();
     }
   });
-}, { threshold: .3 });
-const statsBand = document.querySelector('.stats-band');
-if (statsBand) counterObs.observe(statsBand);
+},{threshold:.3});
+const statsBand=document.querySelector('.stats-band');
+if(statsBand)counterObs.observe(statsBand);
 
-// ════════════════
-// MODAL
-// ════════════════
-function openModal() {
-  document.getElementById('roleModal').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeModal() {
-  document.getElementById('roleModal').classList.remove('open');
-  document.body.style.overflow = '';
-}
-document.getElementById('roleModal').addEventListener('click', e => {
-  if (e.target === e.currentTarget) closeModal();
-});
-function goTo(url) {
-  showToastMsg('🚀 Loading...');
-  document.body.style.opacity = '0';
-  document.body.style.transition = 'opacity .4s';
-  setTimeout(() => location.href = url, 380);
-}
-
-// ════════════════
 // VOICE
-// ════════════════
-let voiceActive = false;
-const GREETINGS = [
-  'Welcome to ESLD! Every child is a superstar here!',
-  'Hi there! Ready to unlock your learning superpowers?',
-  'ESLD makes learning fun and joyful for every child!',
-  'Hello! I am Luna, your learning buddy. Let us begin!',
-];
-function speakIt(text) {
-  if (!('speechSynthesis' in window)) return;
+let voiceActive=false;
+const GREETINGS=['Welcome to ESLD! Every child is a superstar here!','Hi there! Ready to unlock your learning superpowers?','ESLD makes learning fun and joyful for every child!'];
+function speakIt(text){
+  if(!('speechSynthesis' in window))return;
   speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.rate = .9; u.pitch = 1.15;
-  const voices = speechSynthesis.getVoices();
-  const pick = voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('female'))
-            || voices.find(v => v.lang.startsWith('en')) || voices[0];
-  if (pick) u.voice = pick;
-  speechSynthesis.speak(u);
+  const u=new SpeechSynthesisUtterance(text);u.rate=.9;u.pitch=1.15;
+  const v=speechSynthesis.getVoices();
+  const pick=v.find(x=>x.lang.startsWith('en')&&x.name.toLowerCase().includes('female'))||v.find(x=>x.lang.startsWith('en'))||v[0];
+  if(pick)u.voice=pick;speechSynthesis.speak(u);
 }
-function toggleVoice() {
-  const btn = document.getElementById('voiceBtn');
-  if (!voiceActive) {
-    voiceActive = true;
-    btn.textContent = '🔊';
-    btn.classList.add('active');
-    speakIt(GREETINGS[Math.floor(Math.random() * GREETINGS.length)]);
-    setTimeout(() => { btn.textContent = '🎤'; btn.classList.remove('active'); voiceActive = false; }, 3500);
-  } else {
-    speechSynthesis.cancel();
-    btn.textContent = '🎤';
-    btn.classList.remove('active');
-    voiceActive = false;
-  }
+function toggleVoice(){
+  const btn=document.getElementById('voiceBtn');
+  if(!voiceActive){
+    voiceActive=true;btn.textContent='🔊';btn.classList.add('active');
+    speakIt(GREETINGS[Math.floor(Math.random()*GREETINGS.length)]);
+    setTimeout(()=>{btn.textContent='🎤';btn.classList.remove('active');voiceActive=false;},3500);
+  }else{speechSynthesis.cancel();btn.textContent='🎤';btn.classList.remove('active');voiceActive=false;}
 }
-window.addEventListener('load', () => {
-  setTimeout(() => speakIt('Welcome to ESLD! Every child is a superstar here!'), 1200);
-});
+window.addEventListener('load',()=>setTimeout(()=>speakIt('Welcome to ESLD! Every child is a superstar here!'),1200));
 
-// ════════════════
 // TOAST
-// ════════════════
-function showToastMsg(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2800);
-}
+function showToastMsg(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
 
-// ════════════════
-// ACCESSIBILITY
-// ════════════════
-let largeFonts = false, highContrast = false, slowAnim = false;
-function toggleLargeFonts() {
-  largeFonts = !largeFonts;
-  document.body.style.fontSize = largeFonts ? '118%' : '';
-  document.querySelectorAll('.a11y-btn')[0].classList.toggle('on', largeFonts);
-  showToastMsg(largeFonts ? '🔤 Large text ON' : '🔤 Normal text');
-}
-function toggleHighContrast() {
-  highContrast = !highContrast;
-  document.body.style.filter = highContrast ? 'contrast(1.25) brightness(1.05)' : '';
-  document.querySelectorAll('.a11y-btn')[1].classList.toggle('on', highContrast);
-  showToastMsg(highContrast ? '🌓 High contrast ON' : '🌓 Normal contrast');
-}
-function toggleSlowAnim() {
-  slowAnim = !slowAnim;
-  document.documentElement.style.setProperty('--anim-speed', slowAnim ? '.3' : '1');
-  document.body.style.animationPlayState = slowAnim ? 'paused' : '';
-  document.querySelectorAll('[style*="animation"]').forEach(el => {
-    el.style.animationDuration = slowAnim ? '8s' : '';
-  });
-  document.querySelectorAll('.a11y-btn')[2].classList.toggle('on', slowAnim);
-  showToastMsg(slowAnim ? '🐢 Slow animations ON' : '🐢 Normal speed');
-}
+// A11Y
+let largeFonts=false,highContrast=false,slowAnim=false;
+function toggleLargeFonts(){largeFonts=!largeFonts;document.body.style.fontSize=largeFonts?'118%':'';document.querySelectorAll('.a11y-btn')[0].classList.toggle('on',largeFonts);showToastMsg(largeFonts?'🔤 Large text ON':'🔤 Normal text');}
+function toggleHighContrast(){highContrast=!highContrast;document.body.style.filter=highContrast?'contrast(1.25) brightness(1.05)':'';document.querySelectorAll('.a11y-btn')[1].classList.toggle('on',highContrast);showToastMsg(highContrast?'🌓 High contrast ON':'🌓 Normal contrast');}
+function toggleSlowAnim(){slowAnim=!slowAnim;document.querySelectorAll('[style*="animation"]').forEach(el=>{el.style.animationDuration=slowAnim?'8s':'';});document.querySelectorAll('.a11y-btn')[2].classList.toggle('on',slowAnim);showToastMsg(slowAnim?'🐢 Slow animations ON':'🐢 Normal speed');}
 
-// ════════════════
-// MASCOT EASTER EGGS
-// ════════════════
-let clickCount = 0;
-document.querySelectorAll('.mascot-card').forEach(card => {
-  card.addEventListener('dblclick', () => {
-    card.style.transform = 'rotate(360deg) scale(1.2)';
-    card.style.transition = '.5s';
-    setTimeout(() => { card.style.transform = ''; card.style.transition = ''; }, 600);
+// MASCOT EASTER EGG
+document.querySelectorAll('.mascot-card').forEach(card=>{
+  card.addEventListener('dblclick',()=>{
+    card.style.transform='rotate(360deg) scale(1.2)';card.style.transition='.5s';
+    setTimeout(()=>{card.style.transform='';card.style.transition='';},600);
     showToastMsg('🎉 You found a secret! +10 XP when you log in!');
   });
 });

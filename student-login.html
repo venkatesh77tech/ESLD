@@ -1,819 +1,1072 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ESLD – Student Login</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESLD — Student Access</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Lexend:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+/* ── TOKENS ─────────────────────────────────────────────── */
 :root{
-  --bg:#06091a;--card:#0d2225;--border:rgba(255,255,255,.1);
-  --green:#22c55e;--blue:#38bdf8;--purple:#a78bfa;
-  --yellow:#fbbf24;--orange:#fb923c;--red:#ef4444;--pink:#f472b6;--teal:#2dd4bf;
+  --bg:#060c1c;
+  --panel:#0e1630;
+  --panel-soft:#0a112a;
+  --panel-inner:#070e22;
+  --ink:#eef0f7;
+  --ink-dim:#7a85a8;
+  --line:rgba(255,255,255,0.07);
+  --line-bright:rgba(255,255,255,0.13);
+  --accent:#34d8b0;
+  --accent-dim:rgba(52,216,176,0.14);
+  --accent-glow:rgba(52,216,176,0.35);
+  --blue:#7c8cff;
+  --blue-dim:rgba(124,140,255,0.14);
+  --red:#ff5d7a;
+  --radius:20px;
+  --r-sm:12px;
+  --r-xs:9px;
+  --ease:cubic-bezier(0.4,0,0.2,1);
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
 body{
-  font-family:'Nunito',sans-serif;background:var(--bg);color:#f1f5f9;
-  min-height:100vh;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;padding:20px;overflow-x:hidden;
+  background:var(--bg); color:var(--ink);
+  font-family:'Lexend',sans-serif;
+  min-height:100vh; overflow-x:hidden; position:relative;
 }
 
-/* BG CANVAS */
-#bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
-
-/* BG GLOW BLOBS */
-.glow-blob{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0}
-.blob1{width:500px;height:500px;top:-150px;left:-150px;background:rgba(34,197,94,.08)}
-.blob2{width:400px;height:400px;bottom:-120px;right:-100px;background:rgba(56,189,248,.08)}
-.blob3{width:300px;height:300px;top:40%;left:60%;background:rgba(167,139,250,.06)}
-
-/* BACK BUTTON */
-.back-btn{
-  position:fixed;top:20px;left:20px;z-index:20;
-  display:flex;align-items:center;gap:6px;
-  padding:8px 18px;border-radius:999px;
-  border:1px solid var(--border);background:rgba(13,18,37,.8);
-  color:#94a3b8;cursor:pointer;font-weight:800;font-family:'Nunito',sans-serif;
-  font-size:.82rem;transition:.2s;backdrop-filter:blur(10px);text-decoration:none;
+/* ── ANIMATED BACKGROUND ─────────────────────────────────── */
+.bg-canvas{
+  position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
 }
-.back-btn:hover{color:#f1f5f9;border-color:rgba(255,255,255,.2)}
-
-/* SHELL */
-.shell{
-  position:relative;z-index:10;
-  width:min(1000px,100%);
-  animation:shellIn .6s cubic-bezier(.34,1.56,.64,1);
+/* Orb blobs */
+.orb{
+  position:absolute; border-radius:50%; filter:blur(80px); opacity:0;
+  animation:orbFade 1.5s var(--ease) forwards;
 }
-@keyframes shellIn{from{transform:translateY(40px);opacity:0}}
+.orb-1{width:500px;height:500px;background:var(--accent);top:-180px;left:-160px;opacity:.28;animation:drift1 24s ease-in-out infinite;}
+.orb-2{width:400px;height:400px;background:var(--blue);bottom:-160px;right:-130px;opacity:.24;animation:drift2 30s ease-in-out infinite;}
+.orb-3{width:260px;height:260px;background:#ff8ab0;top:40%;right:8%;opacity:.14;animation:drift3 20s ease-in-out infinite;}
 
-/* ══ TWO COLUMN LAYOUT ══ */
-.layout{display:grid;grid-template-columns:1fr 1.1fr;gap:0;border-radius:32px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.7);border:1px solid var(--border)}
+@keyframes drift1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(60px,50px) scale(1.06);}}
+@keyframes drift2{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-50px,-35px) scale(1.04);}}
+@keyframes drift3{0%,100%{transform:translate(0,0);}50%{transform:translate(-30px,20px);}}
 
-/* LEFT PANEL */
-.left-panel{
-  background:linear-gradient(160deg,rgba(34,197,94,.12) 0%,rgba(56,189,248,.08) 50%,rgba(167,139,250,.1) 100%);
-  padding:48px 40px;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;position:relative;overflow:hidden;
-  border-right:1px solid var(--border);
+/* Grid lines */
+.grid-lines{
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size:48px 48px;
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 100%);
 }
-.left-panel::before{content:'';position:absolute;inset:0;background:rgba(6,9,26,.3)}
-.lp-content{position:relative;z-index:1}
-.lp-mascot{font-size:90px;display:block;animation:mascotFloat 3s ease-in-out infinite;margin-bottom:20px;filter:drop-shadow(0 12px 24px rgba(0,0,0,.4))}
-@keyframes mascotFloat{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-16px) rotate(3deg)}}
-.lp-title{font-family:'Fredoka One';font-size:2rem;margin-bottom:8px;background:linear-gradient(135deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.lp-sub{color:#64748b;font-size:.9rem;margin-bottom:30px;line-height:1.6;max-width:260px}
-.feature-list{display:flex;flex-direction:column;gap:10px;text-align:left;width:100%;max-width:280px}
-.feat-row{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:10px 14px}
-.feat-icon{font-size:20px;flex-shrink:0}
-.feat-txt{font-size:.82rem;font-weight:700;color:#94a3b8;line-height:1.35}
-.feat-txt strong{color:#f1f5f9;display:block;font-size:.85rem}
-/* Floating badges */
-.float-badge{position:absolute;border-radius:14px;padding:8px 14px;font-size:.72rem;font-weight:800;background:rgba(13,18,37,.9);border:1px solid var(--border);backdrop-filter:blur(8px);animation:badgeFloat 4s ease-in-out infinite;white-space:nowrap}
-.fb1{top:22px;right:16px;color:var(--yellow);border-color:rgba(251,191,36,.25);animation-delay:0s}
-.fb2{bottom:80px;left:14px;color:var(--teal);border-color:rgba(45,212,191,.25);animation-delay:1.2s}
-.fb3{bottom:24px;right:18px;color:var(--pink);border-color:rgba(244,114,182,.25);animation-delay:.6s}
-@keyframes badgeFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 
-/* RIGHT PANEL */
-.right-panel{background:rgba(10,14,30,.95);padding:44px 40px}
-.form-header{margin-bottom:28px}
-.form-header h2{font-family:'Fredoka One';font-size:1.7rem;margin-bottom:4px}
-.form-header p{color:#475569;font-size:.88rem}
-
-/* TABS */
-.tabs{display:flex;gap:0;margin-bottom:28px;background:rgba(255,255,255,.05);padding:4px;border-radius:14px}
-.tab{flex:1;padding:10px;border-radius:10px;border:none;background:transparent;color:#475569;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.9rem;transition:.25s;position:relative}
-.tab.active{background:rgba(255,255,255,.1);color:#f1f5f9;border:1px solid var(--border)}
-.tab-indicator{width:6px;height:6px;border-radius:50%;background:var(--green);margin:0 auto;margin-top:4px;display:none}
-.tab.active .tab-indicator{display:block}
-
-/* FORM GROUPS */
-.form-group{margin-bottom:14px}
-.form-group label{display:block;font-size:.7rem;font-weight:800;color:#475569;margin-bottom:6px;text-transform:uppercase;letter-spacing:.6px}
-.input-wrap{position:relative}
-.input-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;z-index:1}
-input[type=text],input[type=email],input[type=password],select{
-  width:100%;padding:12px 14px 12px 42px;
-  background:rgba(255,255,255,.04);border:1.5px solid var(--border);
-  border-radius:12px;color:#f1f5f9;font-size:.9rem;
-  font-family:'Nunito',sans-serif;outline:none;transition:.25s;
+/* Floating particles */
+.particles{position:absolute;inset:0;}
+.particle{
+  position:absolute; border-radius:50%;
+  background:var(--accent); opacity:0;
+  animation:floatUp var(--dur,12s) ease-in-out var(--delay,0s) infinite;
 }
-input:focus,select:focus{border-color:var(--green);background:rgba(34,197,94,.04);box-shadow:0 0 0 3px rgba(34,197,94,.1)}
-input.err{border-color:var(--red)!important;box-shadow:0 0 0 3px rgba(239,68,68,.1)!important}
-select.err{border-color:var(--red)!important}
-.eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#475569;cursor:pointer;font-size:15px;padding:4px;z-index:1}
-.eye-btn:hover{color:#94a3b8}
-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer}
-select option{background:#0d1225}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-
-/* LINK ROW */
-.link-row{display:flex;justify-content:space-between;align-items:center;margin-top:5px}
-.link-row a,.form-link{color:var(--blue);text-decoration:none;font-size:.78rem;font-weight:800;background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif;padding:0;transition:.2s}
-.link-row a:hover,.form-link:hover{color:#7dd3fc}
-
-/* ID PREVIEW STRIP */
-.id-strip{
-  display:flex;align-items:center;gap:10px;
-  background:rgba(34,197,94,.07);border:1.5px dashed rgba(34,197,94,.3);
-  border-radius:12px;padding:10px 14px;margin-bottom:12px;
+@keyframes floatUp{
+  0%{transform:translateY(0) scale(0);opacity:0;}
+  10%{opacity:.6;}
+  90%{opacity:.2;}
+  100%{transform:translateY(-80vh) scale(1.5);opacity:0;}
 }
-.ids-label{font-size:.68rem;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
-.ids-value{font-family:'Fredoka One';font-size:1.1rem;color:var(--green);letter-spacing:1px;flex:1}
 
-/* STRENGTH */
-.strength-wrap{margin-top:4px;display:none}
-.strength-bar{height:4px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden;margin-bottom:2px}
-.strength-fill{height:100%;border-radius:2px;transition:.3s;width:0}
-.strength-lbl{font-size:.7rem;font-weight:700}
+/* ── TOPBAR ──────────────────────────────────────────────── */
+.topbar{
+  position:relative; z-index:10;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px 28px;
+  animation:slideDown .6s var(--ease) both;
+}
+@keyframes slideDown{from{opacity:0;transform:translateY(-14px);}to{opacity:1;transform:translateY(0);}}
 
-/* BUTTONS */
+.back{
+  color:var(--ink-dim); text-decoration:none; font-size:13px;
+  display:flex; align-items:center; gap:6px;
+  transition:color .2s, gap .2s;
+}
+.back:hover{color:var(--ink); gap:10px;}
+.back svg{transition:transform .2s;}
+.back:hover svg{transform:translateX(-2px);}
+
+.badge{
+  font-family:'JetBrains Mono',monospace; font-size:11px;
+  letter-spacing:.12em; text-transform:uppercase;
+  color:var(--accent); border:1px solid var(--accent-dim);
+  background:var(--accent-dim); padding:5px 14px; border-radius:20px;
+  position:relative; overflow:hidden;
+}
+.badge::after{
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(90deg,transparent,rgba(52,216,176,.18),transparent);
+  transform:translateX(-100%);
+  animation:shimmer 3s ease-in-out infinite;
+}
+@keyframes shimmer{0%{transform:translateX(-100%);}60%,100%{transform:translateX(120%);}}
+
+/* ── STAGE + CARD ────────────────────────────────────────── */
+.stage{
+  position:relative; z-index:5;
+  display:flex; justify-content:center;
+  padding:0 18px 80px;
+  animation:riseUp .8s var(--ease) .15s both;
+}
+@keyframes riseUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+
+.card{
+  width:100%; max-width:460px;
+  background:linear-gradient(160deg, rgba(20,30,58,.96) 0%, rgba(8,14,34,.97) 100%);
+  border:1px solid var(--line-bright);
+  border-radius:26px; padding:32px 30px 28px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.04) inset,
+    0 40px 80px -30px rgba(0,0,0,.7),
+    0 0 60px -20px rgba(52,216,176,.08);
+  backdrop-filter:blur(12px);
+  position:relative; overflow:hidden;
+}
+/* Card shimmer border */
+.card::before{
+  content:''; position:absolute; inset:-1px;
+  border-radius:27px; z-index:-1;
+  background:conic-gradient(from 0deg, var(--accent-glow) 0%, transparent 25%, transparent 75%, var(--blue) 100%, transparent);
+  opacity:0;
+  animation:rotateBorder 6s linear infinite, borderAppear .8s .4s forwards;
+}
+@keyframes rotateBorder{to{transform:rotate(360deg);}}
+@keyframes borderAppear{to{opacity:.4;}}
+
+h1{font-family:'Outfit',sans-serif;font-weight:800;font-size:26px;line-height:1.2;letter-spacing:-.4px;}
+.lede{color:var(--ink-dim);font-size:13.5px;margin-top:5px;margin-bottom:22px;line-height:1.6;font-weight:300;}
+
+/* ── TABS ────────────────────────────────────────────────── */
+.tabs{
+  display:flex; background:var(--panel-inner);
+  border:1px solid var(--line); border-radius:14px;
+  padding:4px; margin-bottom:24px; gap:4px;
+  position:relative;
+}
+/* sliding indicator */
+.tab-indicator{
+  position:absolute; top:4px; bottom:4px; left:4px;
+  width:calc(50% - 4px); border-radius:10px;
+  background:linear-gradient(95deg,var(--accent),#22b893);
+  transition:transform .3s var(--ease);
+  box-shadow:0 4px 16px -4px var(--accent-glow);
+}
+.tab-indicator.right{transform:translateX(calc(100% + 4px));}
+
+.tab{
+  flex:1; text-align:center; padding:10px 0;
+  border-radius:10px; font-size:13.5px; font-weight:600;
+  cursor:pointer; transition:.25s var(--ease); border:none;
+  background:none; font-family:'Lexend',sans-serif;
+  position:relative; z-index:1;
+  color:var(--ink-dim);
+}
+.tab.active{color:#06140f;}
+
+.panel{display:none;}
+.panel.active{display:block;animation:panelIn .35s var(--ease);}
+@keyframes panelIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── FIELDS ──────────────────────────────────────────────── */
+.field{margin-bottom:14px;}
+.field label{
+  display:flex; align-items:center; gap:6px;
+  font-size:12px; color:var(--ink-dim);
+  margin-bottom:7px; font-weight:500; letter-spacing:.03em;
+}
+.field label svg{width:13px;height:13px;opacity:.6;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+.input-wrap{position:relative;}
+.input-wrap .icon{
+  position:absolute; left:13px; top:50%; transform:translateY(-50%);
+  color:var(--ink-dim); pointer-events:none; transition:color .2s;
+}
+.input-wrap.has-icon input{ padding-left:40px; }
+
+input,select{
+  width:100%; background:var(--panel-inner); border:1.5px solid var(--line);
+  color:var(--ink); padding:11px 13px; border-radius:var(--r-xs);
+  font-size:14px; font-family:'Lexend',sans-serif;
+  outline:none; transition:border-color .2s,box-shadow .2s,background .2s;
+  appearance:none;
+}
+input::placeholder{color:#3d4a6e;}
+input:focus,select:focus{
+  border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-dim);
+  background:#0b1330;
+}
+input:focus + .input-line{transform:scaleX(1);}
+input.invalid{border-color:var(--red); box-shadow:0 0 0 3px rgba(255,93,122,.12);}
+input.valid{border-color:rgba(52,216,176,.4);}
+
+/* Strength bar */
+.pw-wrap{position:relative;}
+.pw-toggle{
+  position:absolute; right:12px; top:50%; transform:translateY(-50%);
+  background:none; border:none; cursor:pointer; color:var(--ink-dim);
+  padding:4px; display:flex; align-items:center;
+}
+.pw-toggle:hover{color:var(--ink);}
+.strength-bar{
+  height:3px; border-radius:2px; margin-top:6px;
+  background:var(--line); overflow:hidden;
+}
+.strength-fill{
+  height:100%; border-radius:2px; width:0%;
+  transition:width .4s var(--ease), background .4s;
+}
+
+.hint{font-size:11.5px; color:#5a6380; margin-top:5px; line-height:1.4;}
+.hint.err{color:#ff8aa0;}
+.hint.ok{color:var(--accent);}
+
+/* ── OTP BOX ─────────────────────────────────────────────── */
+.otp-row{display:flex;gap:10px;}
+.otp-row input{
+  font-family:'JetBrains Mono',monospace;
+  letter-spacing:.35em; font-size:18px; text-align:center;
+}
+
+/* ── BUTTONS ─────────────────────────────────────────────── */
 .btn{
-  width:100%;padding:13px;border-radius:12px;border:none;font-weight:900;
-  font-size:.95rem;cursor:pointer;font-family:'Nunito',sans-serif;
-  transition:.3s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;justify-content:center;gap:8px;
-  margin-top:4px;
+  border:none; cursor:pointer; font-family:'Lexend',sans-serif;
+  font-weight:600; font-size:14px; border-radius:var(--r-xs);
+  padding:12px 16px; transition:.22s var(--ease); white-space:nowrap;
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
 }
-.btn:hover:not(:disabled){transform:translateY(-2px)}
-.btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
-.btn-primary{background:linear-gradient(135deg,var(--green),#16a34a);color:#052e16;box-shadow:0 8px 24px rgba(34,197,94,.25)}
-.btn-primary:hover:not(:disabled){box-shadow:0 14px 32px rgba(34,197,94,.38)}
-.btn-ghost{background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid var(--border)}
-.btn-ghost:hover:not(:disabled){background:rgba(255,255,255,.11);color:#f1f5f9}
-.btn-demo{background:linear-gradient(135deg,rgba(251,191,36,.15),rgba(251,146,60,.1));color:var(--yellow);border:1px solid rgba(251,191,36,.25);font-size:.85rem;padding:10px}
-.btn-demo:hover:not(:disabled){background:rgba(251,191,36,.2)}
-.divider{display:flex;align-items:center;gap:10px;margin:12px 0;color:#334155;font-size:.73rem;font-weight:700}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
-
-/* MESSAGE */
-.msg{padding:11px 14px;border-radius:11px;margin-top:10px;font-size:.8rem;font-weight:700;display:none;align-items:center;gap:8px;line-height:1.5}
-.msg.show{display:flex}
-.msg.error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.22);color:#fca5a5}
-.msg.success{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86efac}
-.msg.info{background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.22);color:#7dd3fc}
-
-/* LOADER */
-.loader{display:inline-block;width:15px;height:15px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* QUICK LOGIN CHIPS */
-.quick-login{margin-bottom:18px}
-.ql-label{font-size:.7rem;font-weight:800;color:#334155;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
-.ql-chips{display:flex;gap:8px;flex-wrap:wrap}
-.ql-chip{
-  padding:7px 14px;border-radius:999px;border:1px solid var(--border);
-  background:rgba(255,255,255,.05);color:#64748b;font-size:.78rem;font-weight:800;
-  cursor:pointer;transition:.2s;font-family:'Nunito',sans-serif;display:flex;align-items:center;gap:6px;
+.btn-primary{
+  background:linear-gradient(95deg,var(--accent),#22b893);
+  color:#06140f; width:100%; position:relative; overflow:hidden;
 }
-.ql-chip:hover{background:rgba(255,255,255,.1);color:#f1f5f9;border-color:rgba(255,255,255,.2)}
-
-/* POPUP */
-.popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(14px);z-index:100;display:grid;place-items:center;padding:20px;animation:fadeIn .3s}
-@keyframes fadeIn{from{opacity:0}}
-.popup{background:#0a0f24;border:1.5px solid rgba(34,197,94,.3);border-radius:28px;padding:36px 40px;max-width:440px;width:100%;text-align:center;animation:popIn .4s cubic-bezier(.34,1.56,.64,1);position:relative}
-@keyframes popIn{from{transform:scale(.82);opacity:0}}
-.popup-close{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.07);border:none;color:#f1f5f9;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;display:grid;place-items:center}
-.popup-icon{font-size:70px;display:block;margin-bottom:12px;animation:mascotFloat 3s ease-in-out infinite}
-.popup-title{font-family:'Fredoka One';font-size:1.8rem;color:var(--green);margin-bottom:5px}
-.popup-sub{color:#475569;font-size:.88rem;margin-bottom:20px;line-height:1.5}
-.id-card{background:rgba(34,197,94,.07);border:2px dashed rgba(34,197,94,.35);border-radius:18px;padding:20px;margin-bottom:16px}
-.id-card-label{font-size:.7rem;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px}
-.id-card-value{font-family:'Fredoka One';font-size:2.5rem;background:linear-gradient(135deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:3px;margin-bottom:6px}
-.id-card-name{font-size:.82rem;color:#475569;margin-bottom:10px}
-.copy-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 18px;border-radius:999px;border:1px solid rgba(34,197,94,.3);background:transparent;color:var(--green);font-size:.8rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;transition:.2s}
-.copy-btn:hover{background:rgba(34,197,94,.1)}
-.id-note{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2);border-radius:12px;padding:12px 14px;margin-bottom:18px;font-size:.8rem;color:var(--yellow);font-weight:700;text-align:left;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
-.popup-actions{display:flex;gap:10px}
-.pa-btn{flex:1;padding:12px;border-radius:12px;border:none;font-weight:900;font-size:.9rem;cursor:pointer;font-family:'Nunito',sans-serif;transition:.25s;display:flex;align-items:center;justify-content:center;gap:7px}
-.pa-btn:hover{transform:translateY(-2px)}
-.pa-primary{background:linear-gradient(135deg,var(--green),#16a34a);color:#052e16}
-.pa-sec{background:rgba(255,255,255,.07);color:#94a3b8;border:1px solid var(--border)}
-.pa-sec:hover{color:#f1f5f9}
-
-/* TOAST */
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-60px);background:linear-gradient(135deg,var(--green),var(--teal));color:#fff;padding:11px 26px;border-radius:999px;font-weight:800;font-size:.85rem;z-index:200;opacity:0;transition:.35s;pointer-events:none;white-space:nowrap}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-.hide{display:none!important}
-
-/* RESPONSIVE */
-@media(max-width:720px){
-  .layout{grid-template-columns:1fr}
-  .left-panel{display:none}
-  .right-panel{padding:32px 24px}
-  .form-row{grid-template-columns:1fr}
+.btn-primary::after{
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);
+  transform:translateX(-100%);
 }
+.btn-primary:not(:disabled):hover::after{animation:btnShimmer .5s forwards;}
+@keyframes btnShimmer{to{transform:translateX(100%);}}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed;}
+.btn-primary:not(:disabled):hover{
+  transform:translateY(-2px);
+  box-shadow:0 12px 28px -8px var(--accent-glow);
+}
+.btn-primary:not(:disabled):active{transform:translateY(0);}
+.btn-ghost{
+  background:var(--panel-soft); border:1.5px solid var(--line);
+  color:var(--ink);
+}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn-link{
+  background:none; border:none; color:var(--accent);
+  font-size:12.5px; cursor:pointer; padding:0;
+  font-family:'Lexend',sans-serif; font-weight:500;
+  transition:opacity .2s;
+}
+.btn-link:hover{opacity:.75;}
+
+/* Loading spinner on button */
+.btn .spinner{
+  width:16px; height:16px; border:2px solid rgba(6,20,15,.3);
+  border-top-color:#06140f; border-radius:50%;
+  animation:spin .7s linear infinite; display:none;
+}
+.btn.loading .spinner{display:block;}
+.btn.loading .btn-text{display:none;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── TOGGLE / SWITCH ─────────────────────────────────────── */
+.toggle-line{
+  display:flex; align-items:center; justify-content:space-between;
+  margin:14px 0 18px; font-size:13px; color:var(--ink-dim);
+}
+.switch{position:relative;width:40px;height:22px;}
+.switch input{display:none;}
+.switch .track{
+  position:absolute; inset:0; background:#1a2240;
+  border:1.5px solid var(--line); border-radius:20px;
+  cursor:pointer; transition:.28s var(--ease);
+}
+.switch .track::after{
+  content:''; position:absolute; width:14px; height:14px;
+  border-radius:50%; background:#fff; top:3px; left:3px;
+  transition:.28s var(--ease); box-shadow:0 1px 4px rgba(0,0,0,.3);
+}
+.switch input:checked + .track{background:var(--accent);border-color:var(--accent);}
+.switch input:checked + .track::after{transform:translateX(18px);}
+
+/* ── DIVIDERS ────────────────────────────────────────────── */
+.divider{
+  display:flex; align-items:center; gap:10px;
+  margin:18px 0; color:#3d4a6e; font-size:11px;
+  letter-spacing:.1em; text-transform:uppercase;
+}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--line);}
+
+/* ── SUCCESS STATE ───────────────────────────────────────── */
+.success{text-align:center;padding:8px 0 4px;}
+.check-ring{
+  width:60px; height:60px; border-radius:50%;
+  border:2px solid var(--accent); display:flex;
+  align-items:center; justify-content:center;
+  margin:0 auto 18px; position:relative;
+  animation:ringPop .6s var(--ease) both;
+}
+.check-ring::before{
+  content:''; position:absolute; inset:-6px;
+  border-radius:50%; border:1px solid var(--accent-dim);
+  animation:ringPulse 2s ease-in-out 1s infinite;
+}
+@keyframes ringPop{0%{transform:scale(0);opacity:0;}60%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+@keyframes ringPulse{0%,100%{transform:scale(1);opacity:.5;}50%{transform:scale(1.15);opacity:.1;}}
+
+.check-ring svg{animation:checkDraw .5s .3s both;}
+@keyframes checkDraw{from{stroke-dashoffset:30;}to{stroke-dashoffset:0;}}
+.check-ring svg path{stroke-dasharray:30;stroke-dashoffset:0;}
+
+.id-box{
+  background:var(--panel-inner); border:1px dashed rgba(52,216,176,.35);
+  border-radius:var(--r-sm); padding:16px; margin:18px 0;
+  display:flex; align-items:center; justify-content:space-between;
+  position:relative; overflow:hidden;
+}
+.id-box::before{
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(90deg,var(--accent-dim),transparent);
+  opacity:.5;
+}
+.id-box .id{
+  font-family:'JetBrains Mono',monospace; font-size:17px;
+  letter-spacing:.06em; color:var(--accent); position:relative; z-index:1;
+}
+.copy-btn{
+  background:none; border:1px solid var(--line); color:var(--ink-dim);
+  border-radius:8px; padding:6px 11px; font-size:11.5px;
+  cursor:pointer; transition:.2s; position:relative; z-index:1;
+  font-family:'Lexend',sans-serif;
+}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ── STEP INDICATOR (register) ───────────────────────────── */
+.steps{
+  display:flex; align-items:center; gap:0; margin-bottom:24px;
+}
+.step-item{
+  display:flex; flex-direction:column; align-items:center; gap:4px; flex:1;
+}
+.step-dot{
+  width:28px; height:28px; border-radius:50%;
+  border:2px solid var(--line); background:var(--panel-inner);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'JetBrains Mono',monospace; font-size:11px;
+  color:var(--ink-dim); transition:.35s var(--ease); position:relative; z-index:1;
+}
+.step-dot.active{
+  border-color:var(--accent); color:var(--accent);
+  box-shadow:0 0 0 3px var(--accent-dim);
+}
+.step-dot.done{
+  background:var(--accent); border-color:var(--accent); color:#06140f;
+}
+.step-label{font-size:10px; color:var(--ink-dim); text-align:center; white-space:nowrap;}
+.step-label.active{color:var(--accent);}
+.step-line{flex:1; height:1.5px; background:var(--line); margin-top:-14px; position:relative;}
+.step-line-fill{
+  height:100%; background:var(--accent); width:0%;
+  transition:width .4s var(--ease);
+}
+
+/* ── FIELDSET ────────────────────────────────────────────── */
+fieldset{border:none;}
+legend{
+  font-size:10.5px; text-transform:uppercase; letter-spacing:.1em;
+  color:#3d4a6e; margin-bottom:12px; font-weight:600;
+  display:flex; align-items:center; gap:8px;
+}
+legend::after{content:''; flex:1; height:1px; background:var(--line);}
+.section-gap{margin-top:20px;}
+
+/* ── TOAST ───────────────────────────────────────────────── */
+.toast{
+  position:fixed; bottom:24px; left:50%;
+  transform:translateX(-50%) translateY(20px);
+  z-index:100; background:var(--panel); border:1px solid var(--line-bright);
+  color:var(--ink); padding:13px 20px; border-radius:14px;
+  font-size:13px; box-shadow:0 16px 40px -12px rgba(0,0,0,.7);
+  opacity:0; transition:.3s var(--ease); pointer-events:none;
+  max-width:92vw; display:flex; align-items:center; gap:10px;
+  backdrop-filter:blur(10px);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.ok .t-icon{color:var(--accent);}
+.toast.err{border-color:rgba(255,93,122,.3);}
+.toast.err .t-icon{color:var(--red);}
+.t-icon{font-size:16px; flex-shrink:0;}
+
+/* ── FORGOT ──────────────────────────────────────────────── */
+#forgotBlock{
+  border:1px solid var(--line); border-radius:var(--r-sm);
+  padding:18px; margin-top:18px;
+  background:rgba(0,0,0,.2);
+  animation:panelIn .3s var(--ease);
+}
+
+/* ── PROGRESS BAR ────────────────────────────────────────── */
+.top-progress{
+  position:fixed; top:0; left:0; height:2.5px; z-index:999;
+  background:linear-gradient(90deg,var(--accent),var(--blue));
+  width:0%; transition:width .4s var(--ease);
+}
+
+/* ── SECTION REVEAL ──────────────────────────────────────── */
+.reveal{
+  opacity:0; transform:translateY(10px);
+  transition:opacity .4s var(--ease), transform .4s var(--ease);
+}
+.reveal.in{opacity:1; transform:translateY(0);}
+
+/* ── MISC ────────────────────────────────────────────────── */
+select option{background:#0e1630;}
+.mt10{margin-top:10px;}
+@media(max-width:420px){.row2{grid-template-columns:1fr;}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important;}}
 </style>
 </head>
 <body>
 
-<canvas id="bgCanvas"></canvas>
-<div class="glow-blob blob1"></div>
-<div class="glow-blob blob2"></div>
-<div class="glow-blob blob3"></div>
+<!-- Progress bar -->
+<div class="top-progress" id="topProgress"></div>
 
-<a class="back-btn" href="index.html">← Home</a>
+<!-- Background -->
+<div class="bg-canvas">
+  <div class="grid-lines"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="particles" id="particles"></div>
+</div>
 
-<div class="shell">
-  <div class="layout">
+<!-- Top bar -->
+<div class="topbar">
+  <a class="back" href="index.html">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Back to roles
+  </a>
+  <span class="badge">Student</span>
+</div>
 
-    <!-- ══ LEFT PANEL ══ -->
-    <div class="left-panel">
-      <!-- Floating badges -->
-      <div class="float-badge fb1">🏆 50+ Games</div>
-    
-      <div class="float-badge fb3">🎓 100 Schools</div>
+<!-- Card -->
+<div class="stage">
+  <div class="card">
 
-      <div class="lp-content">
-        <span class="lp-mascot">🦋</span>
-        <div class="lp-title">Student Portal</div>
-        <p class="lp-sub">Start your learning adventure and unlock your superpowers today!</p>
-
-        <div class="feature-list">
-          <div class="feat-row">
-            <span class="feat-icon">🎮</span>
-            <div class="feat-txt"><strong>50+ Learning Games</strong>Dyslexia, Dysgraphia & ADHD</div>
-          </div>
-          <div class="feat-row">
-            <span class="feat-icon">🏆</span>
-            <div class="feat-txt"><strong>Earn Coins & Badges</strong>Level up as you learn</div>
-          </div>
-          <div class="feat-row">
-            <span class="feat-icon">🤖</span>
-            <div class="feat-txt"><strong>AI-Powered Feedback</strong>Smart hints just for you</div>
-          </div>
-          <div class="feat-row">
-            <span class="feat-icon">📊</span>
-            <div class="feat-txt"><strong>Track Your Progress</strong>Charts parents can see</div>
-          </div>
-          <div class="feat-row">
-            <span class="feat-icon">🔊</span>
-            <div class="feat-txt"><strong>Voice Assistant</strong>Luna helps you anytime</div>
-          </div>
-        </div>
-      </div>
+    <!-- TABS -->
+    <div class="tabs">
+      <div class="tab-indicator" id="tabIndicator"></div>
+      <button class="tab active" id="tabLoginBtn" onclick="switchTab('login')">Log In</button>
+      <button class="tab" id="tabRegisterBtn" onclick="switchTab('register')">Register</button>
     </div>
 
-    <!-- ══ RIGHT PANEL ══ -->
-    <div class="right-panel">
-      <div class="form-header">
-        <h2>Welcome Back! 👋</h2>
-        <p>Login to continue your learning journey</p>
+    <!-- ══ LOGIN PANEL ══ -->
+    <div class="panel active" id="loginPanel">
+      <h1>Welcome back</h1>
+      <p class="lede">Log in with your Student ID to continue your learning journey.</p>
+
+      <div class="toggle-line reveal">
+        <span>Use OTP instead of password</span>
+        <label class="switch"><input type="checkbox" id="otpLoginToggle" onchange="toggleOtpLogin()"><span class="track"></span></label>
       </div>
 
-      <!-- TABS -->
-      <div class="tabs">
-        <button class="tab active" id="tabLogin" onclick="showTab('login')">
-          🚀 Login
-          <div class="tab-indicator"></div>
+      <!-- Password mode -->
+      <div id="loginPwBlock">
+        <div class="field reveal">
+          <label>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Student ID
+          </label>
+          <div class="input-wrap">
+            <input id="loginSid" placeholder="SID-ABC001-1234" autocomplete="username" oninput="this.value=this.value.toUpperCase()">
+          </div>
+        </div>
+        <div class="field reveal">
+          <label>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
+            Password
+          </label>
+          <div class="input-wrap pw-wrap">
+            <input id="loginPw" type="password" placeholder="••••••••" autocomplete="current-password">
+            <button class="pw-toggle" type="button" onclick="togglePw('loginPw',this)" aria-label="Toggle password visibility">
+              <svg width="16" height="16" id="eyeLogin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div style="text-align:right;margin:-4px 0 18px;">
+          <button class="btn-link" onclick="toggleForgot()">Forgot password?</button>
+        </div>
+        <button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">
+          <span class="btn-text">Log In</span>
+          <div class="spinner"></div>
         </button>
-        <button class="tab" id="tabReg" onclick="showTab('reg')">
-          ✨ Sign Up
-          <div class="tab-indicator"></div>
+      </div>
+
+      <!-- OTP mode -->
+      <div id="loginOtpBlock" style="display:none;">
+        <div class="field">
+          <label>Student ID</label>
+          <input id="loginOtpSid" placeholder="SID-ABC001-1234" oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div class="field">
+          <label>Registered Parent Mobile</label>
+          <input id="loginOtpMobile" placeholder="98765 43210" inputmode="numeric" maxlength="10">
+        </div>
+        <div class="field" id="loginOtpInputWrap" style="display:none;">
+          <label>Enter OTP</label>
+          <div class="otp-row">
+            <input id="loginOtpCode" maxlength="6" inputmode="numeric" placeholder="• • • • • •">
+            <button class="btn btn-ghost" id="loginResendBtn" onclick="sendLoginOtp()">Resend</button>
+          </div>
+          <p class="hint" id="loginOtpHint"></p>
+        </div>
+        <button class="btn btn-ghost" style="width:100%;margin-bottom:10px;" id="loginSendOtpBtn" onclick="sendLoginOtp()">Send OTP</button>
+        <button class="btn btn-primary" onclick="handleOtpLogin()">
+          <span class="btn-text">Verify &amp; Log In</span>
+          <div class="spinner"></div>
         </button>
       </div>
 
-      <!-- ══ LOGIN SECTION ══ -->
-      <div id="loginSection">
-
-        <!-- Quick Login Chips (for demo/returning users) -->
-        <div class="quick-login">
-          <div class="ql-label">⚡ Quick Fill (Demo)</div>
-          <div class="ql-chips">
-            <button class="ql-chip" onclick="quickFill('arjun@esld.app','Student123')">🎓 Arjun (Dyslexia)</button>
-            <button class="ql-chip" onclick="quickFill('priya@esld.app','Student123')">🌟 Priya (ADHD)</button>
-            <button class="ql-chip" onclick="quickFill('ritu@esld.app','Student123')">✍️ Ritu (Dysgraphia)</button>
+      <!-- Forgot password -->
+      <div id="forgotBlock" style="display:none;">
+        <div class="divider">Reset Password</div>
+        <div class="field"><label>Student ID</label><input id="fpSid" placeholder="SID-ABC001-1234" oninput="this.value=this.value.toUpperCase()"></div>
+        <div class="field"><label>Registered Student Email</label><input id="fpEmail" placeholder="you@example.com"></div>
+        <div class="field" id="fpOtpWrap" style="display:none;">
+          <label>Enter OTP</label>
+          <div class="otp-row">
+            <input id="fpOtpCode" maxlength="6" inputmode="numeric" placeholder="• • • • • •">
+            <button class="btn btn-ghost" onclick="sendForgotOtp()">Resend</button>
           </div>
         </div>
-
-        <!-- Email -->
-        <div class="form-group">
-          <label>📧 Email Address</label>
-          <div class="input-wrap">
-            <span class="input-icon">📧</span>
-            <input id="lEmail" type="email" placeholder="student@esld.app" autocomplete="email"/>
-          </div>
+        <div class="field" id="fpNewPwWrap" style="display:none;">
+          <label>New Password</label>
+          <input id="fpNewPw" type="password" placeholder="At least 8 characters">
         </div>
+        <button class="btn btn-ghost" style="width:100%;margin-bottom:10px;" onclick="sendForgotOtp()">Send OTP to Email</button>
+        <button class="btn btn-primary" id="fpSubmitBtn" style="display:none;" onclick="submitForgotPassword()">
+          <span class="btn-text">Reset Password</span>
+          <div class="spinner"></div>
+        </button>
+      </div>
+    </div>
 
-        <!-- Password -->
-        <div class="form-group">
-          <label>🔒 Password</label>
-          <div class="input-wrap">
-            <span class="input-icon">🔒</span>
-            <input id="lPass" type="password" placeholder="Your password" autocomplete="current-password"/>
-            <button class="eye-btn" onclick="toggleEye('lPass',this)" tabindex="-1">👁️</button>
-          </div>
-          <div class="link-row">
-            <span></span>
-            <a href="student-forgot-password.html">Forgot Password?</a>
-          </div>
+    <!-- ══ REGISTER PANEL ══ -->
+    <div class="panel" id="registerPanel">
+      <h1>Create account</h1>
+      <p class="lede">Fill in a few details — your Student ID is generated automatically.</p>
+
+      <!-- Step indicator -->
+      <div class="steps" id="regSteps">
+        <div class="step-item">
+          <div class="step-dot active" id="step1dot">1</div>
+          <div class="step-label active" id="step1lbl">Personal</div>
         </div>
-
-        <!-- Remember checkbox -->
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-          <input type="checkbox" id="rememberMe" style="width:auto;padding:0;accent-color:var(--green)"/>
-          <label for="rememberMe" style="font-size:.8rem;color:#475569;text-transform:none;letter-spacing:0;margin:0;cursor:pointer">Remember me on this device</label>
+        <div class="step-line"><div class="step-line-fill" id="line1"></div></div>
+        <div class="step-item">
+          <div class="step-dot" id="step2dot">2</div>
+          <div class="step-label" id="step2lbl">School</div>
         </div>
-
-        <div class="msg" id="loginMsg"></div>
-
-        <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">🚀 Login to ESLD</button>
-
-        <div class="divider">or try demo</div>
-
-        <button class="btn btn-demo" onclick="demoLogin()">🎮 Try Demo (No Account Needed)</button>
-
-        <div style="text-align:center;margin-top:16px;font-size:.82rem;color:#334155;font-weight:700">
-          No account yet?
-          <button class="form-link" onclick="showTab('reg')" style="margin-left:4px">Sign up free →</button>
+        <div class="step-line"><div class="step-line-fill" id="line2"></div></div>
+        <div class="step-item">
+          <div class="step-dot" id="step3dot">3</div>
+          <div class="step-label" id="step3lbl">Contact</div>
+        </div>
+        <div class="step-line"><div class="step-line-fill" id="line3"></div></div>
+        <div class="step-item">
+          <div class="step-dot" id="step4dot">4</div>
+          <div class="step-label" id="step4lbl">Security</div>
         </div>
       </div>
 
-      <!-- ══ REGISTER SECTION ══ -->
-      <div id="regSection" class="hide">
+      <form id="registerForm" autocomplete="off">
 
-        <!-- Name + School row -->
-        <div class="form-group">
-          <label>👤 Full Name</label>
-          <div class="input-wrap">
-            <span class="input-icon">👤</span>
-            <input id="rName" type="text" placeholder="e.g. Arjun Sharma" autocomplete="name" oninput="updateIdPreview()"/>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>🏫 School (Tamil Nadu)</label>
-          <div class="input-wrap">
-            <span class="input-icon">🏫</span>
-            <select id="rSchool">
-              <option value="" disabled selected>-- Select your school --</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>📚 Class / Grade</label>
-            <div class="input-wrap">
-              <span class="input-icon">📚</span>
-              <select id="rStandard">
-                <option value="" disabled selected>Grade</option>
-                <option value="1">Grade 1</option>
-                <option value="2">Grade 2</option>
-                <option value="3">Grade 3</option>
-                <option value="4">Grade 4</option>
-                <option value="5">Grade 5</option>
-                <option value="6">Grade 6</option>
-                <option value="7">Grade 7</option>
-                <option value="8">Grade 8</option>
-                <option value="9">Grade 9</option>
-                <option value="10">Grade 10</option>
-                <option value="11">Grade 11</option>
-                <option value="12">Grade 12</option>
-              </select>
+        <!-- Step 1: Personal -->
+        <div id="regStep1">
+          <fieldset>
+            <legend>Personal Details</legend>
+            <div class="field"><label>Full Name</label><input id="regName" placeholder="Aanya Sharma"></div>
+            <div class="row2">
+              <div class="field"><label>Age</label><input id="regAge" type="number" min="4" max="20" placeholder="10"></div>
+              <div class="field"><label>Gender</label>
+                <select id="regGender"><option value="">Select</option><option>Female</option><option>Male</option><option>Other</option><option>Prefer not to say</option></select>
+              </div>
             </div>
-          </div>
-          <div class="form-group">
-            <label>🔤 Section</label>
-            <div class="input-wrap">
-              <span class="input-icon">🔤</span>
-              <select id="rSection">
-                <option value="A">Section A</option>
-                <option value="B">Section B</option>
-                <option value="C">Section C</option>
-                <option value="D">Section D</option>
-              </select>
+          </fieldset>
+          <button type="button" class="btn btn-primary mt10" onclick="nextStep(1)">Next — School Details →</button>
+        </div>
+
+        <!-- Step 2: School -->
+        <div id="regStep2" style="display:none;">
+          <fieldset>
+            <legend>School Details</legend>
+            <div class="field"><label>School Name</label><input id="regSchoolName" placeholder="Sri Sairam Public School"></div>
+            <div class="row2">
+              <div class="field"><label>School Code</label><input id="regSchoolCode" placeholder="ABC001" oninput="this.value=this.value.toUpperCase()"></div>
+              <div class="field"><label>Class / Grade</label><input id="regGrade" placeholder="6"></div>
             </div>
+          </fieldset>
+          <div style="display:flex;gap:10px;margin-top:10px;">
+            <button type="button" class="btn btn-ghost" style="flex:1;" onclick="prevStep(2)">← Back</button>
+            <button type="button" class="btn btn-primary" style="flex:2;" onclick="nextStep(2)">Next — Contact →</button>
           </div>
         </div>
 
-        <div class="form-group">
-          <label>🧩 Learning Profile</label>
-          <div class="input-wrap">
-            <span class="input-icon">🧩</span>
-            <select id="rDisability">
-              <option value="dyslexia">📖 Dyslexia</option>
-              <option value="dysgraphia">✍️ Dysgraphia</option>
-              <option value="adhd">⚡ ADHD</option>
-              <option value="dyscalculia">🔢 Dyscalculia</option>
-            </select>
+        <!-- Step 3: Contact -->
+        <div id="regStep3" style="display:none;">
+          <fieldset>
+            <legend>Contact Details</legend>
+            <div class="field"><label>Parent Mobile</label><input id="regParentMobile" placeholder="98765 43210" inputmode="numeric" maxlength="10"></div>
+            <div class="field"><label>Parent Email</label><input id="regParentEmail" placeholder="parent@example.com"></div>
+            <div class="field"><label>Student Email</label><input id="regStudentEmail" placeholder="student@example.com"></div>
+          </fieldset>
+
+          <!-- OTP in step 3 -->
+          <div class="field" id="regOtpInputWrap" style="display:none;">
+            <label>OTP sent to parent's mobile</label>
+            <div class="otp-row">
+              <input id="regOtpCode" maxlength="6" inputmode="numeric" placeholder="• • • • • •">
+              <button type="button" class="btn btn-ghost" id="regResendBtn" onclick="sendRegisterOtp()">Resend</button>
+            </div>
+            <p class="hint" id="regOtpHint"></p>
+          </div>
+          <button type="button" class="btn btn-ghost" style="width:100%;margin-top:10px;margin-bottom:10px;" id="regSendOtpBtn" onclick="sendRegisterOtp()">Send OTP to Parent</button>
+          <div style="display:flex;gap:10px;">
+            <button type="button" class="btn btn-ghost" style="flex:1;" onclick="prevStep(3)">← Back</button>
+            <button type="button" class="btn btn-primary" style="flex:2;" onclick="nextStep(3)" id="step3Next" disabled>Next — Security →</button>
           </div>
         </div>
 
-        <!-- ID Preview -->
-        <div class="id-strip" id="idStripWrap">
-          <span class="ids-label">Your ID:</span>
-          <span class="ids-value" id="idPreview">Fill your name above →</span>
-        </div>
-
-        <div class="form-group">
-          <label>📧 Email Address</label>
-          <div class="input-wrap">
-            <span class="input-icon">📧</span>
-            <input id="rEmail" type="email" placeholder="student@esld.app" autocomplete="email"/>
+        <!-- Step 4: Security -->
+        <div id="regStep4" style="display:none;">
+          <fieldset>
+            <legend>Security</legend>
+            <div class="field">
+              <label>Password</label>
+              <div class="input-wrap pw-wrap">
+                <input id="regPw" type="password" placeholder="At least 8 characters" oninput="updateStrength(this.value)">
+                <button class="pw-toggle" type="button" onclick="togglePw('regPw',this)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+              <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+              <p class="hint" id="strengthHint"></p>
+            </div>
+            <div class="field">
+              <label>Confirm Password</label>
+              <div class="input-wrap pw-wrap">
+                <input id="regPwConfirm" type="password" placeholder="Re-enter password">
+                <button class="pw-toggle" type="button" onclick="togglePw('regPwConfirm',this)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+          </fieldset>
+          <div style="display:flex;gap:10px;margin-top:10px;">
+            <button type="button" class="btn btn-ghost" style="flex:1;" onclick="prevStep(4)">← Back</button>
+            <button type="button" class="btn btn-primary" style="flex:2;" id="regSubmitBtn" onclick="handleRegister()">
+              <span class="btn-text">Create Account</span>
+              <div class="spinner"></div>
+            </button>
           </div>
         </div>
 
-        <div class="form-group">
-          <label>🔒 Password (min 6 chars)</label>
-          <div class="input-wrap">
-            <span class="input-icon">🔒</span>
-            <input id="rPass" type="password" placeholder="Create a strong password" autocomplete="new-password" oninput="checkStrength(this.value)"/>
-            <button class="eye-btn" onclick="toggleEye('rPass',this)" tabindex="-1">👁️</button>
-          </div>
-          <div class="strength-wrap" id="strengthWrap">
-            <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
-            <div class="strength-lbl" id="strengthLbl"></div>
-          </div>
+      </form>
+
+      <!-- Success -->
+      <div class="success" id="registerSuccess" style="display:none;">
+        <div class="check-ring">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#34d8b0" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
         </div>
-
-        <div class="form-group">
-          <label>🔒 Confirm Password</label>
-          <div class="input-wrap">
-            <span class="input-icon">🔒</span>
-            <input id="rConfirm" type="password" placeholder="Repeat password" autocomplete="new-password"/>
-            <button class="eye-btn" onclick="toggleEye('rConfirm',this)" tabindex="-1">👁️</button>
-          </div>
+        <h1 style="font-size:22px;">Account created!</h1>
+        <p class="lede">Your Student ID has been generated. Save it — you'll need it to log in every time.</p>
+        <div class="id-box">
+          <span class="id" id="newSidDisplay">SID-ABC001-1234</span>
+          <button class="copy-btn" onclick="copySid()">Copy</button>
         </div>
-
-        <div class="msg" id="regMsg"></div>
-
-        <button class="btn btn-primary" id="regBtn" onclick="doRegister()">✨ Create My Account</button>
-
-        <div style="text-align:center;margin-top:14px;font-size:.82rem;color:#334155;font-weight:700">
-          Already have an account?
-          <button class="form-link" onclick="showTab('login')" style="margin-left:4px">Login →</button>
-        </div>
+        <button class="btn btn-primary" onclick="switchTab('login'); prefillLogin();">Continue to Log In →</button>
       </div>
+    </div>
 
-    </div><!-- /right-panel -->
-  </div><!-- /layout -->
-</div><!-- /shell -->
-
-<!-- ══ STUDENT ID POPUP ══ -->
-<div class="popup-overlay hide" id="idPopup">
-  <div class="popup">
-    <button class="popup-close" onclick="closePopup()">✕</button>
-    <span class="popup-icon">🎉</span>
-    <div class="popup-title">You're In!</div>
-    <p class="popup-sub">Your ESLD account is ready. Save your unique Student ID below — you'll need it!</p>
-    <div class="id-card">
-      <div class="id-card-label">Your Student ID</div>
-      <div class="id-card-value" id="popId">ARJ0001ST</div>
-      <div class="id-card-name" id="popNameSub">Generated from your name</div>
-      <button class="copy-btn" onclick="copyId()">📋 Copy ID</button>
-    </div>
-    <div class="id-note">
-      <span>⚠️</span>
-      <span>Save this ID! Share it with your parent and teacher. It is also stored in your Profile page.</span>
-    </div>
-    <div class="popup-actions">
-      <button class="pa-btn pa-primary" onclick="proceedLogin()">🚀 Go to Login →</button>
-      <button class="pa-btn pa-sec" onclick="closePopup()">Note it first</button>
-    </div>
   </div>
 </div>
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span class="t-icon" id="toastIcon">✓</span>
+  <span id="toastMsg"></span>
+</div>
 
 <script>
-// API URL
-const API = "https://esld.onrender.com";
-// ════════════════════════════
-//  SCHOOLS DATA
-// ════════════════════════════
-const TN_SCHOOLS = [
-  "Adyar Government Higher Secondary School, Chennai",
-  "Asan Memorial School, Chennai",
-  "Bala Vidya Mandir, Chennai",
-  "Bhavan's Rajaji Vidyashram, Chennai",
-  "Chettinad Vidyashram, Chennai",
-  "Children's Garden School, Chennai",
-  "DAV Boys Senior Secondary School, Chennai",
-  "DAV Girls Senior Secondary School, Chennai",
-  "Don Bosco Matriculation School, Chennai",
-  "GRT Mahalakshmi Vidya Mandir, Chennai",
-  "Hindu Senior Secondary School, Chennai",
-  "JBAS School, Chennai",
-  "Loyola School, Chennai",
-  "National Public School, Chennai",
-  "P.S. Senior Secondary School, Chennai",
-  "Padma Seshadri Bala Bhavan, Chennai",
-  "SBOA School & Junior College, Chennai",
-  "Sri Sankara Senior Secondary School, Chennai",
-  "St. Bede's Anglo-Indian Higher Secondary School, Chennai",
-  "St. Michael's Academy, Chennai",
-  "The Hindu Senior Secondary School, Adyar",
-  "Vidya Mandir Senior Secondary School, Chennai",
-  "PSG Public School, Coimbatore",
-  "Suguna PIP School, Coimbatore",
-  "Stanes Anglo Indian Higher Secondary School, Coimbatore",
-  "Amrita Vidyalayam, Coimbatore",
-  "Good Shepherd Matriculation School, Ooty",
-  "Breeks Memorial Anglo Indian School, Ooty",
-  "Sacred Heart Higher Secondary School, Trichy",
-  "Bishop Heber Higher Secondary School, Trichy",
-  "Kendriya Vidyalaya NIT, Trichy",
-  "Vivekananda Vidyalaya, Madurai",
-  "St. Mary's Higher Secondary School, Madurai",
-  "Sethupathy Higher Secondary School, Madurai",
-  "Joseph School, Madurai",
-  "SBK Girls Higher Secondary School, Thanjavur",
-  "St. Peter's Higher Secondary School, Thanjavur",
-  "Maharaja's Girls Higher Secondary School, Salem",
-  "Saradha Vidhyalaya Girls Higher Secondary School, Salem",
-  "Yamuna Matric Higher Secondary School, Salem",
-  "Sri Ramakrishna Vidyalayam, Erode",
-  "St. John's Higher Secondary School, Tirunelveli",
-  "Government Model Higher Secondary School, Vellore",
-  "De Britto Academy, Vellore",
-  "Bhavan's Vidhyashram, Puducherry",
-  "Sri Aurobindo International Centre of Education, Puducherry",
-  "Nadar Higher Secondary School, Dindigul",
-  "KSR Matriculation School, Tiruchengode",
-  "Maria Auxiliatrice Higher Secondary School, Kanyakumari",
-  "St. Xavier's Higher Secondary School, Nagercoil"
-].sort();
-
-// Populate schools dropdown
-const sel = document.getElementById('rSchool');
-TN_SCHOOLS.forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; sel.appendChild(o); });
-
-// ════════════════════════════
-//  BG CANVAS
-// ════════════════════════════
-const canvas = document.getElementById('bgCanvas');
-const ctx    = canvas.getContext('2d');
-let W, H, pts = [];
-function resize() {
-  W = canvas.width  = window.innerWidth;
-  H = canvas.height = window.innerHeight;
-  pts = [];
-  const cols = ['#22c55e','#38bdf8','#a78bfa','#f472b6','#fbbf24'];
-  for (let i = 0; i < 100; i++) {
-    pts.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.2+.2,
-      dx:(Math.random()-.5)*.3,dy:-(Math.random()*.35+.08),
-      op:Math.random()*.4+.05,c:cols[i%cols.length],p:Math.random()*Math.PI*2});
+/* ══ PARTICLES ═══════════════════════════════════════════ */
+(function createParticles(){
+  const c = document.getElementById('particles');
+  for(let i=0;i<18;i++){
+    const p = document.createElement('div');
+    p.className='particle';
+    const size = 2 + Math.random()*4;
+    p.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%;
+      bottom:-10px;
+      --dur:${10+Math.random()*14}s;
+      --delay:${Math.random()*10}s;
+      background:${Math.random()>.5?'var(--accent)':'var(--blue)'};
+      opacity:0;
+    `;
+    c.appendChild(p);
   }
-}
-function draw() {
-  ctx.clearRect(0,0,W,H);
-  pts.forEach(p => {
-    p.p+=.012; p.x+=p.dx; p.y+=p.dy;
-    if(p.y<-5){p.y=H+5;p.x=Math.random()*W;}
-    const op = Math.max(.03,Math.min(.5,p.op+Math.sin(p.p)*.08));
-    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx.fillStyle=p.c+Math.floor(op*255).toString(16).padStart(2,'0');ctx.fill();
-  });
-  requestAnimationFrame(draw);
-}
-resize(); draw();
-window.addEventListener('resize',resize);
+})();
 
-// ════════════════════════════
-//  TABS
-// ════════════════════════════
-function showTab(t) {
-  document.getElementById('loginSection').classList.toggle('hide', t!=='login');
-  document.getElementById('regSection').classList.toggle('hide', t!=='reg');
-  document.getElementById('tabLogin').classList.toggle('active', t==='login');
-  document.getElementById('tabReg').classList.toggle('active',   t==='reg');
-  document.querySelector('.form-header h2').textContent = t==='login' ? 'Welcome Back! 👋' : 'Create Account ✨';
-  document.querySelector('.form-header p').textContent  = t==='login' ? 'Login to continue your learning journey' : 'Join ESLD and unlock your superpowers!';
-  clearMsgs();
+/* ══ REVEAL ON SCROLL ════════════════════════════════════ */
+const io = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+/* ══ UTILS ════════════════════════════════════════════════ */
+const $ = s => document.querySelector(s);
+const STORE_KEY = 'esld-students';
+function getStudents(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)||'[]'); }catch(e){ return []; } }
+function saveStudents(a){ localStorage.setItem(STORE_KEY, JSON.stringify(a)); }
+
+function toast(msg, type='ok'){
+  const t=$('#toast'), icon=$('#toastIcon'), m=$('#toastMsg');
+  m.textContent = msg;
+  icon.textContent = type==='err' ? '✕' : '✓';
+  t.className = `toast show ${type}`;
+  clearTimeout(window._tt);
+  window._tt = setTimeout(()=> t.classList.remove('show'), 3400);
 }
 
-// ════════════════════════════
-//  HELPERS
-// ════════════════════════════
-function clearMsgs() {
-  ['loginMsg','regMsg'].forEach(id=>{const e=document.getElementById(id);e.className='msg';e.innerHTML='';});
-  document.querySelectorAll('input,select').forEach(i=>i.classList.remove('err'));
-}
-function showMsg(id,txt,type){const e=document.getElementById(id);e.innerHTML=txt;e.className='msg '+type+' show';}
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
-function toggleEye(id,btn){const el=document.getElementById(id);const pw=el.type==='password';el.type=pw?'text':'password';btn.textContent=pw?'🙈':'👁️';}
-
-// ════════════════════════════
-//  PASSWORD STRENGTH
-// ════════════════════════════
-function checkStrength(pw) {
-  const wrap=document.getElementById('strengthWrap');
-  const fill=document.getElementById('strengthFill');
-  const lbl =document.getElementById('strengthLbl');
-  wrap.style.display='block';
-  let s=0;
-  if(pw.length>=6)s++;if(pw.length>=10)s++;
-  if(/[A-Z]/.test(pw))s++;if(/[0-9]/.test(pw))s++;if(/[^A-Za-z0-9]/.test(pw))s++;
-  const lv=[{p:20,c:'#ef4444',t:'Very Weak'},{p:40,c:'#f97316',t:'Weak'},{p:60,c:'#fbbf24',t:'Fair'},{p:80,c:'#22c55e',t:'Strong'},{p:100,c:'#0ea5e9',t:'Very Strong'}];
-  const v=lv[Math.max(0,s-1)];
-  fill.style.width=v.p+'%';fill.style.background=v.c;lbl.textContent=v.t;lbl.style.color=v.c;
+async function sha256(text){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
-// ════════════════════════════
-//  ID PREVIEW
-// ════════════════════════════
-function generateId(name) {
-  const n = (name||'').trim().toUpperCase().replace(/[^A-Z]/g,'');
-  const pfx = n.length>=3 ? n.substring(0,3) : n.padEnd(3,'X');
-  const k = 'esld_cnt_'+pfx;
-  const cnt = parseInt(localStorage.getItem(k)||'0')+1;
-  return `${pfx}${String(cnt).padStart(4,'0')}ST`;
-}
-function updateIdPreview() {
-  const name = document.getElementById('rName').value.trim();
-  const pv = document.getElementById('idPreview');
-  if(!name){pv.textContent='Fill your name above →';return;}
-  const n = name.toUpperCase().replace(/[^A-Z]/g,'');
-  const pfx = n.substring(0,3).padEnd(3,'X');
-  pv.textContent = pfx+'0001ST (example)';
-  pv.style.color='var(--green)';
+function genOtp(){ return Math.floor(100000+Math.random()*900000).toString(); }
+function isValidMobile(v){ return /^[6-9]\d{9}$/.test(v); }
+function isValidEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+function genSid(schoolCode){
+  const code = (schoolCode||'GEN').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6)||'GEN';
+  const existing = getStudents();
+  let id;
+  do{ id=`SID-${code}-${Math.floor(1000+Math.random()*9000)}`; }while(existing.some(s=>s.sid===id));
+  return id;
 }
 
-// ════════════════════════════
-//  QUICK FILL (DEMO)
-// ════════════════════════════
-function quickFill(email, pass) {
-  document.getElementById('lEmail').value = email;
-  document.getElementById('lPass').value  = pass;
-  showToast('✅ Demo credentials filled!');
+/* Progress bar */
+function setProgress(pct){
+  $('#topProgress').style.width = pct + '%';
 }
 
-// ════════════════════════════
-//  DEMO LOGIN (offline)
-// ════════════════════════════
-function demoLogin() {
-  const demoId = 'DEMO0001ST';
-  sessionStorage.setItem('studentId',   demoId);
-  sessionStorage.setItem('studentName', 'Demo Student');
-  sessionStorage.setItem('disability',  'dyslexia');
-  sessionStorage.setItem('loggedIn',    'true');
-  localStorage.setItem('coins-'+demoId, '120');
-  showToast('🎮 Loading demo mode...');
-  setTimeout(()=>location.href='student-dashboard.html', 1000);
+/* Button loading state */
+function setLoading(btn, on){
+  btn.classList.toggle('loading', on);
+  btn.disabled = on;
 }
 
-// ════════════════════════════
-//  LOGIN
-// ════════════════════════════
-async function doLogin() {
-  clearMsgs();
-  const email = document.getElementById('lEmail').value.trim();
-  const pass  = document.getElementById('lPass').value;
-  if(!email){document.getElementById('lEmail').classList.add('err');showMsg('loginMsg','❌ Please enter your email','error');return;}
-  if(!pass) {document.getElementById('lPass').classList.add('err'); showMsg('loginMsg','❌ Please enter your password','error');return;}
+/* Fake async delay (remove in production) */
+const fakeDelay = ms => new Promise(r=>setTimeout(r,ms));
 
-  const btn=document.getElementById('loginBtn');
-  btn.disabled=true;btn.innerHTML='<span class="loader"></span> Logging in…';
+/* Password visibility toggle */
+function togglePw(id, btn){
+  const inp = document.getElementById(id);
+  const isText = inp.type === 'text';
+  inp.type = isText ? 'password' : 'text';
+  btn.querySelector('svg').style.opacity = isText ? '1' : '.4';
+}
 
-  // Remember me
-  if(document.getElementById('rememberMe').checked) {
-    localStorage.setItem('esld_remember_email', email);
+/* ══ PASSWORD STRENGTH ════════════════════════════════════ */
+function updateStrength(pw){
+  const fill=$('#strengthFill'), hint=$('#strengthHint');
+  let score=0;
+  if(pw.length>=8) score++;
+  if(/[A-Z]/.test(pw)) score++;
+  if(/[0-9]/.test(pw)) score++;
+  if(/[^A-Za-z0-9]/.test(pw)) score++;
+  const levels=[
+    {w:'0%',bg:'transparent',txt:''},
+    {w:'25%',bg:'#ff5d7a',txt:'Weak'},
+    {w:'50%',bg:'#ffaa5a',txt:'Fair'},
+    {w:'75%',bg:'#f5d85e',txt:'Good'},
+    {w:'100%',bg:'var(--accent)',txt:'Strong'},
+  ];
+  const l=levels[score]||levels[0];
+  fill.style.width=l.w; fill.style.background=l.bg;
+  hint.textContent=l.txt; hint.className=`hint ${score>=3?'ok':''}`;
+}
+
+/* ══ TABS ════════════════════════════════════════════════ */
+function switchTab(which){
+  const ind=$('#tabIndicator');
+  $('#tabLoginBtn').classList.toggle('active', which==='login');
+  $('#tabRegisterBtn').classList.toggle('active', which==='register');
+  $('#loginPanel').classList.toggle('active', which==='login');
+  $('#registerPanel').classList.toggle('active', which==='register');
+  ind.classList.toggle('right', which==='register');
+  if(which==='register') resetSteps();
+}
+
+/* ══ REGISTER: MULTI-STEP ════════════════════════════════ */
+let currentStep = 1;
+const totalSteps = 4;
+
+function updateStepUI(step){
+  for(let i=1;i<=totalSteps;i++){
+    const dot=$(`#step${i}dot`), lbl=$(`#step${i}lbl`);
+    dot.classList.remove('active','done');
+    lbl.classList.remove('active');
+    if(i<step){ dot.classList.add('done'); dot.textContent='✓'; }
+    else if(i===step){ dot.classList.add('active'); dot.textContent=i; lbl.classList.add('active'); }
+    else{ dot.textContent=i; }
   }
+  // fill step lines
+  for(let i=1;i<totalSteps;i++){
+    const fill=$(`#line${i}`);
+    if(fill) fill.style.width = i<step ? '100%' : '0%';
+  }
+  setProgress((step-1)/totalSteps*100);
+}
 
-  try {
-    const res  = await fetch(`${API}/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass}),signal:AbortSignal.timeout(9000)});
-    const data = await res.json();
-    if(res.ok){
-      // Format student ID
-      let sid = data.student_id || '';
-      if(!/^[A-Z]{3}\d{4}ST$/.test(String(sid))){
-        const n=(data.name||email).toUpperCase().replace(/[^A-Z]/g,'').substring(0,3).padEnd(3,'X');
-        sid=`${n}${String(parseInt(sid)||1).padStart(4,'0')}ST`;
-      }
-      sessionStorage.setItem('studentId',   sid);
-      sessionStorage.setItem('studentName', data.name||'Student');
-      sessionStorage.setItem('studentEmail',email);
-      sessionStorage.setItem('disability',  data.disability||'');
-      sessionStorage.setItem('loggedIn',    'true');
-      // Save profile for parent dashboard
-      localStorage.setItem('esld_profile_'+email, JSON.stringify({studentId:sid,name:data.name,email,disability:data.disability||'',joinDate:new Date().toISOString()}));
-      showMsg('loginMsg','🎉 Welcome, '+data.name+'! Loading your dashboard…','success');
-      showToast('🚀 Login successful!');
-      setTimeout(()=>{document.body.style.opacity='0';document.body.style.transition='.4s';setTimeout(()=>location.href='student-dashboard.html',380)},1200);
-    } else {
-      showMsg('loginMsg','❌ '+(data.error||'Wrong email or password. Try again!'),'error');
-    }
-  } catch(err){
-    if(err.name==='TimeoutError'||err.name==='AbortError'){
-      showMsg('loginMsg','⚠️ Server timeout. <b>Using offline demo mode instead.</b><br><button onclick="demoLogin()" class="form-link" style="margin-top:6px;display:block">→ Try Demo Mode</button>','error');
-    } else {
-      showMsg('loginMsg','⚠️ Server not reachable. <button onclick="demoLogin()" class="form-link" style="margin-left:4px">Try Demo Mode →</button>','error');
-    }
-  } finally {
-    btn.disabled=false;btn.innerHTML='🚀 Login to ESLD';
+function showStep(step){
+  for(let i=1;i<=totalSteps;i++){
+    const el=$(`#regStep${i}`);
+    if(!el) continue;
+    el.style.display = i===step ? 'block' : 'none';
+    if(i===step) el.style.animation='panelIn .35s cubic-bezier(0.4,0,0.2,1)';
+  }
+  currentStep = step;
+  updateStepUI(step);
+}
+
+function nextStep(from){
+  if(from===1){
+    const name=$('#regName').value.trim(), age=$('#regAge').value.trim(), gender=$('#regGender').value;
+    if(!name||!age||!gender){ toast('Fill in all personal details.','err'); return; }
+    showStep(2);
+  } else if(from===2){
+    const school=$('#regSchoolName').value.trim(), code=$('#regSchoolCode').value.trim(), grade=$('#regGrade').value.trim();
+    if(!school||!code||!grade){ toast('Fill in all school details.','err'); return; }
+    showStep(3);
+  } else if(from===3){
+    if(!regOtpVerified){ toast('Verify the OTP first.','err'); return; }
+    showStep(4);
   }
 }
 
-// ════════════════════════════
-//  REGISTER
-// ════════════════════════════
-let pendingEmail='';
-async function doRegister() {
-  clearMsgs();
-  const name    = document.getElementById('rName').value.trim();
-  const school  = document.getElementById('rSchool').value;
-  const std     = document.getElementById('rStandard').value;
-  const sec     = document.getElementById('rSection').value;
-  const dis     = document.getElementById('rDisability').value;
-  const email   = document.getElementById('rEmail').value.trim();
-  const pass    = document.getElementById('rPass').value;
-  const confirm = document.getElementById('rConfirm').value;
+function prevStep(from){
+  showStep(from-1);
+}
 
-  let ok=true;
-  const markErr=(id)=>{document.getElementById(id).classList.add('err');ok=false;};
-  if(!name)   markErr('rName');
-  if(!school) markErr('rSchool');
-  if(!std)    markErr('rStandard');
-  if(!email)  markErr('rEmail');
-  if(!pass)   markErr('rPass');
-  if(!ok){showMsg('regMsg','❌ Please fill in all required fields','error');return;}
-  if(pass.length<6){showMsg('regMsg','❌ Password must be at least 6 characters','error');return;}
-  if(pass!==confirm){document.getElementById('rConfirm').classList.add('err');showMsg('regMsg','❌ Passwords do not match','error');return;}
+function resetSteps(){
+  showStep(1);
+  regOtpVerified = false;
+  $('#step3Next') && ($('#step3Next').disabled=true);
+  $('#regOtpInputWrap').style.display='none';
+  $('#registerForm').style.display='';
+  $('#registerSuccess').style.display='none';
+}
 
-  const btn=document.getElementById('regBtn');
-  btn.disabled=true;btn.innerHTML='<span class="loader"></span> Creating account…';
+/* ══ LOGIN: PASSWORD ══════════════════════════════════════ */
+async function handleLogin(){
+  const sid=$('#loginSid').value.trim().toUpperCase();
+  const pw=$('#loginPw').value;
+  if(!sid||!pw){ toast('Enter your Student ID and password.','err'); return; }
+  const btn=$('#loginBtn');
+  setLoading(btn,true); setProgress(40);
+  await fakeDelay(700);
+  const student=getStudents().find(s=>s.sid===sid);
+  if(!student){ setLoading(btn,false); setProgress(0); toast('No account found for that Student ID.','err'); return; }
+  const hash=await sha256(pw);
+  if(hash!==student.passwordHash){ setLoading(btn,false); setProgress(0); toast('Incorrect password.','err'); return; }
+  setProgress(100);
+  localStorage.setItem('esld-session', JSON.stringify({role:'student',id:student.sid,name:student.fullName}));
+  toast(`Welcome back, ${student.fullName.split(' ')[0]}! Redirecting…`);
+  setLoading(btn,false);
+  setTimeout(()=>{ setProgress(0); toast('Student Dashboard coming soon!','ok'); },1600);
+}
 
-  try {
-    const body={name,email,password:pass,disability:dis,school,standard:std,section:sec};
-    const res =await fetch(`${API}/register`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(9000)});
-    const data=await res.json();
-    if(res.ok){
-      // Build name-based ID
-      let sid=data.student_id||'';
-      if(!/^[A-Z]{3}\d{4}ST$/.test(String(sid))){ sid=generateId(name); }
-      // Save profile
-      localStorage.setItem('esld_profile_'+email,JSON.stringify({studentId:sid,name,email,disability:dis,school,standard:std,section:sec,joinDate:new Date().toISOString()}));
-      pendingEmail=email;
-      showPopup(sid,name);
-    } else {
-      showMsg('regMsg','❌ '+(data.error||'Registration failed. Please try again.'),'error');
+/* ══ LOGIN: OTP ══════════════════════════════════════════ */
+let loginOtpValue=null;
+function toggleOtpLogin(){
+  const on=$('#otpLoginToggle').checked;
+  $('#loginPwBlock').style.display=on?'none':'block';
+  $('#loginOtpBlock').style.display=on?'block':'none';
+}
+function sendLoginOtp(){
+  const sid=$('#loginOtpSid').value.trim().toUpperCase();
+  const mobile=$('#loginOtpMobile').value.trim();
+  if(!sid){ toast('Enter your Student ID first.','err'); return; }
+  if(!isValidMobile(mobile)){ toast('Enter a valid 10-digit mobile number.','err'); return; }
+  const student=getStudents().find(s=>s.sid===sid&&s.parentMobile===mobile);
+  if(!student){ toast('Student ID and mobile don\'t match our records.','err'); return; }
+  loginOtpValue=genOtp();
+  $('#loginOtpInputWrap').style.display='block';
+  $('#loginOtpHint').textContent=`Demo mode — OTP: ${loginOtpValue}`;
+  toast(`OTP sent to ${mobile.slice(0,2)}••••••${mobile.slice(-2)}`);
+  startResendCooldown($('#loginResendBtn'));
+}
+async function handleOtpLogin(){
+  const code=$('#loginOtpCode').value.trim();
+  if(!loginOtpValue){ toast('Send an OTP first.','err'); return; }
+  if(code!==loginOtpValue){ toast('Incorrect OTP.','err'); return; }
+  const sid=$('#loginOtpSid').value.trim().toUpperCase();
+  const student=getStudents().find(s=>s.sid===sid);
+  setProgress(100);
+  localStorage.setItem('esld-session', JSON.stringify({role:'student',id:student.sid,name:student.fullName}));
+  toast(`Welcome back, ${student.fullName.split(' ')[0]}!`);
+  setTimeout(()=>setProgress(0),800);
+}
+
+/* ══ FORGOT PASSWORD ══════════════════════════════════════ */
+let fpOtpValue=null;
+function toggleForgot(){
+  const el=$('#forgotBlock');
+  el.style.display=el.style.display==='none'?'block':'none';
+}
+function sendForgotOtp(){
+  const sid=$('#fpSid').value.trim().toUpperCase();
+  const email=$('#fpEmail').value.trim();
+  if(!isValidEmail(email)){ toast('Enter a valid email.','err'); return; }
+  const student=getStudents().find(s=>s.sid===sid&&s.studentEmail.toLowerCase()===email.toLowerCase());
+  if(!student){ toast('Student ID and email don\'t match.','err'); return; }
+  fpOtpValue=genOtp();
+  $('#fpOtpWrap').style.display='block';
+  $('#fpNewPwWrap').style.display='block';
+  $('#fpSubmitBtn').style.display='block';
+  toast(`OTP sent (demo: ${fpOtpValue})`);
+}
+async function submitForgotPassword(){
+  const code=$('#fpOtpCode').value.trim();
+  const newPw=$('#fpNewPw').value;
+  if(code!==fpOtpValue){ toast('Incorrect OTP.','err'); return; }
+  if(newPw.length<8){ toast('Password must be at least 8 characters.','err'); return; }
+  const sid=$('#fpSid').value.trim().toUpperCase();
+  const students=getStudents();
+  const idx=students.findIndex(s=>s.sid===sid);
+  students[idx].passwordHash=await sha256(newPw);
+  saveStudents(students);
+  toast('Password updated! You can now log in.');
+  toggleForgot();
+}
+
+/* ══ REGISTER ════════════════════════════════════════════ */
+let regOtpValue=null, regOtpVerified=false;
+
+function sendRegisterOtp(){
+  const mobile=$('#regParentMobile').value.trim();
+  if(!isValidMobile(mobile)){ toast('Enter a valid 10-digit parent mobile number.','err'); return; }
+  regOtpValue=genOtp();
+  regOtpVerified=false;
+  $('#regOtpInputWrap').style.display='block';
+  $('#regOtpHint').textContent=`Demo mode — OTP: ${regOtpValue}`;
+  toast(`OTP sent to parent's mobile (demo: ${regOtpValue})`);
+  startResendCooldown($('#regResendBtn'));
+}
+
+document.addEventListener('input', e=>{
+  if(e.target.id==='regOtpCode'){
+    if(e.target.value.trim()===regOtpValue&&regOtpValue){
+      regOtpVerified=true;
+      const btn=$('#step3Next');
+      if(btn) btn.disabled=false;
+      toast('Mobile number verified!');
+      $('#regOtpHint').textContent='✓ Verified';
+      $('#regOtpHint').className='hint ok';
     }
-  } catch(err){
-    if(err.name==='TimeoutError'||err.name==='AbortError'){
-      showMsg('regMsg','⚠️ Server timeout. Trying offline registration…','info');
-      // Offline fallback registration
-      const sid=generateId(name);
-      localStorage.setItem('esld_profile_'+email,JSON.stringify({studentId:sid,name,email,disability:dis,school,standard:std,section:sec,joinDate:new Date().toISOString()}));
-      pendingEmail=email;
-      setTimeout(()=>showPopup(sid,name),600);
-    } else {
-      showMsg('regMsg','⚠️ Server not found. Created account locally. <small>(Data will sync when server is available)</small>','info');
-      const sid=generateId(name);
-      localStorage.setItem('esld_profile_'+email,JSON.stringify({studentId:sid,name,email,disability:dis,school,standard:std,section:sec,joinDate:new Date().toISOString()}));
-      pendingEmail=email;
-      setTimeout(()=>showPopup(sid,name),400);
-    }
-  } finally {
-    btn.disabled=false;btn.innerHTML='✨ Create My Account';
   }
-}
-
-// ════════════════════════════
-//  POPUP
-// ════════════════════════════
-function showPopup(sid,name){
-  document.getElementById('popId').textContent=sid;
-  document.getElementById('popNameSub').textContent='Generated from name: '+name;
-  document.getElementById('idPopup').classList.remove('hide');
-}
-function closePopup(){document.getElementById('idPopup').classList.add('hide');}
-function copyId(){
-  const txt=document.getElementById('popId').textContent;
-  navigator.clipboard.writeText(txt).then(()=>{
-    const b=document.querySelector('.copy-btn');b.textContent='✅ Copied!';
-    showToast('📋 Student ID copied!');
-    setTimeout(()=>b.textContent='📋 Copy ID',2000);
-  }).catch(()=>{
-    const r=document.createRange();r.selectNode(document.getElementById('popId'));
-    window.getSelection().removeAllRanges();window.getSelection().addRange(r);
-  });
-}
-function proceedLogin(){
-  closePopup();showTab('login');
-  document.getElementById('lEmail').value=pendingEmail;
-  showMsg('loginMsg','✅ Account ready! Enter your password to login.','info');
-}
-
-// ════════════════════════════
-//  ENTER KEY
-// ════════════════════════════
-document.addEventListener('keydown',e=>{
-  if(e.key!=='Enter') return;
-  if(!document.getElementById('regSection').classList.contains('hide')) doRegister();
-  else doLogin();
 });
 
-// ════════════════════════════
-//  REMEMBER ME AUTO-FILL
-// ════════════════════════════
-const remembered=localStorage.getItem('esld_remember_email');
-if(remembered){
-  document.getElementById('lEmail').value=remembered;
-  document.getElementById('rememberMe').checked=true;
+async function handleRegister(){
+  const data={
+    fullName:$('#regName').value.trim(),
+    age:$('#regAge').value.trim(),
+    gender:$('#regGender').value,
+    schoolName:$('#regSchoolName').value.trim(),
+    schoolCode:$('#regSchoolCode').value.trim().toUpperCase(),
+    classGrade:$('#regGrade').value.trim(),
+    parentMobile:$('#regParentMobile').value.trim(),
+    parentEmail:$('#regParentEmail').value.trim(),
+    studentEmail:$('#regStudentEmail').value.trim(),
+    pw:$('#regPw').value,
+    pwConfirm:$('#regPwConfirm').value
+  };
+  if(Object.values(data).some(v=>v==='')){ toast('Please fill in every field.','err'); return; }
+  if(!isValidEmail(data.parentEmail)||!isValidEmail(data.studentEmail)){ toast('Check that both emails are valid.','err'); return; }
+  if(data.pw.length<8){ toast('Password must be at least 8 characters.','err'); return; }
+  if(data.pw!==data.pwConfirm){ toast('Passwords don\'t match.','err'); return; }
+
+  const btn=$('#regSubmitBtn');
+  setLoading(btn,true); setProgress(60);
+  await fakeDelay(800);
+
+  const sid=genSid(data.schoolCode);
+  const passwordHash=await sha256(data.pw);
+  const students=getStudents();
+  students.push({
+    sid, fullName:data.fullName, age:data.age, gender:data.gender,
+    schoolName:data.schoolName, schoolCode:data.schoolCode, classGrade:data.classGrade,
+    parentMobile:data.parentMobile, parentEmail:data.parentEmail, studentEmail:data.studentEmail,
+    passwordHash, createdAt:new Date().toISOString()
+  });
+  saveStudents(students);
+
+  setProgress(100);
+  setLoading(btn,false);
+
+  $('#registerForm').style.display='none';
+  $('#regSteps').style.display='none';
+  $('#registerSuccess').style.display='block';
+  $('#newSidDisplay').textContent=sid;
+  window._lastSid=sid;
+  setTimeout(()=>setProgress(0),600);
 }
+
+function copySid(){
+  navigator.clipboard?.writeText(window._lastSid||'');
+  toast('Student ID copied to clipboard!');
+}
+function prefillLogin(){
+  if(window._lastSid) $('#loginSid').value=window._lastSid;
+}
+
+/* ══ RESEND COOLDOWN ══════════════════════════════════════ */
+function startResendCooldown(btn){
+  let n=30;
+  btn.disabled=true; btn.textContent=`Resend (${n})`;
+  const t=setInterval(()=>{
+    n--;
+    if(n<=0){ clearInterval(t); btn.disabled=false; btn.textContent='Resend'; }
+    else btn.textContent=`Resend (${n})`;
+  },1000);
+}
+
+/* ══ INIT ════════════════════════════════════════════════ */
+updateStepUI(1);
+// Trigger reveal animations
+setTimeout(()=>{
+  document.querySelectorAll('.reveal').forEach((el,i)=>{
+    setTimeout(()=>el.classList.add('in'), i*80);
+  });
+},200);
 </script>
 </body>
 </html>
