@@ -26,7 +26,8 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:#f1f5f9;min-heig
 .t-avatar{width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:grid;place-items:center;font-size:20px;margin:0 auto 8px;font-weight:900}
 .t-name{font-weight:800;font-size:.88rem}
 .t-id{color:#64748b;font-size:.72rem;margin-top:2px}
-.header{background:rgba(15,23,42,.75);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50}
+.t-school-chip{margin-top:8px;padding:5px 9px;border-radius:10px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:var(--green);font-size:.68rem;font-weight:800;line-height:1.4;word-break:break-word}
+.header{background:rgba(15,23,42,.75);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;flex-wrap:wrap;gap:10px}
 .header h2{font-family:'Fredoka One';font-size:1.35rem}
 .hdate{color:#64748b;font-size:.78rem;margin-top:2px}
 .header-right{display:flex;gap:8px;align-items:center}
@@ -154,8 +155,9 @@ textarea{resize:vertical;min-height:75px}
 .det-item{background:rgba(255,255,255,.05);border-radius:11px;padding:11px}
 .det-l{font-size:.72rem;color:#64748b;font-weight:700;margin-bottom:3px}
 .det-v{font-weight:800;font-size:.96rem}
-.toast{position:fixed;bottom:24px;right:24px;background:#0f172a;border:1px solid var(--green);border-radius:14px;padding:14px 20px;color:var(--green);font-weight:800;font-size:.88rem;z-index:9999;transform:translateY(80px);transition:.4s;display:flex;align-items:center;gap:10px}
+.toast{position:fixed;bottom:24px;right:24px;background:#0f172a;border:1px solid var(--green);border-radius:14px;padding:14px 20px;color:var(--green);font-weight:800;font-size:.88rem;z-index:9999;transform:translateY(80px);transition:.4s;display:flex;align-items:center;gap:10px;max-width:380px}
 .toast.show{transform:translateY(0)}
+.toast.warn-toast{border-color:var(--yellow);color:var(--yellow)}
 .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.15);border-top-color:var(--blue);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading{text-align:center;padding:30px;color:#64748b;font-size:.88rem}
@@ -184,6 +186,7 @@ textarea{resize:vertical;min-height:75px}
     <div class="t-avatar" id="tAvatar">T</div>
     <div class="t-name" id="tName">Teacher</div>
     <div class="t-id" id="tId">ID: --</div>
+    <div class="t-school-chip" id="tSchoolChip">🏫 —</div>
   </div>
 </aside>
 
@@ -191,6 +194,7 @@ textarea{resize:vertical;min-height:75px}
   <div>
     <h2 id="pageTitle">Dashboard Overview</h2>
     <div class="hdate" id="hDate"></div>
+    <div class="hdate" id="hSchool" style="color:var(--blue);font-weight:700;margin-top:2px"></div>
   </div>
   <div class="header-right">
     <span class="hbadge">👩‍🏫 Teacher Portal</span>
@@ -282,7 +286,12 @@ textarea{resize:vertical;min-height:75px}
         </select>
       </div>
       <div class="form-group"><label>Assign To</label>
-        <select id="aGroup"><option>All Students</option><option>Dyslexia Group</option><option>Dysgraphia Group</option><option>ADHD Group</option></select>
+        <select id="aGroup" onchange="toggleAssignStudentSel()">
+          <option>All Students</option><option>Dyslexia Group</option><option>Dysgraphia Group</option><option>ADHD Group</option><option>Specific Student</option>
+        </select>
+      </div>
+      <div class="form-group" id="aStudentWrap" style="display:none"><label>Choose Student</label>
+        <select id="aStudent"><option value="">No students loaded yet</option></select>
       </div>
       <div class="form-group"><label>Difficulty</label>
         <select id="aDiff"><option>Easy</option><option>Medium</option><option>Hard</option></select>
@@ -358,15 +367,19 @@ textarea{resize:vertical;min-height:75px}
     <h4>📤 Send Message to Student / Parent</h4>
     <div class="form-grid">
       <div class="form-group"><label>Send To</label>
-        <select id="tMsgTo">
+        <select id="tMsgTo" onchange="toggleMsgStudentSel()">
           <option value="all-students">All Students</option>
           <option value="all-parents">All Parents</option>
-          <option value="specific">Specific Student</option>
+          <option value="specific-student">Specific Student</option>
+          <option value="specific-parent">Specific Student's Parent</option>
           <option value="dyslexia">Dyslexia Group</option>
+          <option value="dysgraphia">Dysgraphia Group</option>
           <option value="adhd">ADHD Group</option>
         </select>
       </div>
-      <div class="form-group"><label>Student Name (if specific)</label><input type="text" id="tMsgStudent" placeholder="Enter student name"/></div>
+      <div class="form-group" id="tMsgStudentWrap" style="display:none"><label>Choose Student</label>
+        <select id="tMsgStudentSel"><option value="">No students loaded yet</option></select>
+      </div>
       <div class="form-group"><label>Subject</label><input type="text" id="tMsgSubject" placeholder="Message subject"/></div>
       <div class="form-group"><label>Type</label>
         <select id="tMsgType">
@@ -429,9 +442,9 @@ textarea{resize:vertical;min-height:75px}
     <div class="det-grid" id="modalDets"></div>
     <canvas id="modalChart" height="110"></canvas>
     <div style="margin-top:13px;display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn primary" onclick="closeModal();messageStudent()">💬 Message Student</button>
-      <button class="btn" onclick="closeModal();goTab('assignments',null)">📝 Assign Activity</button>
-      <button class="btn warn" onclick="closeModal()">📊 View Progress</button>
+      <button class="btn primary" id="modalMsgBtn" onclick="closeModal();">💬 Message Student</button>
+      <button class="btn warn" id="modalParentBtn" onclick="closeModal();">👪 Message Parent</button>
+      <button class="btn" id="modalAssignBtn" onclick="closeModal();">📝 Assign Activity</button>
       <button class="btn danger" onclick="closeModal();showToast('⚠️ Student flagged for review!')">⚠️ Flag</button>
     </div>
     <button class="modal-close" onclick="closeModal()">Close</button>
@@ -444,15 +457,40 @@ textarea{resize:vertical;min-height:75px}
 Chart.defaults.color='#64748b';
 Chart.defaults.borderColor='rgba(255,255,255,.07)';
 
+// Same backend as the rest of ESLD (student/teacher login pages already
+// point here). Flask serves /all-students-progress, /student-game-summary,
+// etc — see app.py.
+const API = 'https://esld.onrender.com';
+
 if(!sessionStorage.getItem('teacherLoggedIn')){
+  // Direct-URL demo bootstrap. teacher-login.html always sets a real
+  // school (and standard/section if chosen) on completeLogin() — this
+  // fallback just gives a sane default if someone opens this page
+  // directly without going through login.
   sessionStorage.setItem('teacherId','TEA-DEMO-001');
   sessionStorage.setItem('teacherName','Ms. Priya Sharma');
+  sessionStorage.setItem('teacherSchool','Loyola School, Chennai');
+  sessionStorage.setItem('teacherStandard','');
+  sessionStorage.setItem('teacherSection','');
   sessionStorage.setItem('teacherLoggedIn','true');
 }
 document.getElementById('tName').textContent=sessionStorage.getItem('teacherName')||'Teacher';
 document.getElementById('tId').textContent='ID: '+(sessionStorage.getItem('teacherId')||'TEA-001');
 document.getElementById('tAvatar').textContent=(sessionStorage.getItem('teacherName')||'T')[0].toUpperCase();
 document.getElementById('hDate').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+// ── Safe JSON helper — every localStorage read in this file goes through
+// this instead of a bare JSON.parse, so one corrupted key can't take down
+// the whole dashboard (this was the root cause of similar "many errors"
+// bugs elsewhere in ESLD). ──
+function safeJSON(key, fallback){
+  try{
+    const raw = localStorage.getItem(key);
+    if(raw===null) return fallback;
+    const v = JSON.parse(raw);
+    return v===null||v===undefined ? fallback : v;
+  }catch(e){ return fallback; }
+}
 
 let STUDENTS=[];
 const DEMO=[
@@ -470,9 +508,63 @@ const DEMO=[
   {student_id:'ESLD2026ST012',name:'Lakshmi Pillai',disability:'dyslexia',avg_accuracy:94,sessions:35,total_coins:680,status:'high',last_active:'2026-05-17'},
 ];
 
+// ════════════════════════════════════════
+// LOAD STUDENTS — real, school/class-filtered data from the backend.
+// This is the actual teacher↔student connection: app.py's
+// /all-students-progress route filters the `students` table by the exact
+// school (and optionally standard/section) the teacher is signed in
+// under — the same school string a student picked from the dropdown on
+// student-login.html. Two distinct "no data" situations are told apart:
+//   • network/server unreachable  -> fall back to demo data, say so
+//   • server fine, zero matches   -> real empty state, NOT demo data
+// ════════════════════════════════════════
 async function loadStudents(){
-  STUDENTS = DEMO;
-  renderOverview(); renderStudents(STUDENTS); renderAnalytics(); renderAlerts(); renderAssignments(); renderMessages(); renderDoubts(); updateBadges();
+  document.getElementById('stuBody').innerHTML = `<tr><td colspan="9" class="loading"><span class="spinner"></span> Loading your class…</td></tr>`;
+  const school   = sessionStorage.getItem('teacherSchool')   || '';
+  const standard = sessionStorage.getItem('teacherStandard') || '';
+  const section  = sessionStorage.getItem('teacherSection')  || '';
+  updateSchoolBanner(school, standard, section);
+
+  let usedDemo=false, isEmpty=false;
+  try{
+    const qs=new URLSearchParams();
+    if(school)   qs.set('school', school);
+    if(standard) qs.set('standard', standard);
+    if(section)  qs.set('section', section);
+    const res=await fetch(`${API}/all-students-progress?${qs.toString()}`,{signal:AbortSignal.timeout(8000)});
+    if(!res.ok) throw new Error('bad status '+res.status);
+    const data=await res.json();
+    if(Array.isArray(data.students) && data.students.length){
+      STUDENTS = data.students;
+    } else {
+      STUDENTS = []; isEmpty = true;
+    }
+  }catch(e){
+    STUDENTS = DEMO; usedDemo = true;
+  }
+
+  renderOverview(); renderStudents(STUDENTS); renderAnalytics(); renderAlerts(); renderAssignments(); renderMessages(); renderDoubts(); updateBadges(); populateStudentSelectors();
+
+  if(usedDemo){
+    showToast('⚠️ Server unreachable — showing demo data so you can explore the dashboard.', true);
+  } else if(isEmpty){
+    showToast(`📭 No students have registered under "${school||'your school'}" yet.`, true);
+  }
+}
+
+function updateSchoolBanner(school, standard, section){
+  const chip=document.getElementById('tSchoolChip');
+  const hEl=document.getElementById('hSchool');
+  if(!school){
+    chip.textContent='🏫 No school set';
+    hEl.textContent='⚠️ No school on your profile — showing ALL students. Update your profile to filter by school.';
+    return;
+  }
+  chip.textContent='🏫 '+school;
+  let txt='🏫 '+school;
+  if(standard) txt+=' • Grade '+standard;
+  if(section)  txt+=' '+section;
+  hEl.textContent=txt;
 }
 
 // TABS
@@ -498,7 +590,7 @@ function renderOverview(){
   document.getElementById('ovTotal').textContent=T;
   const active=H+Math.floor(M*.7);
   document.getElementById('ovActive').textContent=active;
-  document.getElementById('activeRate').textContent=Math.round(active/T*100)+'% active rate';
+  document.getElementById('activeRate').textContent=(T?Math.round(active/T*100):0)+'% active rate';
   document.getElementById('ovAcc').textContent=acc+'%';
   document.getElementById('ovLow').textContent=L;
   const dg={dyslexia:[],dysgraphia:[],adhd:[]};
@@ -512,34 +604,83 @@ function renderOverview(){
   OVC.t=new Chart(document.getElementById('cTrend'),{type:'line',data:{labels:d30,datasets:[{data:d30.map((_,i)=>Math.max(35,Math.min(98,acc-18+i*.65+Math.sin(i*.4)*5))),borderColor:'#a78bfa',backgroundColor:'#a78bfa15',tension:.4,fill:true}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{min:25,max:100}}}});
   const ar=STUDENTS.filter(s=>s.status==='low');
   const el=document.getElementById('atRiskList');
+  if(!T){el.innerHTML=`<div class="alert info"><div class="alert-ic">📭</div><div class="alert-text"><b>No students yet</b><span>Once students register under your school, they'll show up here.</span></div></div>`;return;}
   if(!ar.length){el.innerHTML=`<div class="alert good"><div class="alert-ic">🎉</div><div class="alert-text"><b>All students are on track!</b></div></div>`;return;}
   el.innerHTML=ar.map(s=>`<div class="alert warn"><div class="alert-ic">⚠️</div><div class="alert-text"><b>${s.name}</b><span>${s.disability.toUpperCase()} • ${s.avg_accuracy}% accuracy • Last active: ${s.last_active||'N/A'}</span></div><button class="btn" onclick="openModal('${s.student_id}')" style="margin-left:auto">View →</button></div>`).join('');
-  // Quick action unread count
-  const msgs = JSON.parse(localStorage.getItem('teacher-inbox')||'[]');
+  const msgs = safeJSON('teacher-inbox',[]);
   const unread = msgs.filter(m=>!m.read).length;
-  if(unread>0) document.getElementById('qaUnread').textContent = '('+unread+' new)';
+  document.getElementById('qaUnread').textContent = unread>0 ? '('+unread+' new)' : '';
 }
 
 // STUDENTS
 function renderStudents(list){
   document.getElementById('stuCount').textContent=list.length;
   const colors=['#22c55e','#38bdf8','#a78bfa','#f472b6','#fbbf24','#fb923c'];
-  if(!list.length){document.getElementById('stuBody').innerHTML=`<tr><td colspan="9" class="loading">No students found</td></tr>`;return;}
+  if(!list.length){
+    const school=sessionStorage.getItem('teacherSchool')||'your school';
+    document.getElementById('stuBody').innerHTML=`<tr><td colspan="9" class="loading">📭 No students found for "${school}" matching these filters yet.</td></tr>`;
+    return;
+  }
   document.getElementById('stuBody').innerHTML=list.map((s,i)=>{
     const clr=colors[i%colors.length],pc=s.status==='high'?'#22c55e':s.status==='medium'?'#fbbf24':'#ef4444';
     const stTxt=s.status==='high'?'✅ On Track':s.status==='medium'?'⚡ Average':'🔴 Struggling';
-    return`<tr><td><div class="s-cell"><div class="s-av" style="background:linear-gradient(135deg,${clr}55,${clr}25);color:${clr}">${s.name[0]}</div><div><div style="font-weight:800;font-size:.85rem">${s.name}</div><div style="color:#64748b;font-size:.72rem">${s.disability}</div></div></div></td><td style="color:#64748b;font-size:.78rem">${s.student_id}</td><td><span class="tag ${s.disability}">${s.disability}</span></td><td style="font-weight:800;color:${pc}">${s.avg_accuracy}%</td><td>${s.sessions}</td><td style="color:var(--yellow)">🪙${s.total_coins}</td><td style="color:#64748b;font-size:.78rem">${s.last_active||'Never'}</td><td><span class="tag ${s.status}">${stTxt}</span></td><td style="display:flex;gap:4px;flex-wrap:wrap"><button class="act-btn" onclick="openModal('${s.student_id}')">Details</button><button class="act-btn" onclick="quickMsg('${s.name}')">💬</button></td></tr>`;
+    return`<tr><td><div class="s-cell"><div class="s-av" style="background:linear-gradient(135deg,${clr}55,${clr}25);color:${clr}">${s.name[0]}</div><div><div style="font-weight:800;font-size:.85rem">${s.name}</div><div style="color:#64748b;font-size:.72rem">${s.disability}</div></div></div></td><td style="color:#64748b;font-size:.78rem">${s.student_id}</td><td><span class="tag ${s.disability}">${s.disability}</span></td><td style="font-weight:800;color:${pc}">${s.avg_accuracy}%</td><td>${s.sessions}</td><td style="color:var(--yellow)">🪙${s.total_coins}</td><td style="color:#64748b;font-size:.78rem">${s.last_active||'Never'}</td><td><span class="tag ${s.status}">${stTxt}</span></td><td style="display:flex;gap:4px;flex-wrap:wrap"><button class="act-btn" onclick="openModal('${s.student_id}')">Details</button><button class="act-btn" onclick="quickMsg('${s.student_id}')" title="Message student">💬</button><button class="act-btn" onclick="parentMsg('${s.student_id}')" title="Message parent">👪</button><button class="act-btn" onclick="quickAssign('${s.student_id}')" title="Assign activity">📝</button></td></tr>`;
   }).join('');
 }
 function filterStudents(q){renderStudents(STUDENTS.filter(s=>s.name.toLowerCase().includes(q.toLowerCase())||s.student_id.toLowerCase().includes(q.toLowerCase())))}
 function filterDisability(d){renderStudents(d?STUDENTS.filter(s=>s.disability===d):STUDENTS)}
 function filterStatus(st){renderStudents(st?STUDENTS.filter(s=>s.status===st):STUDENTS)}
-function quickMsg(stuName){goTab('messages',null);document.getElementById('tMsgTo').value='specific';document.getElementById('tMsgStudent').value=stuName;}
+
+// ════════════════════════════════════════
+// SELECTOR POPULATION — keeps the assignment / message "specific student"
+// dropdowns in sync with whatever STUDENTS currently holds.
+// ════════════════════════════════════════
+function populateStudentSelectors(){
+  const opts = STUDENTS.length
+    ? STUDENTS.map(s=>`<option value="${s.student_id}">${s.name} (${s.student_id})</option>`).join('')
+    : '<option value="">No students loaded</option>';
+  const a=document.getElementById('aStudent'); if(a) a.innerHTML=opts;
+  const m=document.getElementById('tMsgStudentSel'); if(m) m.innerHTML=opts;
+}
+function toggleAssignStudentSel(){
+  document.getElementById('aStudentWrap').style.display =
+    document.getElementById('aGroup').value==='Specific Student' ? 'flex' : 'none';
+}
+function toggleMsgStudentSel(){
+  const v=document.getElementById('tMsgTo').value;
+  document.getElementById('tMsgStudentWrap').style.display =
+    (v==='specific-student'||v==='specific-parent') ? 'flex' : 'none';
+}
+function quickMsg(sid){
+  goTab('messages',null);
+  document.getElementById('tMsgTo').value='specific-student';
+  toggleMsgStudentSel();
+  document.getElementById('tMsgStudentSel').value=sid;
+  document.querySelector('#sec-messages .form-card').scrollIntoView({behavior:'smooth'});
+}
+function parentMsg(sid){
+  goTab('messages',null);
+  document.getElementById('tMsgTo').value='specific-parent';
+  toggleMsgStudentSel();
+  document.getElementById('tMsgStudentSel').value=sid;
+  document.querySelector('#sec-messages .form-card').scrollIntoView({behavior:'smooth'});
+}
+function quickAssign(sid){
+  goTab('assignments',null);
+  document.getElementById('aGroup').value='Specific Student';
+  toggleAssignStudentSel();
+  document.getElementById('aStudent').value=sid;
+  document.querySelector('#sec-assignments .form-card').scrollIntoView({behavior:'smooth'});
+}
 
 // ANALYTICS
 let ANC={};
 function renderAnalytics(){
-  if(!STUDENTS.length)return;
+  if(!STUDENTS.length){
+    ['anDys','anDysg','anAdhd'].forEach(id=>document.getElementById(id).textContent='--%');
+    document.getElementById('anCoins').textContent='--';
+    return;
+  }
   const dg={dyslexia:[],dysgraphia:[],adhd:[]};
   STUDENTS.forEach(s=>{if(dg[s.disability])dg[s.disability].push(s.avg_accuracy)});
   const da=k=>dg[k].length?Math.round(dg[k].reduce((a,v)=>a+v,0)/dg[k].length):0;
@@ -549,37 +690,72 @@ function renderAnalytics(){
   document.getElementById('anCoins').textContent=STUDENTS.reduce((a,s)=>a+s.total_coins,0);
   Object.values(ANC).forEach(c=>{try{c.destroy()}catch{}});ANC={};
   ANC.b=new Chart(document.getElementById('cAllStu'),{type:'bar',data:{labels:STUDENTS.map(s=>s.name.split(' ')[0]),datasets:[{data:STUDENTS.map(s=>s.avg_accuracy),backgroundColor:STUDENTS.map(s=>s.status==='high'?'#22c55e60':s.status==='medium'?'#fbbf2460':'#ef444460'),borderColor:STUDENTS.map(s=>s.status==='high'?'#22c55e':s.status==='medium'?'#fbbf24':'#ef4444'),borderWidth:2,borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:100}}}});
-  const dc={dyslexia:0,dysgraphia:0,adhd:0};STUDENTS.forEach(s=>dc[s.disability]++);
+  const dc={dyslexia:0,dysgraphia:0,adhd:0};STUDENTS.forEach(s=>{if(dc[s.disability]!==undefined)dc[s.disability]++});
   ANC.p=new Chart(document.getElementById('cPie'),{type:'doughnut',data:{labels:['Dyslexia','Dysgraphia','ADHD'],datasets:[{data:Object.values(dc),backgroundColor:['#22c55e50','#38bdf850','#fb923c50'],borderColor:['#22c55e','#38bdf8','#fb923c'],borderWidth:2}]},options:{responsive:true,cutout:'55%'}});
-  const sc={high:0,medium:0,low:0};STUDENTS.forEach(s=>sc[s.status]++);
+  const sc={high:0,medium:0,low:0};STUDENTS.forEach(s=>{if(sc[s.status]!==undefined)sc[s.status]++});
   ANC.s=new Chart(document.getElementById('cStatus'),{type:'bar',data:{labels:['On Track','Average','Struggling'],datasets:[{data:[sc.high,sc.medium,sc.low],backgroundColor:['#22c55e60','#fbbf2460','#ef444460'],borderColor:['#22c55e','#fbbf24','#ef4444'],borderWidth:2,borderRadius:8}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
 }
 
 // ASSIGNMENTS
-let ASSIGNS=[
+const SEED_ASSIGNS=[
   {title:'Missing Letter – Easy',game:'Missing Letter',to:'Dyslexia Group',due:'2026-05-20',difficulty:'Easy',done:'18/20',status:'Active'},
   {title:'Letter Confusion Practice',game:'Letter Confusion',to:'All Students',due:'2026-05-17',difficulty:'Medium',done:'22/24',status:'Due Today'},
   {title:'Word Builder – Medium',game:'Word Builder',to:'Dyslexia Group',due:'2026-05-14',difficulty:'Medium',done:'12/12',status:'Completed'},
   {title:'Focus Training Set 1',game:'Focus Training',to:'ADHD Group',due:'2026-05-25',difficulty:'Hard',done:'4/8',status:'Active'},
 ];
 function renderAssignments(){
-  const teacherA = JSON.parse(localStorage.getItem('teacher-assignments')||'[]');
-  const all = [...ASSIGNS, ...teacherA.map(a=>({...a,difficulty:a.difficulty||'Medium',done:'0/'+STUDENTS.length,status:'Active'}))];
+  const teacherA = safeJSON('teacher-assignments',[]);
+  const all = [...SEED_ASSIGNS, ...teacherA.map(a=>({...a,difficulty:a.difficulty||'Medium',done:a.done||('0/'+STUDENTS.length),status:a.status||'Active'}))];
   document.getElementById('assignBody').innerHTML=all.map(a=>{
     const clr=a.status==='Completed'?'#22c55e':a.status==='Due Today'?'#ef4444':'#38bdf8';
     return`<tr><td style="font-weight:700">${a.title}</td><td>${a.game}</td><td>${a.to}</td><td>${a.due}</td><td><span class="tag" style="background:rgba(251,191,36,.13);color:var(--yellow)">${a.difficulty}</span></td><td style="font-weight:800;color:#22c55e">${a.done}</td><td><span class="tag" style="background:${clr}20;color:${clr}">${a.status}</span></td><td><button class="act-btn" onclick="showToast('✅ Assignment details coming soon!')">View</button></td></tr>`;
   }).join('');
 }
+function resolveAssignmentTargets(a){
+  if(a.toGroup==='Specific Student') return a.toStudentId ? [a.toStudentId] : [];
+  if(a.toGroup==='Dyslexia Group')   return STUDENTS.filter(s=>s.disability==='dyslexia').map(s=>s.student_id);
+  if(a.toGroup==='Dysgraphia Group') return STUDENTS.filter(s=>s.disability==='dysgraphia').map(s=>s.student_id);
+  if(a.toGroup==='ADHD Group')       return STUDENTS.filter(s=>s.disability==='adhd').map(s=>s.student_id);
+  return STUDENTS.map(s=>s.student_id);
+}
 function submitAssign(){
   const t=document.getElementById('aTitle').value.trim();
   if(!t){showToast('❌ Please enter a title');return;}
-  const a={title:t,game:document.getElementById('aGame').value,to:document.getElementById('aGroup').value,due:document.getElementById('aDue').value||'TBD',difficulty:document.getElementById('aDiff').value,coins:Number(document.getElementById('aCoins').value)||50,instructions:document.getElementById('aInstr').value};
-  const ta=JSON.parse(localStorage.getItem('teacher-assignments')||'[]');
+  const groupVal=document.getElementById('aGroup').value;
+  const specificId=document.getElementById('aStudent').value;
+  if(groupVal==='Specific Student' && !specificId){showToast('❌ Choose a student first');return;}
+  const targetStudent=STUDENTS.find(s=>s.student_id===specificId);
+  const a={
+    title:t,
+    game:document.getElementById('aGame').value,
+    toGroup:groupVal,
+    toStudentId: groupVal==='Specific Student' ? specificId : null,
+    to: groupVal==='Specific Student' ? (targetStudent?targetStudent.name:specificId) : groupVal,
+    due:document.getElementById('aDue').value||'TBD',
+    difficulty:document.getElementById('aDiff').value,
+    coins:Number(document.getElementById('aCoins').value)||50,
+    instructions:document.getElementById('aInstr').value,
+    school: sessionStorage.getItem('teacherSchool')||'',
+    createdAt:new Date().toISOString()
+  };
+  const ta=safeJSON('teacher-assignments',[]);
   ta.unshift(a);
   localStorage.setItem('teacher-assignments',JSON.stringify(ta));
+
+  // Fan out into each targeted student's own assignment list, so a future
+  // student-assignments.html (or the existing one, if it reads this key)
+  // can show it without re-deriving the group logic.
+  const targets=resolveAssignmentTargets(a);
+  targets.forEach(sid=>{
+    const key='student-assignments-'+sid;
+    const list=safeJSON(key,[]);
+    list.unshift({...a, status:'Active'});
+    localStorage.setItem(key,JSON.stringify(list));
+  });
+
   renderAssignments();
   document.getElementById('aTitle').value='';document.getElementById('aInstr').value='';
-  showToast('✅ Assignment created and sent to students!');
+  showToast(`✅ Assignment sent to ${targets.length} student${targets.length===1?'':'s'}!`);
 }
 function saveDraft(){ showToast('💾 Draft saved!'); }
 function previewAssign(){ showToast('👁️ Preview feature coming soon!'); }
@@ -591,8 +767,8 @@ function renderAlerts(){
     if(s.status==='low')al.push({type:'warn',ic:'🔴',title:`${s.name} – Low Performance`,sub:`Accuracy: ${s.avg_accuracy}% • ${s.sessions} sessions`,time:'Today'});
     if(s.status==='high'&&s.avg_accuracy>=90)al.push({type:'good',ic:'🏆',title:`${s.name} – Outstanding!`,sub:`${s.avg_accuracy}% accuracy — Excellent progress!`,time:'Today'});
   });
-  const doubts=JSON.parse(localStorage.getItem('student-doubts')||'[]');
-  doubts.filter(d=>!d.reply).forEach(d=>al.unshift({type:'doubt',ic:'💡',title:'Doubt from '+d.from,sub:d.assignment+': '+d.message.substring(0,60)+'...',time:'Recent'}));
+  const doubts=safeJSON('student-doubts',[]);
+  doubts.filter(d=>!d.reply).forEach(d=>al.unshift({type:'doubt',ic:'💡',title:'Doubt from '+d.from,sub:d.assignment+': '+(d.message||'').substring(0,60)+'...',time:'Recent'}));
   al.push({type:'info',ic:'📅',title:'Assignment Due Soon',sub:'Letter Confusion Practice due today.',time:'8h ago'});
   const cr=al.filter(a=>a.type==='warn').length,gd=al.filter(a=>a.type==='good').length;
   document.getElementById('alCrit').textContent=cr;document.getElementById('alWarn').textContent=doubts.filter(d=>!d.reply).length;document.getElementById('alGood').textContent=gd;document.getElementById('alTotal').textContent=al.length;
@@ -606,11 +782,11 @@ function getTeacherInbox(){
     {id:'base-001',from:"Mrs. Anita (Arjun's Parent)",studentId:'ESLD2026ST001',subject:'Thank You!',body:'Thank you! Arjun loved the Word Builder game. He has been practicing every evening.',time:'2026-05-16T09:30:00',read:false,type:'parent'},
     {id:'base-002',from:"Mr. Kumar (Ravi's Parent)",studentId:'ESLD2026ST003',subject:'Progress Report Request',body:"Can you send this week's progress report for Ravi? We want to help him practice at home.",time:'2026-05-15T14:00:00',read:true,type:'parent'},
   ];
-  const live=JSON.parse(localStorage.getItem('teacher-inbox')||'[]');
+  const live=safeJSON('teacher-inbox',[]);
   return [...live,...base];
 }
 function getSentByTeacher(){
-  return JSON.parse(localStorage.getItem('teacher-sent')||'[]');
+  return safeJSON('teacher-sent',[]);
 }
 function switchMsgTab(tab,btn){
   msgTab=tab;
@@ -666,8 +842,7 @@ function openTeacherMsg(msgId, i, tab){
   const m=msgs[i]; if(!m)return;
   currentMsgId=msgId;
 
-  // Mark as read
-  const liveInbox=JSON.parse(localStorage.getItem('teacher-inbox')||'[]');
+  const liveInbox=safeJSON('teacher-inbox',[]);
   const li=liveInbox.find(x=>x.id===msgId);
   if(li){li.read=true;localStorage.setItem('teacher-inbox',JSON.stringify(liveInbox));}
 
@@ -697,57 +872,82 @@ function openTeacherMsg(msgId, i, tab){
 function sendReply(){
   const txt=document.getElementById('replyText').value.trim();
   if(!txt){showToast('❌ Write a reply first!');return;}
-  const liveInbox=JSON.parse(localStorage.getItem('teacher-inbox')||'[]');
+  const liveInbox=safeJSON('teacher-inbox',[]);
   const msg=liveInbox.find(m=>m.id===currentMsgId);
   if(msg){
     msg.reply=txt;msg.read=true;
     localStorage.setItem('teacher-inbox',JSON.stringify(liveInbox));
-    // Also write to student's inbox if it came from a student
     if(msg.studentId){
-      const sInbox=JSON.parse(localStorage.getItem('student-inbox-'+msg.studentId)||'[]');
-      sInbox.unshift({id:'reply-'+Date.now(),from:'Ms. Priya Sharma',subject:'Re: '+msg.subject,body:txt,time:new Date().toISOString(),read:false});
+      const sInbox=safeJSON('student-inbox-'+msg.studentId,[]);
+      sInbox.unshift({id:'reply-'+Date.now(),from:sessionStorage.getItem('teacherName')||'Teacher',subject:'Re: '+msg.subject,body:txt,time:new Date().toISOString(),read:false});
       localStorage.setItem('student-inbox-'+msg.studentId,JSON.stringify(sInbox));
     }
   }
-  // For doubts
-  const doubts=JSON.parse(localStorage.getItem('student-doubts')||'[]');
+  const doubts=safeJSON('student-doubts',[]);
   const d=doubts.find(x=>x.studentId===msg?.studentId&&x.subject===msg?.subject);
-  if(d)d.reply=txt;
-  localStorage.setItem('student-doubts',JSON.stringify(doubts));
+  if(d){d.reply=txt;localStorage.setItem('student-doubts',JSON.stringify(doubts));}
 
   document.getElementById('replyText').value='';
-  if(msg){ msg.reply=txt; openTeacherMsg(currentMsgId,0,msgTab); }
+  if(msg){ openTeacherMsg(currentMsgId,0,msgTab); }
   showToast('✅ Reply sent to student!');
   renderMessages();
 }
 
 function markAllRead(){
-  const liveInbox=JSON.parse(localStorage.getItem('teacher-inbox')||'[]');
+  const liveInbox=safeJSON('teacher-inbox',[]);
   liveInbox.forEach(m=>m.read=true);
   localStorage.setItem('teacher-inbox',JSON.stringify(liveInbox));
   renderMessages();
   showToast('✅ All marked as read');
 }
 
+// ════════════════════════════════════════
+// SEND MESSAGE — now resolves real student IDs from the loaded roster
+// instead of a free-text name with no actual link. "Parent" sends write
+// into a parent-inbox-<studentId> key (mirrors the existing
+// student-inbox-<id> convention) so a parent-facing page can read it.
+// ════════════════════════════════════════
+function resolveMessageTargets(to, specificId){
+  let ids=[], isParent=false;
+  if(to==='all-students')       ids=STUDENTS.map(s=>s.student_id);
+  else if(to==='all-parents'){  ids=STUDENTS.map(s=>s.student_id); isParent=true; }
+  else if(to==='specific-student') ids=specificId?[specificId]:[];
+  else if(to==='specific-parent'){ ids=specificId?[specificId]:[]; isParent=true; }
+  else if(to==='dyslexia')      ids=STUDENTS.filter(s=>s.disability==='dyslexia').map(s=>s.student_id);
+  else if(to==='dysgraphia')    ids=STUDENTS.filter(s=>s.disability==='dysgraphia').map(s=>s.student_id);
+  else if(to==='adhd')          ids=STUDENTS.filter(s=>s.disability==='adhd').map(s=>s.student_id);
+  return {ids,isParent};
+}
 function teacherSendMsg(){
   const subj=document.getElementById('tMsgSubject').value.trim();
   const body=document.getElementById('tMsgBody').value.trim();
+  const to=document.getElementById('tMsgTo').value;
+  const specificId=document.getElementById('tMsgStudentSel').value;
   if(!subj||!body){showToast('❌ Fill in subject and message');return;}
-  const sent=JSON.parse(localStorage.getItem('teacher-sent')||'[]');
-  sent.unshift({id:'sent-'+Date.now(),from:'Ms. Priya Sharma',to:document.getElementById('tMsgTo').value,subject:subj,body,time:new Date().toISOString(),type:'teacher-sent'});
-  localStorage.setItem('teacher-sent',JSON.stringify(sent));
-  document.getElementById('tMsgSubject').value='';document.getElementById('tMsgBody').value='';
-  showToast('✅ Message sent!');
-}
+  if((to==='specific-student'||to==='specific-parent') && !specificId){showToast('❌ Choose a student first');return;}
 
-function messageStudent(){
-  goTab('messages',null);
-  showToast('💬 Compose area open!');
+  const {ids,isParent}=resolveMessageTargets(to,specificId);
+  if(!ids.length){showToast('❌ No matching students found');return;}
+
+  const teacherName=sessionStorage.getItem('teacherName')||'Teacher';
+  const sent=safeJSON('teacher-sent',[]);
+  sent.unshift({id:'sent-'+Date.now(),from:teacherName,to,subject:subj,body,time:new Date().toISOString(),type:'teacher-sent',audience:isParent?'parent':'student',recipientCount:ids.length});
+  localStorage.setItem('teacher-sent',JSON.stringify(sent));
+
+  ids.forEach(sid=>{
+    const key = isParent ? ('parent-inbox-'+sid) : ('student-inbox-'+sid);
+    const inbox=safeJSON(key,[]);
+    inbox.unshift({id:'tmsg-'+Date.now()+'-'+sid,from:teacherName,subject:subj,body,time:new Date().toISOString(),read:false});
+    localStorage.setItem(key,JSON.stringify(inbox));
+  });
+
+  document.getElementById('tMsgSubject').value='';document.getElementById('tMsgBody').value='';
+  showToast(`✅ Message sent to ${ids.length} ${isParent?'parent(s)':'student(s)'}!`);
 }
 
 // DOUBTS
 function renderDoubts(){
-  const doubts=JSON.parse(localStorage.getItem('student-doubts')||'[]');
+  const doubts=safeJSON('student-doubts',[]);
   const unanswered=doubts.filter(d=>!d.reply).length;
   const answered=doubts.filter(d=>d.reply).length;
   const students=[...new Set(doubts.map(d=>d.studentId))].length;
@@ -781,15 +981,14 @@ function renderDoubts(){
 }
 
 function replyToDoubt(i){
-  const doubts=JSON.parse(localStorage.getItem('student-doubts')||'[]');
+  const doubts=safeJSON('student-doubts',[]);
   const txt=document.getElementById('dreply-'+i)?.value.trim();
   if(!txt){showToast('❌ Write a reply!');return;}
   doubts[i].reply=txt;
   localStorage.setItem('student-doubts',JSON.stringify(doubts));
-  // Notify student
   if(doubts[i].studentId){
-    const sInbox=JSON.parse(localStorage.getItem('student-inbox-'+doubts[i].studentId)||'[]');
-    sInbox.unshift({id:'dreply-'+Date.now(),from:'Ms. Priya Sharma',subject:'Reply to your doubt: '+doubts[i].assignment,body:txt,time:new Date().toISOString(),read:false});
+    const sInbox=safeJSON('student-inbox-'+doubts[i].studentId,[]);
+    sInbox.unshift({id:'dreply-'+Date.now(),from:sessionStorage.getItem('teacherName')||'Teacher',subject:'Reply to your doubt: '+doubts[i].assignment,body:txt,time:new Date().toISOString(),read:false});
     localStorage.setItem('student-inbox-'+doubts[i].studentId,JSON.stringify(sInbox));
   }
   showToast('✅ Reply sent to student!');
@@ -797,9 +996,9 @@ function replyToDoubt(i){
 }
 
 function updateBadges(){
-  const inbox=JSON.parse(localStorage.getItem('teacher-inbox')||'[]');
+  const inbox=safeJSON('teacher-inbox',[]);
   const unread=inbox.filter(m=>!m.read).length;
-  const doubts=JSON.parse(localStorage.getItem('student-doubts')||'[]');
+  const doubts=safeJSON('student-doubts',[]);
   const doubtUnanswered=doubts.filter(d=>!d.reply).length;
   const msgBadge=document.getElementById('msgNavBadge');
   const doubtBadge=document.getElementById('doubtNavBadge');
@@ -819,7 +1018,7 @@ function genReport(type){
   if(type==='risk')extra=ar.map(s=>`<div style="margin:5px 0;padding:9px;background:rgba(239,68,68,.08);border-radius:9px;border-left:3px solid #ef4444">🔴 <b>${s.name}</b> — ${s.avg_accuracy}% accuracy</div>`).join('')||'<p style="color:#64748b">No at-risk students!</p>';
   if(type==='achievements')extra=[...STUDENTS].sort((a,b)=>b.total_coins-a.total_coins).map((s,i)=>`<p>🥇 #${i+1} ${s.name} — 🪙 ${s.total_coins} coins</p>`).join('');
   if(type==='disability'){const dg={dyslexia:[],dysgraphia:[],adhd:[]};STUDENTS.forEach(s=>{if(dg[s.disability])dg[s.disability].push(s.avg_accuracy)});const da=k=>dg[k].length?Math.round(dg[k].reduce((a,v)=>a+v,0)/dg[k].length):0;extra=`<p>📖 Dyslexia (${dg.dyslexia.length}): <b>${da('dyslexia')}%</b></p><p>✍️ Dysgraphia (${dg.dysgraphia.length}): <b>${da('dysgraphia')}%</b></p><p>⚡ ADHD (${dg.adhd.length}): <b>${da('adhd')}%</b></p>`;}
-  document.getElementById('reportBody').innerHTML=`<div style="color:#94a3b8;font-size:.88rem;line-height:2;margin-top:10px"><p>📅 Generated: ${new Date().toLocaleDateString('en-IN')}</p><p>👩‍🎓 Total Students: ${STUDENTS.length}</p><p>📈 Class Avg: <b style="color:var(--green)">${acc}%</b></p><p>✅ On Track: <b>${STUDENTS.filter(s=>s.status==='high').length}</b></p><p>⚡ Average: <b>${STUDENTS.filter(s=>s.status==='medium').length}</b></p><p>🔴 Need Help: <b>${ar.length}</b></p><p>🪙 Total Coins: <b>${STUDENTS.reduce((a,s)=>a+s.total_coins,0)}</b></p>${extra?'<hr style="margin:10px 0;border-color:var(--border)"/>'+extra:''}</div>`;
+  document.getElementById('reportBody').innerHTML=`<div style="color:#94a3b8;font-size:.88rem;line-height:2;margin-top:10px"><p>📅 Generated: ${new Date().toLocaleDateString('en-IN')}</p><p>🏫 School: <b>${sessionStorage.getItem('teacherSchool')||'—'}</b></p><p>👩‍🎓 Total Students: ${STUDENTS.length}</p><p>📈 Class Avg: <b style="color:var(--green)">${acc}%</b></p><p>✅ On Track: <b>${STUDENTS.filter(s=>s.status==='high').length}</b></p><p>⚡ Average: <b>${STUDENTS.filter(s=>s.status==='medium').length}</b></p><p>🔴 Need Help: <b>${ar.length}</b></p><p>🪙 Total Coins: <b>${STUDENTS.reduce((a,s)=>a+s.total_coins,0)}</b></p>${extra?'<hr style="margin:10px 0;border-color:var(--border)"/>'+extra:''}</div>`;
   document.getElementById('reportOut').scrollIntoView({behavior:'smooth'});
 }
 function downloadCSV(){
@@ -830,27 +1029,44 @@ function downloadCSV(){
 }
 function downloadPDF(){showToast('📋 PDF export coming soon!');}
 
-// MODAL
+// ════════════════════════════════════════
+// STUDENT DETAIL MODAL — now pulls the real weekly accuracy curve from
+// /student-game-summary/<id> (already returned by app.py) instead of a
+// fabricated 4-point line. Falls back to a synthetic curve only if that
+// call fails (offline/demo data).
+// ════════════════════════════════════════
 let MC=null;
-function openModal(sid){
+async function openModal(sid){
   const s=STUDENTS.find(x=>x.student_id===sid);if(!s)return;
   document.getElementById('modalName').textContent=s.name+' — '+s.student_id;
   const clr=s.status==='high'?'#22c55e':s.status==='medium'?'#fbbf24':'#ef4444';
   document.getElementById('modalDets').innerHTML=`<div class="det-item"><div class="det-l">Disability</div><div class="det-v">${s.disability.charAt(0).toUpperCase()+s.disability.slice(1)}</div></div><div class="det-item"><div class="det-l">Avg Accuracy</div><div class="det-v" style="color:${clr}">${s.avg_accuracy}%</div></div><div class="det-item"><div class="det-l">Total Sessions</div><div class="det-v">${s.sessions}</div></div><div class="det-item"><div class="det-l">Coins Earned</div><div class="det-v" style="color:var(--yellow)">🪙${s.total_coins}</div></div><div class="det-item"><div class="det-l">Last Active</div><div class="det-v">${s.last_active||'N/A'}</div></div><div class="det-item"><div class="det-l">Status</div><div class="det-v" style="color:${clr}">${s.status==='high'?'✅ On Track':s.status==='medium'?'⚡ Average':'🔴 Needs Help'}</div></div>`;
-  if(MC){try{MC.destroy()}catch{}}
-  MC=new Chart(document.getElementById('modalChart'),{type:'line',data:{labels:['Week 1','Week 2','Week 3','Week 4'],datasets:[{data:[Math.max(0,s.avg_accuracy-16),Math.max(0,s.avg_accuracy-9),Math.max(0,s.avg_accuracy-4),s.avg_accuracy],borderColor:clr,backgroundColor:clr+'25',tension:.4,fill:true,pointBackgroundColor:clr,pointRadius:5}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{min:0,max:100}}}});
+  document.getElementById('modalMsgBtn').onclick=()=>{closeModal();quickMsg(sid);};
+  document.getElementById('modalParentBtn').onclick=()=>{closeModal();parentMsg(sid);};
+  document.getElementById('modalAssignBtn').onclick=()=>{closeModal();quickAssign(sid);};
   document.getElementById('stuModal').classList.add('open');
+
+  let weekly=null;
+  try{
+    const res=await fetch(`${API}/student-game-summary/${encodeURIComponent(sid)}`,{signal:AbortSignal.timeout(6000)});
+    const data=await res.json();
+    if(res.ok && Array.isArray(data.weekly_accuracy) && data.weekly_accuracy.length) weekly=data.weekly_accuracy;
+  }catch(e){ /* fall back to synthetic curve below */ }
+
+  if(MC){try{MC.destroy()}catch{}}
+  const labels = weekly ? weekly.map(w=>w.date.slice(5)) : ['Week 1','Week 2','Week 3','Week 4'];
+  const points = weekly ? weekly.map(w=>w.accuracy) : [Math.max(0,s.avg_accuracy-16),Math.max(0,s.avg_accuracy-9),Math.max(0,s.avg_accuracy-4),s.avg_accuracy];
+  MC=new Chart(document.getElementById('modalChart'),{type:'line',data:{labels,datasets:[{data:points,borderColor:clr,backgroundColor:clr+'25',tension:.4,fill:true,pointBackgroundColor:clr,pointRadius:5}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{min:0,max:100}}}});
 }
 function closeModal(){document.getElementById('stuModal').classList.remove('open')}
 function doLogout(){if(confirm('Are you sure?')){sessionStorage.clear();location.href='teacher-login.html'}}
 
-function showToast(msg){
+function showToast(msg, warn){
   const t=document.getElementById('toast');
   t.textContent=msg;
-  t.style.borderColor=msg.includes('❌')?'var(--red)':'var(--green)';
-  t.style.color=msg.includes('❌')?'var(--red)':'var(--green)';
+  t.classList.toggle('warn-toast', !!warn || msg.includes('❌') || msg.includes('⚠️'));
   t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3000);
+  setTimeout(()=>t.classList.remove('show'),3400);
 }
 
 loadStudents();
