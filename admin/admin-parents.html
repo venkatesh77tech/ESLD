@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESLD — Parent Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Lexend:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin-common.css">
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><div class="mark">E</div><div><div class="name">ESLD Admin</div><div class="sub">School Management</div></div></div>
+
+    <div class="nav-group">
+      <div class="nav-label">Overview</div>
+      <a class="nav-item" href="admin-dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Dashboard Home
+      </a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Management</div>
+      <a class="nav-item" href="admin-teachers.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Teacher Management
+      </a>
+      <a class="nav-item" href="admin-students.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        Student Management
+      </a>
+      <a class="nav-item active" href="admin-parents.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5 5 0 0 0-7.07 0L12 5.34l-1.73-1.74a5 5 0 1 0-7.07 7.07L12 19.34l8.8-8.67a5 5 0 0 0 0-7.07Z"/></svg>
+        Parent Management
+      </a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Insights</div>
+      <a class="nav-item" href="admin-reports.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5a2 2 0 0 1 2-2h8l6 6v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h5"/></svg>
+        Reports &amp; Analytics
+      </a>
+      <a class="nav-item" href="admin-settings.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+        School Settings
+      </a>
+    </div>
+    <div class="sidebar-foot">
+      <div class="admin-mini"><div class="av" id="adminAvatar">A</div><div><div class="nm" id="adminNameMini">Demo Admin</div><div class="rl" id="adminSchoolMini">ESLD Demo School</div></div></div>
+      <button class="logout-btn" onclick="logout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        Logout
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button class="menu-btn" onclick="toggleSidebar()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+        <div><h1>Parent Management</h1><div class="school-tag" id="schoolTag">ESLD Demo School &middot; DEMO01</div></div>
+      </div>
+      <span class="id-chip" id="topbarAid">AID-DEMO-01</span>
+    </div>
+
+    <div class="content">
+      <section class="view">
+        <div class="section-card">
+          <div class="section-head">
+            <div><h2>Parent Management</h2><p class="ch-sub">Add, edit, remove parents and link each one to a student.</p></div>
+            <div class="toolbar">
+              <input class="search-input" id="parentSearch" placeholder="Search parents…" oninput="renderParents()">
+              <button class="btn btn-primary" onclick="openParentModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Add Parent
+              </button>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Parent ID</th><th>Name</th><th>Mobile</th><th>Linked Student</th><th></th></tr></thead>
+              <tbody id="parentTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="parentModal">
+  <div class="modal">
+    <h3 id="parentModalTitle">Add Parent</h3>
+    <input type="hidden" id="parentEditPid">
+    <div class="field"><label>Parent Name</label><input id="pName" placeholder="Full name"></div>
+    <div class="field"><label>Mobile Number</label><input id="pMobile" placeholder="98765 43210" maxlength="10"></div>
+    <div class="field"><label>Linked Student</label><select id="pStudent"><option value="">— Select student —</option></select></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('parentModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveParent()">Save Parent</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="admin-common.js"></script>
+<script>
+function populateStudentSelect(){
+  const sel = $('#pStudent');
+  const students = getData(K_STUDENTS);
+  sel.innerHTML = '<option value="">— Select student —</option>' + students.map(s=>`<option value="${s.sid}">${s.name} (${s.sid})</option>`).join('');
+}
+function renderParents(){
+  const parents = getData(K_PARENTS);
+  const students = getData(K_STUDENTS);
+  const q = ($('#parentSearch').value||'').toLowerCase();
+  const filtered = parents.filter(p => !q || p.name.toLowerCase().includes(q) || p.pid.toLowerCase().includes(q));
+  const body = $('#parentTableBody');
+  body.innerHTML = filtered.length ? filtered.map(p => {
+    const student = students.find(s=>s.sid===p.studentSid);
+    return `<tr>
+      <td><span class="id-chip">${p.pid}</span></td>
+      <td>${p.name}</td>
+      <td>${p.mobile}</td>
+      <td>${student ? `${student.name} (${student.sid})` : '<span style="color:var(--ink-dim);">Unlinked</span>'}</td>
+      <td><div class="row-actions">
+        <button class="btn btn-ghost btn-sm" onclick="editParent('${p.pid}')">Edit</button>
+        <button class="btn btn-danger-ghost btn-sm" onclick="deleteParent('${p.pid}')">Delete</button>
+      </div></td>
+    </tr>`;
+  }).join('') : `<tr class="empty-row"><td colspan="5">No parents found.</td></tr>`;
+}
+function openParentModal(){
+  populateStudentSelect();
+  $('#parentModalTitle').textContent = 'Add Parent';
+  $('#parentEditPid').value=''; $('#pName').value=''; $('#pMobile').value=''; $('#pStudent').value='';
+  $('#parentModal').classList.add('show');
+}
+function editParent(pid){
+  const p = getData(K_PARENTS).find(x=>x.pid===pid);
+  if(!p) return;
+  populateStudentSelect();
+  $('#parentModalTitle').textContent = `Edit ${p.pid}`;
+  $('#parentEditPid').value=p.pid; $('#pName').value=p.name; $('#pMobile').value=p.mobile; $('#pStudent').value=p.studentSid||'';
+  $('#parentModal').classList.add('show');
+}
+function saveParent(){
+  const name=$('#pName').value.trim(), mobile=$('#pMobile').value.trim(), studentSid=$('#pStudent').value;
+  if(!name||!mobile){ toast('Fill in name and mobile.','err'); return; }
+  let parents = getData(K_PARENTS);
+  const editId = $('#parentEditPid').value;
+  if(editId){
+    parents = parents.map(p => p.pid===editId ? {...p, name, mobile, studentSid} : p);
+    toast('Parent updated.');
+  } else {
+    const pid = nextId('PID', parents, 'pid');
+    parents.push({ pid, name, mobile, studentSid });
+    toast(`Parent added — ID ${pid}`);
+  }
+  setData(K_PARENTS, parents);
+  // TODO: await db.collection('parents').doc(pid).set({...})
+  closeModal('parentModal'); renderParents();
+}
+function deleteParent(pid){
+  if(!confirm('Remove this parent record?')) return;
+  setData(K_PARENTS, getData(K_PARENTS).filter(p=>p.pid!==pid));
+  toast('Parent removed.');
+  renderParents();
+}
+document.addEventListener('DOMContentLoaded', renderParents);
+</script>
+</body>
+</html>
