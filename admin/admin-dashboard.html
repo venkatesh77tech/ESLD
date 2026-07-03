@@ -3,1626 +3,188 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ESLD — School Admin Dashboard</title>
+<title>ESLD — Admin Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Lexend:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Lexend:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin-common.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
-
-<style>
-/* ================================================================
-   ESLD ADMIN — COMPLETE SINGLE-FILE STYLESHEET
-================================================================ */
-:root {
-  --bg:       #07091c;
-  --bg2:      #0b0e22;
-  --panel:    #0f1428;
-  --panel2:   #131830;
-  --sidebar:  #080b1e;
-  --border:   rgba(255,255,255,0.07);
-  --border2:  rgba(255,255,255,0.12);
-
-  --ink:   #eef0f7;
-  --ink2:  #8f9ab8;
-  --ink3:  #505c7a;
-
-  --accent:      #a78bfa;
-  --accent2:     #7c5fd4;
-  --accent-glow: rgba(167,139,250,0.18);
-  --accent-deep: rgba(167,139,250,0.08);
-
-  --green:  #34d8b0; --green-s:  rgba(52,216,176,0.14);
-  --blue:   #38bdf8; --blue-s:   rgba(56,189,248,0.14);
-  --pink:   #f472b6; --pink-s:   rgba(244,114,182,0.14);
-  --amber:  #fbbf24; --amber-s:  rgba(251,191,36,0.14);
-  --red:    #f87171; --red-s:    rgba(248,113,113,0.14);
-  --teal:   #2dd4bf; --teal-s:   rgba(45,212,191,0.14);
-
-  --sidebar-w: 256px;
-  --top-h:     62px;
-  --r:  14px;
-  --r2: 10px;
-  --shadow: 0 20px 50px -14px rgba(0,0,0,0.6);
-}
-
-/* ── Reset ── */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
-body{font-family:'Lexend',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
-a{color:inherit;text-decoration:none;}
-button{font-family:inherit;cursor:pointer;border:none;}
-input,select,textarea{font-family:inherit;}
-::-webkit-scrollbar{width:5px;height:5px;}
-::-webkit-scrollbar-thumb{background:#252d45;border-radius:6px;}
-
-/* ── Layout ── */
-.shell{display:flex;min-height:100vh;}
-.main-wrap{margin-left:var(--sidebar-w);flex:1;min-width:0;display:flex;flex-direction:column;}
-
-/* ================================================================
-   SIDEBAR
-================================================================ */
-.sidebar{
-  width:var(--sidebar-w);
-  background:var(--sidebar);
-  border-right:1px solid var(--border);
-  display:flex;flex-direction:column;
-  position:fixed;top:0;left:0;bottom:0;z-index:60;
-  overflow-y:auto;overflow-x:hidden;
-  transition:transform .28s cubic-bezier(.4,0,.2,1);
-}
-.sb-brand{
-  display:flex;align-items:center;gap:11px;
-  padding:20px 18px 16px;
-  border-bottom:1px solid var(--border);flex-shrink:0;
-}
-.sb-mark{
-  width:38px;height:38px;border-radius:11px;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Outfit',sans-serif;font-weight:800;font-size:17px;color:#100730;
-  box-shadow:0 6px 18px -4px var(--accent-glow);flex-shrink:0;
-}
-.sb-title{font-family:'Outfit',sans-serif;font-weight:700;font-size:15px;}
-.sb-sub{font-size:10.5px;color:var(--ink3);margin-top:1px;}
-
-.nav-grp{padding:14px 10px 4px;}
-.nav-grp-lbl{
-  font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--ink3);padding:0 8px 9px;display:block;
-}
-.nav-link{
-  display:flex;align-items:center;gap:10px;
-  padding:9px 10px;border-radius:var(--r2);
-  font-size:13.5px;font-weight:500;color:var(--ink2);
-  transition:background .15s,color .15s;margin-bottom:2px;
-  position:relative;background:none;width:100%;text-align:left;border:none;
-}
-.nav-link svg{width:17px;height:17px;flex-shrink:0;stroke-width:1.8;}
-.nav-link:hover{background:rgba(255,255,255,0.04);color:var(--ink);}
-.nav-link.active{background:var(--accent-glow);color:var(--accent);font-weight:600;}
-.nav-link.active::before{
-  content:'';position:absolute;left:0;top:20%;bottom:20%;
-  width:3px;background:var(--accent);border-radius:0 3px 3px 0;
-}
-
-.sb-foot{margin-top:auto;padding:12px 10px;border-top:1px solid var(--border);flex-shrink:0;}
-.sb-profile{display:flex;align-items:center;gap:10px;padding:6px 6px 12px;}
-.sb-av{
-  width:36px;height:36px;border-radius:50%;
-  background:var(--accent-glow);border:1.5px solid rgba(167,139,250,0.35);
-  display:flex;align-items:center;justify-content:center;
-  font-weight:700;font-size:13px;color:var(--accent);flex-shrink:0;
-}
-.sb-pname{font-size:13px;font-weight:600;line-height:1.3;}
-.sb-prole{font-size:10.5px;color:var(--ink3);}
-.logout-btn{
-  display:flex;align-items:center;gap:9px;width:100%;
-  padding:9px 12px;border-radius:var(--r2);
-  background:transparent;border:1px solid var(--border);
-  color:var(--red);font-size:13px;font-weight:600;
-  transition:border-color .2s,background .2s;
-}
-.logout-btn:hover{border-color:var(--red);background:var(--red-s);}
-.logout-btn svg{width:15px;height:15px;}
-
-/* ================================================================
-   TOPBAR
-================================================================ */
-.topbar{
-  height:var(--top-h);
-  background:rgba(7,9,28,0.88);backdrop-filter:blur(14px);
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 26px;position:sticky;top:0;z-index:40;flex-shrink:0;
-}
-.tb-left{display:flex;align-items:center;gap:14px;}
-.page-title{font-family:'Outfit',sans-serif;font-weight:700;font-size:18px;}
-.page-sub{font-size:11.5px;color:var(--ink3);margin-top:1px;}
-.tb-right{display:flex;align-items:center;gap:10px;}
-.ham{
-  display:none;background:none;border:1px solid var(--border);
-  border-radius:9px;padding:7px;color:var(--ink2);transition:.15s;
-}
-.ham:hover{border-color:var(--accent);color:var(--accent);}
-.ham svg{display:block;width:18px;height:18px;}
-
-/* chips */
-.chip{
-  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;
-  background:var(--panel2);border:1px solid var(--border);
-  padding:5px 12px;border-radius:20px;color:var(--ink2);
-}
-.chip.ac{color:var(--accent);border-color:rgba(167,139,250,0.35);background:var(--accent-glow);}
-
-/* ================================================================
-   PAGE CONTENT / VIEWS
-================================================================ */
-.page-content{padding:24px 26px 60px;flex:1;}
-.view{display:none;animation:fadeUp .35s ease both;}
-.view.active{display:block;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-
-/* ================================================================
-   STAT CARDS
-================================================================ */
-.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:14px;margin-bottom:20px;}
-.stat-card{
-  background:linear-gradient(155deg,var(--panel),var(--panel2));
-  border:1px solid var(--border);border-radius:var(--r);
-  padding:18px 20px 15px;position:relative;overflow:hidden;
-  transition:border-color .25s,transform .25s;cursor:default;
-}
-.stat-card:hover{transform:translateY(-2px);border-color:var(--sc,var(--accent));}
-.stat-card::after{
-  content:'';position:absolute;top:0;right:0;width:90px;height:90px;border-radius:50%;
-  background:radial-gradient(circle,var(--sc-s,var(--accent-glow)),transparent 70%);
-  transform:translate(28px,-28px);pointer-events:none;
-}
-.stat-icon{
-  width:38px;height:38px;border-radius:10px;
-  background:var(--sc-s,var(--accent-glow));color:var(--sc,var(--accent));
-  display:flex;align-items:center;justify-content:center;margin-bottom:13px;
-}
-.stat-icon svg{width:18px;height:18px;}
-.stat-val{font-family:'Outfit',sans-serif;font-size:28px;font-weight:700;line-height:1;margin-bottom:5px;}
-.stat-lbl{font-size:12px;color:var(--ink2);}
-.stat-delta{font-size:11px;font-weight:600;margin-top:7px;color:var(--green);}
-
-.sc-green {--sc:var(--green);--sc-s:var(--green-s);}
-.sc-blue  {--sc:var(--blue); --sc-s:var(--blue-s); }
-.sc-accent{--sc:var(--accent);--sc-s:var(--accent-glow);}
-.sc-amber {--sc:var(--amber);--sc-s:var(--amber-s);}
-.sc-pink  {--sc:var(--pink); --sc-s:var(--pink-s); }
-.sc-teal  {--sc:var(--teal); --sc-s:var(--teal-s); }
-
-/* ================================================================
-   CHART PANELS
-================================================================ */
-.chart-grid{display:grid;gap:14px;margin-bottom:18px;}
-.cg-2{grid-template-columns:3fr 2fr;}
-.cg-3{grid-template-columns:repeat(3,1fr);}
-.cg-22{grid-template-columns:1fr 1fr;}
-
-.chart-panel{
-  background:linear-gradient(155deg,var(--panel),var(--panel2));
-  border:1px solid var(--border);border-radius:var(--r);padding:20px;
-}
-.cp-head{margin-bottom:14px;}
-.cp-head h3{font-family:'Outfit',sans-serif;font-size:15px;font-weight:600;margin-bottom:3px;}
-.cp-head p{font-size:12px;color:var(--ink3);}
-.chart-box{position:relative;height:215px;}
-
-/* mini list (dashboard support list) */
-.mini-list{list-style:none;}
-.mini-list li{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;
-}
-.mini-list li:last-child{border-bottom:none;}
-.ml-empty{text-align:center;color:var(--ink3);padding:26px;font-size:13px;}
-
-/* ================================================================
-   SECTION CARDS (tables / forms)
-================================================================ */
-.sec-card{
-  background:linear-gradient(155deg,var(--panel),var(--panel2));
-  border:1px solid var(--border);border-radius:var(--r);margin-bottom:18px;overflow:hidden;
-}
-.sc-head{
-  display:flex;align-items:flex-start;justify-content:space-between;
-  gap:16px;flex-wrap:wrap;
-  padding:18px 20px 14px;border-bottom:1px solid var(--border);
-}
-.sc-head h2{font-family:'Outfit',sans-serif;font-size:16px;font-weight:600;margin-bottom:3px;}
-.sc-head p{font-size:12.5px;color:var(--ink3);}
-.sc-body{padding:16px 20px 18px;}
-
-/* toolbar */
-.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.srch-wrap{position:relative;}
-.srch-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--ink3);pointer-events:none;}
-.srch{
-  background:var(--bg2);border:1px solid var(--border);color:var(--ink);
-  padding:8px 12px 8px 32px;border-radius:var(--r2);font-size:13px;
-  outline:none;min-width:200px;transition:border-color .18s;
-}
-.srch:focus{border-color:var(--accent);}
-.srch::placeholder{color:var(--ink3);}
-
-.sel{
-  background:var(--bg2);border:1px solid var(--border);color:var(--ink);
-  padding:8px 28px 8px 11px;border-radius:var(--r2);font-size:13px;
-  outline:none;appearance:none;cursor:pointer;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23505c7a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 7px center;background-size:13px;
-}
-
-/* ================================================================
-   BUTTONS
-================================================================ */
-.btn{
-  display:inline-flex;align-items:center;gap:7px;
-  border:none;border-radius:var(--r2);padding:9px 16px;
-  font-size:13px;font-weight:600;transition:.18s;white-space:nowrap;cursor:pointer;
-}
-.btn svg{width:14px;height:14px;flex-shrink:0;}
-.btn:disabled{opacity:.4;cursor:not-allowed;}
-
-.btn-primary{
-  background:linear-gradient(95deg,var(--accent),var(--accent2));
-  color:#100730;box-shadow:0 4px 14px -4px rgba(167,139,250,0.5);
-}
-.btn-primary:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 8px 20px -6px rgba(167,139,250,0.65);}
-
-.btn-ghost{background:var(--panel2);border:1px solid var(--border);color:var(--ink);}
-.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
-
-.btn-danger{background:var(--red-s);border:1px solid transparent;color:var(--red);}
-.btn-danger:hover{border-color:var(--red);}
-
-.btn-success{background:var(--green-s);border:1px solid transparent;color:var(--green);}
-.btn-success:hover{border-color:var(--green);}
-
-.btn-sm{padding:6px 11px;font-size:12px;}
-
-/* ================================================================
-   TABLE
-================================================================ */
-.tbl-wrap{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;font-size:13.5px;}
-thead th{
-  text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
-  color:var(--ink3);padding:10px 14px;border-bottom:1px solid var(--border);
-  white-space:nowrap;background:rgba(255,255,255,0.015);
-}
-tbody td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
-tbody tr:last-child td{border-bottom:none;}
-tbody tr:hover{background:rgba(255,255,255,0.018);}
-.td-empty{text-align:center;color:var(--ink3);padding:36px !important;font-size:13px;}
-.td-act{display:flex;gap:7px;justify-content:flex-end;}
-
-/* ================================================================
-   PILLS / TAGS
-================================================================ */
-.pill{
-  font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;
-  display:inline-block;letter-spacing:.02em;
-}
-.p-green {background:var(--green-s);color:var(--green);}
-.p-amber {background:var(--amber-s);color:var(--amber);}
-.p-red   {background:var(--red-s);  color:var(--red);  }
-.p-blue  {background:var(--blue-s); color:var(--blue); }
-.p-accent{background:var(--accent-glow);color:var(--accent);}
-.p-pink  {background:var(--pink-s); color:var(--pink); }
-.p-teal  {background:var(--teal-s); color:var(--teal); }
-
-.id-tag{
-  font-family:'JetBrains Mono',monospace;font-size:11.5px;
-  background:var(--panel2);border:1px solid var(--border);
-  padding:3px 9px;border-radius:7px;color:var(--accent);letter-spacing:.03em;
-}
-
-/* name with avatar */
-.name-cell{display:flex;align-items:center;gap:10px;}
-.av-sm{
-  width:32px;height:32px;border-radius:50%;
-  display:inline-flex;align-items:center;justify-content:center;
-  font-weight:700;font-size:12px;flex-shrink:0;
-}
-.av-blue  {background:var(--blue-s); color:var(--blue); border:1px solid rgba(56,189,248,.25);}
-.av-green {background:var(--green-s);color:var(--green);border:1px solid rgba(52,216,176,.25);}
-.av-pink  {background:var(--pink-s); color:var(--pink); border:1px solid rgba(244,114,182,.25);}
-.av-amber {background:var(--amber-s);color:var(--amber);border:1px solid rgba(251,191,36,.25);}
-.av-teal  {background:var(--teal-s); color:var(--teal); border:1px solid rgba(45,212,191,.25);}
-
-/* ================================================================
-   MODAL
-================================================================ */
-.modal-bg{
-  position:fixed;inset:0;z-index:200;
-  background:rgba(4,6,20,.75);backdrop-filter:blur(5px);
-  display:none;align-items:center;justify-content:center;padding:20px;
-}
-.modal-bg.open{display:flex;animation:bgIn .22s ease;}
-@keyframes bgIn{from{opacity:0;}to{opacity:1;}}
-.modal{
-  width:100%;max-width:480px;
-  background:linear-gradient(155deg,#111828,#0d1122);
-  border:1px solid var(--border2);border-radius:20px;
-  padding:26px;max-height:90vh;overflow-y:auto;
-  box-shadow:var(--shadow);animation:modalPop .28s cubic-bezier(.34,1.56,.64,1);
-}
-.modal.sm{max-width:360px;}
-@keyframes modalPop{from{opacity:0;transform:scale(.92) translateY(10px);}to{opacity:1;transform:scale(1) translateY(0);}}
-.modal-title{
-  font-family:'Outfit',sans-serif;font-size:17px;font-weight:700;
-  margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;
-}
-.modal-x{background:none;border:none;color:var(--ink3);font-size:22px;line-height:1;padding:2px 5px;border-radius:6px;}
-.modal-x:hover{color:var(--ink);background:var(--panel2);}
-.modal-foot{display:flex;gap:10px;margin-top:20px;}
-.modal-foot .btn{flex:1;justify-content:center;}
-
-/* ================================================================
-   FORM FIELDS
-================================================================ */
-.field{margin-bottom:13px;}
-.field label{display:block;font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:6px;letter-spacing:.01em;}
-.field input,.field select,.field textarea{
-  width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--ink);
-  padding:10px 12px;border-radius:var(--r2);font-size:13.5px;outline:none;
-  transition:border-color .18s,box-shadow .18s;appearance:none;
-}
-.field select{
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23505c7a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 10px center;background-size:14px;padding-right:32px;
-}
-.field input:focus,.field select:focus,.field textarea:focus{
-  border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);
-}
-.field input::placeholder{color:var(--ink3);}
-.field textarea{resize:vertical;min-height:80px;}
-.field .hint{font-size:11.5px;color:var(--ink3);margin-top:5px;}
-.field .hint.err{color:var(--red);}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
-
-/* ================================================================
-   SETTINGS
-================================================================ */
-.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.logo-zone{
-  border:1.5px dashed var(--border);border-radius:var(--r);
-  padding:22px;text-align:center;cursor:pointer;transition:.2s;
-}
-.logo-zone:hover{border-color:var(--accent);background:var(--accent-deep);}
-.logo-img{width:64px;height:64px;border-radius:13px;object-fit:cover;margin:0 auto 10px;background:var(--panel2);border:1px solid var(--border);display:block;}
-.logo-hint{font-size:12px;color:var(--ink3);}
-
-/* ================================================================
-   TOAST
-================================================================ */
-#toast-tray{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;}
-.toast{
-  padding:11px 18px;border-radius:12px;background:var(--panel2);border:1px solid var(--border);
-  color:var(--ink);font-size:13px;font-weight:500;box-shadow:0 12px 30px -10px rgba(0,0,0,.6);
-  display:flex;align-items:center;gap:10px;pointer-events:all;
-  max-width:min(400px,90vw);animation:toastIn .3s cubic-bezier(.34,1.56,.64,1);
-}
-.toast.out{animation:toastOut .25s ease forwards;}
-.toast svg{width:16px;height:16px;flex-shrink:0;}
-.toast.t-success{border-color:var(--green);}
-.toast.t-success svg{color:var(--green);}
-.toast.t-error  {border-color:var(--red);  }
-.toast.t-error   svg{color:var(--red);  }
-.toast.t-info   {border-color:var(--blue); }
-.toast.t-info    svg{color:var(--blue); }
-@keyframes toastIn {from{opacity:0;transform:translateY(16px) scale(.95);}to{opacity:1;transform:translateY(0) scale(1);}}
-@keyframes toastOut{to{opacity:0;transform:translateY(10px) scale(.95);}}
-
-/* ================================================================
-   PRINT
-================================================================ */
-@media print{
-  .sidebar,.topbar,.toolbar,.td-act,.no-print,.ham{display:none!important;}
-  .main-wrap{margin-left:0!important;}
-  body{background:#fff!important;color:#000!important;}
-  .sec-card,.chart-panel,.stat-card{border:1px solid #ccc!important;background:#fff!important;}
-  .stat-val,.page-title,.cp-head h3,.sc-head h2{color:#000!important;}
-  .id-tag,.chip,.pill{border:1px solid #aaa!important;background:#f4f4f4!important;color:#333!important;}
-  tbody td,thead th{color:#000!important;border-color:#ddd!important;}
-  .view{display:block!important;}
-  .view:not(#view-reports){display:none!important;}
-}
-
-/* ================================================================
-   RESPONSIVE
-================================================================ */
-@media(max-width:1100px){.cg-2,.cg-3,.cg-22{grid-template-columns:1fr!important;}.settings-grid{grid-template-columns:1fr!important;}}
-@media(max-width:880px){
-  .sidebar{transform:translateX(-100%);box-shadow:none;}
-  .sidebar.open{transform:translateX(0);box-shadow:20px 0 50px rgba(0,0,0,.55);}
-  .main-wrap{margin-left:0;}
-  .ham{display:flex;}
-  .page-content{padding:18px 14px 48px;}
-  .topbar{padding:0 16px;}
-  .stat-row{grid-template-columns:repeat(2,1fr);}
-}
-@media(max-width:480px){.stat-row{grid-template-columns:1fr!important;}.row2,.row3{grid-template-columns:1fr!important;}}
-@media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important;}}
-</style>
 </head>
 <body>
 
-<div class="shell">
-
-  <!-- ============================================================
-       SIDEBAR
-  ============================================================ -->
+<div class="app">
   <aside class="sidebar" id="sidebar">
-    <div class="sb-brand">
-      <div class="sb-mark">E</div>
-      <div>
-        <div class="sb-title">ESLD Admin</div>
-        <div class="sb-sub" id="sbSchoolCode">DEMO01</div>
-      </div>
+    <div class="brand">
+      <div class="mark">E</div>
+      <div><div class="name">ESLD Admin</div><div class="sub">School Management</div></div>
     </div>
 
-    <div class="nav-grp">
-      <span class="nav-grp-lbl">Overview</span>
-      <button class="nav-link active" data-view="dashboard" onclick="nav(this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+    <div class="nav-group">
+      <div class="nav-label">Overview</div>
+      <a class="nav-item active" href="admin-dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
         Dashboard Home
-      </button>
+      </a>
     </div>
 
-    <div class="nav-grp">
-      <span class="nav-grp-lbl">Management</span>
-      <button class="nav-link" data-view="teachers" onclick="nav(this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    <div class="nav-group">
+      <div class="nav-label">Management</div>
+      <a class="nav-item" href="admin-teachers.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
         Teacher Management
-      </button>
-      <button class="nav-link" data-view="students" onclick="nav(this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </a>
+      <a class="nav-item" href="admin-students.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
         Student Management
-      </button>
-      <button class="nav-link" data-view="parents" onclick="nav(this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5 5 0 0 0-7.07 0L12 5.34l-1.73-1.74a5 5 0 1 0-7.07 7.07L12 19.34l8.8-8.67a5 5 0 0 0 0-7.07Z"/></svg>
+      </a>
+      <a class="nav-item" href="admin-parents.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5 5 0 0 0-7.07 0L12 5.34l-1.73-1.74a5 5 0 1 0-7.07 7.07L12 19.34l8.8-8.67a5 5 0 0 0 0-7.07Z"/></svg>
         Parent Management
-      </button>
+      </a>
     </div>
 
-    <div class="nav-grp">
-      <span class="nav-grp-lbl">Insights</span>
-      <button class="nav-link" data-view="reports" onclick="nav(this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-4 4"/></svg>
+    <div class="nav-group">
+      <div class="nav-label">Insights</div>
+      <a class="nav-item" href="admin-reports.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5a2 2 0 0 1 2-2h8l6 6v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h5"/></svg>
         Reports &amp; Analytics
-      </button>
-      <button class="nav-link" data-view="settings" onclick="nav(this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+      </a>
+      <a class="nav-item" href="admin-settings.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
         School Settings
-      </button>
+      </a>
     </div>
 
-    <div class="sb-foot">
-      <div class="sb-profile">
-        <div class="sb-av" id="sbAv">A</div>
-        <div>
-          <div class="sb-pname" id="sbName">Demo Admin</div>
-          <div class="sb-prole" id="sbId">AID-DEMO-01</div>
-        </div>
+    <div class="sidebar-foot">
+      <div class="admin-mini">
+        <div class="av" id="adminAvatar">A</div>
+        <div><div class="nm" id="adminNameMini">Demo Admin</div><div class="rl" id="adminSchoolMini">ESLD Demo School</div></div>
       </div>
-      <button class="logout-btn" onclick="doLogout()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+      <button class="logout-btn" onclick="logout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
         Logout
       </button>
     </div>
   </aside>
 
-  <!-- ============================================================
-       MAIN
-  ============================================================ -->
-  <div class="main-wrap">
-
-    <!-- TOPBAR -->
-    <header class="topbar">
-      <div class="tb-left">
-        <button class="ham" onclick="document.getElementById('sidebar').classList.toggle('open')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-        </button>
-        <div>
-          <div class="page-title" id="viewTitle">Dashboard Home</div>
-          <div class="page-sub" id="viewSub"></div>
-        </div>
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button class="menu-btn" onclick="toggleSidebar()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+        <div><h1>Dashboard Home</h1><div class="school-tag" id="schoolTag">ESLD Demo School &middot; DEMO01</div></div>
       </div>
-      <div class="tb-right">
-        <span class="chip ac" id="topAid">AID-DEMO-01</span>
-      </div>
-    </header>
-
-    <!-- PAGE CONTENT -->
-    <div class="page-content">
-
-      <!-- ========================================================
-           VIEW: DASHBOARD
-      ======================================================== -->
-      <section class="view active" id="view-dashboard">
-
-        <div class="stat-row">
-          <div class="stat-card sc-green">
-            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
-            <div class="stat-val" id="ds-students">—</div>
-            <div class="stat-lbl">Total Students</div>
-            <div class="stat-delta" id="ds-active-d"></div>
-          </div>
-          <div class="stat-card sc-blue">
-            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
-            <div class="stat-val" id="ds-teachers">—</div>
-            <div class="stat-lbl">Total Teachers</div>
-          </div>
-          <div class="stat-card sc-accent">
-            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
-            <div class="stat-val" id="ds-active">—</div>
-            <div class="stat-lbl">Active Students (7d)</div>
-          </div>
-          <div class="stat-card sc-amber">
-            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg></div>
-            <div class="stat-val" id="ds-coins">—</div>
-            <div class="stat-lbl">Total Coins Earned</div>
-          </div>
-          <div class="stat-card sc-pink">
-            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-4 4"/></svg></div>
-            <div class="stat-val" id="ds-avg">—</div>
-            <div class="stat-lbl">Avg. School Performance</div>
-          </div>
-        </div>
-
-        <div class="chart-grid cg-2">
-          <div class="chart-panel">
-            <div class="cp-head"><h3>Accuracy Trend</h3><p>Average accuracy across all modules — last 8 weeks</p></div>
-            <div class="chart-box"><canvas id="ch-trend"></canvas></div>
-          </div>
-          <div class="chart-panel">
-            <div class="cp-head"><h3>Learning Needs</h3><p>Students by primary learning difference</p></div>
-            <div class="chart-box"><canvas id="ch-needs"></canvas></div>
-          </div>
-        </div>
-
-        <div class="chart-grid cg-22">
-          <div class="chart-panel">
-            <div class="cp-head"><h3>Coins by Class</h3><p>Gamification engagement per grade section</p></div>
-            <div class="chart-box"><canvas id="ch-coins"></canvas></div>
-          </div>
-          <div class="chart-panel">
-            <div class="cp-head"><h3>Students Needing Support</h3><p>Accuracy below 50% in the last 2 weeks</p></div>
-            <ul class="mini-list" id="ds-support"></ul>
-          </div>
-        </div>
-
-      </section><!-- /dashboard -->
-
-      <!-- ========================================================
-           VIEW: TEACHERS
-      ======================================================== -->
-      <section class="view" id="view-teachers">
-
-        <div class="stat-row" style="grid-template-columns:repeat(3,1fr)">
-          <div class="stat-card sc-blue">
-            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
-            <div class="stat-val" id="t-total">0</div><div class="stat-lbl">Total Teachers</div>
-          </div>
-          <div class="stat-card sc-green">
-            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87m-4-12a4 4 0 0 1 0 7.75"/></svg></div>
-            <div class="stat-val" id="t-assigned">0</div><div class="stat-lbl">With Students Assigned</div>
-          </div>
-          <div class="stat-card sc-amber">
-            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
-            <div class="stat-val" id="t-unassigned">0</div><div class="stat-lbl">Unassigned</div>
-          </div>
-        </div>
-
-        <div class="sec-card">
-          <div class="sc-head">
-            <div><h2>All Teachers</h2><p>Add, edit or remove teachers. Assign students from Student Management.</p></div>
-            <div class="toolbar no-print">
-              <div class="srch-wrap">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input class="srch" id="t-srch" placeholder="Name, ID, subject…" oninput="renderTeachers()">
-              </div>
-              <select class="sel" id="t-filter" onchange="renderTeachers()"><option value="">All Subjects</option></select>
-              <button class="btn btn-primary" onclick="openTeacherModal()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add Teacher
-              </button>
-            </div>
-          </div>
-          <div class="tbl-wrap">
-            <table>
-              <thead><tr><th>TID</th><th>Name</th><th>Subject</th><th>Email</th><th>Mobile</th><th>Students</th><th>Joined</th><th class="no-print" style="text-align:right">Actions</th></tr></thead>
-              <tbody id="t-tbody"></tbody>
-            </table>
-          </div>
-        </div>
-
-      </section><!-- /teachers -->
-
-      <!-- ========================================================
-           VIEW: STUDENTS
-      ======================================================== -->
-      <section class="view" id="view-students">
-
-        <div class="stat-row" style="grid-template-columns:repeat(4,1fr)">
-          <div class="stat-card sc-green">
-            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
-            <div class="stat-val" id="s-total">0</div><div class="stat-lbl">Total Students</div>
-          </div>
-          <div class="stat-card sc-accent">
-            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
-            <div class="stat-val" id="s-active">0</div><div class="stat-lbl">Active (7d)</div>
-          </div>
-          <div class="stat-card sc-amber">
-            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
-            <div class="stat-val" id="s-avgacc">0%</div><div class="stat-lbl">Avg. Accuracy</div>
-          </div>
-          <div class="stat-card sc-pink">
-            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
-            <div class="stat-val" id="s-atrisk">0</div><div class="stat-lbl">At Risk (&lt;50%)</div>
-          </div>
-        </div>
-
-        <div class="sec-card">
-          <div class="sc-head">
-            <div><h2>All Students</h2><p>Add, edit or remove students. Assign them to a teacher and track their learning progress.</p></div>
-            <div class="toolbar no-print">
-              <div class="srch-wrap">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input class="srch" id="s-srch" placeholder="Name, ID, class…" oninput="renderStudents()">
-              </div>
-              <select class="sel" id="s-filter-need" onchange="renderStudents()">
-                <option value="">All Needs</option>
-                <option>Dyslexia</option><option>Dysgraphia</option><option>ADHD</option><option>Dyscalculia</option>
-              </select>
-              <select class="sel" id="s-filter-status" onchange="renderStudents()">
-                <option value="">All Status</option><option value="active">Active</option><option value="inactive">Inactive</option>
-              </select>
-              <button class="btn btn-primary" onclick="openStudentModal()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add Student
-              </button>
-            </div>
-          </div>
-          <div class="tbl-wrap">
-            <table>
-              <thead><tr><th>SID</th><th>Name</th><th>Class</th><th>Need</th><th>Teacher</th><th>Accuracy</th><th>Coins</th><th>Status</th><th class="no-print" style="text-align:right">Actions</th></tr></thead>
-              <tbody id="s-tbody"></tbody>
-            </table>
-          </div>
-        </div>
-
-      </section><!-- /students -->
-
-      <!-- ========================================================
-           VIEW: PARENTS
-      ======================================================== -->
-      <section class="view" id="view-parents">
-
-        <div class="stat-row" style="grid-template-columns:repeat(3,1fr)">
-          <div class="stat-card sc-pink">
-            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5 5 0 0 0-7.07 0L12 5.34l-1.73-1.74a5 5 0 1 0-7.07 7.07L12 19.34l8.8-8.67a5 5 0 0 0 0-7.07Z"/></svg></div>
-            <div class="stat-val" id="p-total">0</div><div class="stat-lbl">Total Parents</div>
-          </div>
-          <div class="stat-card sc-green">
-            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-            <div class="stat-val" id="p-linked">0</div><div class="stat-lbl">Linked to a Student</div>
-          </div>
-          <div class="stat-card sc-amber">
-            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
-            <div class="stat-val" id="p-unlinked">0</div><div class="stat-lbl">Not Linked Yet</div>
-          </div>
-        </div>
-
-        <div class="sec-card">
-          <div class="sc-head">
-            <div><h2>All Parents</h2><p>Add, edit or remove parent records and link them to their child's student profile.</p></div>
-            <div class="toolbar no-print">
-              <div class="srch-wrap">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input class="srch" id="p-srch" placeholder="Name, ID, mobile…" oninput="renderParents()">
-              </div>
-              <button class="btn btn-primary" onclick="openParentModal()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add Parent
-              </button>
-            </div>
-          </div>
-          <div class="tbl-wrap">
-            <table>
-              <thead><tr><th>PID</th><th>Name</th><th>Mobile</th><th>Email</th><th>Linked Student</th><th class="no-print" style="text-align:right">Actions</th></tr></thead>
-              <tbody id="p-tbody"></tbody>
-            </table>
-          </div>
-        </div>
-
-      </section><!-- /parents -->
-
-      <!-- ========================================================
-           VIEW: REPORTS
-      ======================================================== -->
-      <section class="view" id="view-reports">
-
-        <div class="sec-card no-print" style="margin-bottom:18px;">
-          <div class="sc-head" style="border-bottom:none;padding-bottom:16px;">
-            <div><h2>Reports &amp; Analytics</h2><p>School-wide insights — export to PDF using the button →</p></div>
-            <div class="toolbar">
-              <select class="sel" id="rpt-period" onchange="renderReports()">
-                <option value="all">All Time</option>
-                <option value="month">This Month</option>
-                <option value="week">This Week</option>
-              </select>
-              <button class="btn btn-success" onclick="window.print()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-                Download PDF
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="chart-grid cg-22">
-          <div class="chart-panel">
-            <div class="cp-head"><h3>Performance by Learning Area</h3><p>Average accuracy — Dyslexia, Dysgraphia, ADHD, Dyscalculia</p></div>
-            <div class="chart-box"><canvas id="rpt-area"></canvas></div>
-          </div>
-          <div class="chart-panel">
-            <div class="cp-head"><h3>Weekly Accuracy Trend</h3><p>8-week school-wide performance trajectory</p></div>
-            <div class="chart-box"><canvas id="rpt-trend"></canvas></div>
-          </div>
-        </div>
-
-        <div class="chart-grid cg-22">
-          <div class="chart-panel">
-            <div class="cp-head"><h3>Top 5 Students</h3><p>Ranked by overall accuracy</p></div>
-            <ul class="mini-list" id="rpt-top"></ul>
-          </div>
-          <div class="chart-panel">
-            <div class="cp-head"><h3>Activity Completion Rate</h3><p>By learning module</p></div>
-            <div class="chart-box"><canvas id="rpt-completion"></canvas></div>
-          </div>
-        </div>
-
-        <div class="sec-card">
-          <div class="sc-head"><div><h2>Students Requiring Additional Support</h2><p>Accuracy below 50% — flagged for teacher follow-up</p></div></div>
-          <div class="tbl-wrap">
-            <table>
-              <thead><tr><th>SID</th><th>Name</th><th>Class</th><th>Need</th><th>Accuracy</th><th>Coins</th><th>Status</th></tr></thead>
-              <tbody id="rpt-support-tbody"></tbody>
-            </table>
-          </div>
-        </div>
-
-      </section><!-- /reports -->
-
-      <!-- ========================================================
-           VIEW: SETTINGS
-      ======================================================== -->
-      <section class="view" id="view-settings">
-
-        <div class="settings-grid">
-
-          <!-- School Profile -->
-          <div class="sec-card" style="overflow:visible;">
-            <div class="sc-head"><div><h2>School Profile</h2><p>Basic information about your institution</p></div></div>
-            <div class="sc-body">
-              <div class="field">
-                <label>School Logo</label>
-                <div class="logo-zone" onclick="document.getElementById('logo-inp').click()">
-                  <img class="logo-img" id="logo-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235b6484' stroke-width='1.5'%3E%3Crect x='3' y='3' width='18' height='18' rx='3'/%3E%3Cpath d='M3 16l5-5 4 4 5-5 4 4'/%3E%3C/svg%3E" alt="Logo">
-                  <div class="logo-hint">Click to upload logo</div>
-                </div>
-                <input type="file" id="logo-inp" accept="image/*" style="display:none" onchange="handleLogo(event)">
-              </div>
-              <div class="field"><label>School Name *</label><input id="set-sname" placeholder="e.g. Sri Sairam Public School"></div>
-              <div class="row2">
-                <div class="field"><label>School Code</label><input id="set-scode" disabled style="opacity:.55"></div>
-                <div class="field"><label>Principal / Admin Name</label><input id="set-principal" placeholder="Dr. Priya Raman"></div>
-              </div>
-              <div class="row2">
-                <div class="field"><label>Admin Email</label><input id="set-email" type="email" placeholder="admin@school.edu"></div>
-                <div class="field"><label>Phone Number</label><input id="set-phone" placeholder="98765 43210"></div>
-              </div>
-              <div class="field"><label>School Address</label><textarea id="set-address" placeholder="Full address…"></textarea></div>
-              <button class="btn btn-primary" onclick="saveSchoolProfile()" style="width:100%;justify-content:center;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                Save Profile
-              </button>
-            </div>
-          </div>
-
-          <div style="display:flex;flex-direction:column;gap:16px;">
-
-            <!-- Academic Year -->
-            <div class="sec-card">
-              <div class="sc-head"><div><h2>Academic Year</h2><p>Manage the current academic session</p></div></div>
-              <div class="sc-body">
-                <div class="row2">
-                  <div class="field"><label>Academic Year</label><input id="set-year" placeholder="2025-2026"></div>
-                  <div class="field"><label>Status</label>
-                    <select id="set-status"><option>Active</option><option>Upcoming</option><option>Closed</option></select>
-                  </div>
-                </div>
-                <button class="btn btn-primary" onclick="saveAcadYear()" style="width:100%;justify-content:center;">Save Academic Year</button>
-              </div>
-            </div>
-
-            <!-- Class & Section -->
-            <div class="sec-card" style="flex:1;">
-              <div class="sc-head"><div><h2>Class &amp; Section Management</h2><p>Add or remove class sections for this school</p></div></div>
-              <div class="sc-body">
-                <div class="row2" style="margin-bottom:10px;">
-                  <div class="field" style="margin-bottom:0"><label>Class / Grade</label><input id="cls-grade" placeholder="e.g. 6"></div>
-                  <div class="field" style="margin-bottom:0"><label>Section</label><input id="cls-sec" placeholder="e.g. A"></div>
-                </div>
-                <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-bottom:14px;" onclick="addClass()">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add Class &amp; Section
-                </button>
-                <div class="tbl-wrap">
-                  <table>
-                    <thead><tr><th>Class</th><th>Section</th><th style="text-align:right">Action</th></tr></thead>
-                    <tbody id="cls-tbody"></tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-      </section><!-- /settings -->
-
-    </div><!-- /page-content -->
-  </div><!-- /main-wrap -->
-</div><!-- /shell -->
-
-<!-- ================================================================
-     MODALS
-================================================================ -->
-
-<!-- TEACHER modal -->
-<div class="modal-bg" id="modal-teacher">
-  <div class="modal">
-    <div class="modal-title"><span id="t-modal-title">Add Teacher</span><button class="modal-x" onclick="closeModal('modal-teacher')">×</button></div>
-    <input type="hidden" id="t-edit-id">
-    <div class="field" style="grid-column:span 2"><label>Full Name *</label><input id="t-name" placeholder="e.g. Anita Krishnan"></div>
-    <div class="row2">
-      <div class="field"><label>Subject / Specialisation *</label><input id="t-subject" placeholder="e.g. Special Education"></div>
-      <div class="field"><label>Join Date</label><input id="t-joindate" type="date"></div>
+      <span class="id-chip" id="topbarAid">AID-DEMO-01</span>
     </div>
-    <div class="row2">
-      <div class="field"><label>Email *</label><input id="t-email" type="email" placeholder="teacher@school.edu"></div>
-      <div class="field"><label>Mobile *</label><input id="t-mobile" inputmode="numeric" maxlength="10" placeholder="98765 43210"></div>
+
+    <div class="content">
+      <section class="view">
+        <div class="stat-grid">
+          <div class="stat-card sc-1">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+            <div class="val" id="statTotalStudents">0</div>
+            <div class="lbl">Total Students</div>
+          </div>
+          <div class="stat-card sc-2">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+            <div class="val" id="statTotalTeachers">0</div>
+            <div class="lbl">Total Teachers</div>
+          </div>
+          <div class="stat-card sc-3">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+            <div class="val" id="statActiveStudents">0</div>
+            <div class="lbl">Active Students (7d)</div>
+          </div>
+          <div class="stat-card sc-4">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+            <div class="val" id="statTotalCoins">0</div>
+            <div class="lbl">Total Coins Earned</div>
+          </div>
+          <div class="stat-card sc-5">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-4 4"/></svg></div>
+            <div class="val" id="statAvgPerf">0%</div>
+            <div class="lbl">Avg. School Performance</div>
+          </div>
+        </div>
+
+        <div class="panel-grid">
+          <div class="chart-card">
+            <h3>Student Progress Trend</h3>
+            <p class="ch-sub">Average accuracy across all modules, last 6 weeks</p>
+            <div class="chart-wrap"><canvas id="progressChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Module Distribution</h3>
+            <p class="ch-sub">Students by primary learning need</p>
+            <div class="chart-wrap"><canvas id="moduleChart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="panel-grid">
+          <div class="chart-card">
+            <h3>Coins Earned by Class</h3>
+            <p class="ch-sub">Gamification engagement per grade</p>
+            <div class="chart-wrap"><canvas id="coinsChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Students Needing Support</h3>
+            <p class="ch-sub">Accuracy below 50% in the last 2 weeks</p>
+            <ul class="support-list" id="supportList"></ul>
+          </div>
+        </div>
+      </section>
     </div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeModal('modal-teacher')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveTeacher()">Save Teacher</button>
-    </div>
-  </div>
+  </main>
 </div>
 
-<!-- STUDENT modal -->
-<div class="modal-bg" id="modal-student">
-  <div class="modal">
-    <div class="modal-title"><span id="s-modal-title">Add Student</span><button class="modal-x" onclick="closeModal('modal-student')">×</button></div>
-    <input type="hidden" id="s-edit-id">
-    <div class="row2">
-      <div class="field" style="grid-column:span 2"><label>Full Name *</label><input id="s-name" placeholder="e.g. Aarav Singh"></div>
-    </div>
-    <div class="row3">
-      <div class="field"><label>Class / Grade *</label><input id="s-class" placeholder="e.g. 5-A"></div>
-      <div class="field"><label>Age</label><input id="s-age" type="number" min="4" max="20" placeholder="10"></div>
-      <div class="field"><label>Gender</label>
-        <select id="s-gender"><option value="">Select</option><option>Female</option><option>Male</option><option>Other</option></select>
-      </div>
-    </div>
-    <div class="row2">
-      <div class="field"><label>Primary Learning Need *</label>
-        <select id="s-need"><option>Dyslexia</option><option>Dysgraphia</option><option>ADHD</option><option>Dyscalculia</option></select>
-      </div>
-      <div class="field"><label>Assign Teacher</label><select id="s-teacher"><option value="">— Unassigned —</option></select></div>
-    </div>
-    <div class="row2">
-      <div class="field"><label>Student Email</label><input id="s-email" type="email" placeholder="student@example.com"></div>
-      <div class="field"><label>Parent Mobile</label><input id="s-pmobile" inputmode="numeric" maxlength="10" placeholder="98765 43210"></div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeModal('modal-student')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveStudent()">Save Student</button>
-    </div>
-  </div>
-</div>
+<div class="toast" id="toast"></div>
 
-<!-- PARENT modal -->
-<div class="modal-bg" id="modal-parent">
-  <div class="modal">
-    <div class="modal-title"><span id="p-modal-title">Add Parent</span><button class="modal-x" onclick="closeModal('modal-parent')">×</button></div>
-    <input type="hidden" id="p-edit-id">
-    <div class="field"><label>Parent Name *</label><input id="p-name" placeholder="e.g. Suresh Singh"></div>
-    <div class="row2">
-      <div class="field"><label>Mobile *</label><input id="p-mobile" inputmode="numeric" maxlength="10" placeholder="98765 43210"></div>
-      <div class="field"><label>Email</label><input id="p-email" type="email" placeholder="parent@example.com"></div>
-    </div>
-    <div class="field"><label>Linked Student</label><select id="p-student"><option value="">— Select student —</option></select></div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeModal('modal-parent')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveParent()">Save Parent</button>
-    </div>
-  </div>
-</div>
-
-<!-- CONFIRM DELETE modal -->
-<div class="modal-bg" id="modal-confirm">
-  <div class="modal sm" style="text-align:center;">
-    <div style="font-size:38px;margin-bottom:10px;">🗑️</div>
-    <div class="modal-title" style="justify-content:center;font-size:16px;" id="confirm-title">Are you sure?</div>
-    <p style="color:var(--ink2);font-size:13px;margin-bottom:4px;line-height:1.6;" id="confirm-msg">This action cannot be undone.</p>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">Cancel</button>
-      <button class="btn btn-danger" id="confirm-ok">Delete</button>
-    </div>
-  </div>
-</div>
-
-<!-- TOAST TRAY -->
-<div id="toast-tray"></div>
-
-<!-- ================================================================
-     JAVASCRIPT
-================================================================ */
+<script src="admin-common.js"></script>
 <script>
-'use strict';
-
-/* ─────────────────────────────────────────────────────────
-   CONSTANTS & STORAGE
-───────────────────────────────────────────────────────── */
-const K = {
-  T:'esld-adm-teachers',  S:'esld-adm-students',
-  P:'esld-adm-parents',   C:'esld-adm-classes',
-  ST:'esld-adm-settings', SE:'esld-session',
-};
-const get  = k => { try{ return JSON.parse(localStorage.getItem(k)||'[]'); }catch(e){ return []; } };
-const getO = k => { try{ return JSON.parse(localStorage.getItem(k)||'null'); }catch(e){ return null; } };
-const set  = (k,v) => localStorage.setItem(k, JSON.stringify(v));
-
-/* ─────────────────────────────────────────────────────────
-   SESSION
-───────────────────────────────────────────────────────── */
-let SES = getO(K.SE);
-if (!SES || SES.role !== 'admin')
-  SES = { role:'admin', id:'AID-DEMO-01', name:'Demo Admin', schoolName:'ESLD Demo School', schoolCode:'DEMO01' };
-
-function doLogout(){
-  localStorage.removeItem(K.SE);
-  toast('Logged out successfully.','success');
-  setTimeout(() => window.location.href = 'admin-login.html', 900);
-}
-
-/* ─────────────────────────────────────────────────────────
-   SEED DEMO DATA
-───────────────────────────────────────────────────────── */
-(function seed(){
-  if(!get(K.T).length) set(K.T,[
-    {tid:'TID001',name:'Anita Krishnan',  subject:'Special Education',  email:'anita@demo.esld', mobile:'9811122233',joinDate:'2024-06-01'},
-    {tid:'TID002',name:'Rahul Mehta',     subject:'Maths Support',      email:'rahul@demo.esld', mobile:'9822233344',joinDate:'2024-07-15'},
-    {tid:'TID003',name:'Sara Thomas',     subject:'Language & Reading',  email:'sara@demo.esld',  mobile:'9833344455',joinDate:'2024-08-01'},
-    {tid:'TID004',name:'Priya Venkat',    subject:'Cognitive Skills',    email:'priya@demo.esld', mobile:'9844455566',joinDate:'2025-01-10'},
-  ]);
-  if(!get(K.S).length) set(K.S,[
-    {sid:'SID001',name:'Aarav Singh',  classGrade:'5-A',need:'Dyslexia',  teacherTid:'TID003',accuracy:78,coins:420,active:true, age:11,gender:'Male',  email:'aarav@s.esld',  pMobile:'9900011111',joinDate:'2024-06-15'},
-    {sid:'SID002',name:'Diya Patel',   classGrade:'6-B',need:'Dysgraphia',teacherTid:'TID001',accuracy:64,coins:310,active:true, age:12,gender:'Female',email:'diya@s.esld',   pMobile:'9900022222',joinDate:'2024-06-18'},
-    {sid:'SID003',name:'Kabir Rao',    classGrade:'4-A',need:'ADHD',      teacherTid:'TID002',accuracy:45,coins:150,active:false,age:10,gender:'Male',  email:'kabir@s.esld',  pMobile:'9900033333',joinDate:'2024-07-02'},
-    {sid:'SID004',name:'Meera Iyer',   classGrade:'7-C',need:'Dyscalculia',teacherTid:'TID002',accuracy:38,coins:90, active:false,age:13,gender:'Female',email:'meera@s.esld',  pMobile:'9900044444',joinDate:'2024-07-10'},
-    {sid:'SID005',name:'Vivaan Joshi', classGrade:'5-A',need:'Dyslexia',  teacherTid:'TID003',accuracy:91,coins:610,active:true, age:11,gender:'Male',  email:'vivaan@s.esld', pMobile:'9900055555',joinDate:'2024-08-05'},
-    {sid:'SID006',name:'Ira Nair',     classGrade:'6-B',need:'ADHD',      teacherTid:'TID001',accuracy:88,coins:540,active:true, age:12,gender:'Female',email:'ira@s.esld',    pMobile:'9900066666',joinDate:'2024-08-20'},
-    {sid:'SID007',name:'Aryan Sharma', classGrade:'4-A',need:'Dyslexia',  teacherTid:'TID003',accuracy:55,coins:230,active:true, age:10,gender:'Male',  email:'aryan@s.esld',  pMobile:'9900077777',joinDate:'2025-01-05'},
-    {sid:'SID008',name:'Nisha Reddy',  classGrade:'7-C',need:'Dysgraphia',teacherTid:'TID004',accuracy:70,coins:380,active:true, age:13,gender:'Female',email:'nisha@s.esld',  pMobile:'9900088888',joinDate:'2025-01-12'},
-  ]);
-  if(!get(K.P).length) set(K.P,[
-    {pid:'PID001',name:'Suresh Singh',  mobile:'9900011122',email:'suresh@example.com', studentSid:'SID001'},
-    {pid:'PID002',name:'Kavya Patel',   mobile:'9900022233',email:'kavya@example.com',  studentSid:'SID002'},
-    {pid:'PID003',name:'Rajiv Rao',     mobile:'9900033344',email:'rajiv@example.com',  studentSid:'SID003'},
-  ]);
-  if(!get(K.C).length) set(K.C,[
-    {id:'c1',grade:'4',section:'A'},{id:'c2',grade:'5',section:'A'},
-    {id:'c3',grade:'6',section:'B'},{id:'c4',grade:'7',section:'C'},
-  ]);
-  if(!getO(K.ST)) set(K.ST,{
-    schoolName:SES.schoolName, schoolCode:SES.schoolCode,
-    principal:SES.name, email:'admin@demo.esld', phone:'9000000000',
-    address:'123 School Lane, Chennai, Tamil Nadu',
-    academicYear:'2025-2026', academicStatus:'Active', logo:null,
-  });
-})();
-
-/* ─────────────────────────────────────────────────────────
-   ID GENERATOR
-───────────────────────────────────────────────────────── */
-function nextId(prefix, list, key){
-  const nums = list.map(x=>parseInt((x[key]||'').replace(prefix,''),10)).filter(n=>!isNaN(n));
-  return prefix + String((nums.length ? Math.max(...nums) : 0)+1).padStart(3,'0');
-}
-
-/* ─────────────────────────────────────────────────────────
-   TOAST
-───────────────────────────────────────────────────────── */
-const ICONS = {
-  success:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`,
-  error:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>`,
-  info:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>`,
-};
-function toast(msg, type='info', ms=3000){
-  const tray = document.getElementById('toast-tray');
-  const el   = document.createElement('div');
-  el.className = `toast t-${type}`;
-  el.innerHTML = (ICONS[type]||ICONS.info) + `<span>${msg}</span>`;
-  tray.appendChild(el);
-  setTimeout(()=>{ el.classList.add('out'); el.addEventListener('animationend',()=>el.remove()); }, ms);
-}
-
-/* ─────────────────────────────────────────────────────────
-   MODAL
-───────────────────────────────────────────────────────── */
-function openModal(id)  { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-document.addEventListener('click', e => { if(e.target.classList.contains('modal-bg')) e.target.classList.remove('open'); });
-
-/* ─────────────────────────────────────────────────────────
-   NAVIGATION
-───────────────────────────────────────────────────────── */
-const VIEW_TITLES = {
-  dashboard:'Dashboard Home', teachers:'Teacher Management',
-  students:'Student Management', parents:'Parent Management',
-  reports:'Reports & Analytics', settings:'School Settings',
-};
-let activeView = 'dashboard';
-
-function nav(btn){
-  const v = btn.dataset.view;
-  if(v === activeView) return;
-  activeView = v;
-  document.querySelectorAll('.nav-link').forEach(l => l.classList.toggle('active', l.dataset.view===v));
-  document.querySelectorAll('.view').forEach(s => s.classList.toggle('active', s.id==='view-'+v));
-  document.getElementById('viewTitle').textContent = VIEW_TITLES[v] || v;
-  document.getElementById('sidebar').classList.remove('open');
-  onViewOpen(v);
-}
-function onViewOpen(v){
-  if(v==='dashboard') renderDashboard();
-  if(v==='teachers')  { buildSubjectFilter(); renderTeachers(); }
-  if(v==='students')  { renderStudents(); }
-  if(v==='parents')   { renderParents(); }
-  if(v==='reports')   renderReports();
-  if(v==='settings')  loadSettings();
-}
-
-/* ─────────────────────────────────────────────────────────
-   BOOT TOPBAR / SIDEBAR IDENTITY
-───────────────────────────────────────────────────────── */
-function bootIdentity(){
-  const cfg = getO(K.ST)||{};
-  document.getElementById('topAid').textContent     = SES.id;
-  document.getElementById('sbAv').textContent        = (SES.name||'A')[0].toUpperCase();
-  document.getElementById('sbName').textContent      = SES.name;
-  document.getElementById('sbId').textContent        = SES.id;
-  document.getElementById('sbSchoolCode').textContent = cfg.schoolCode||SES.schoolCode;
-  document.getElementById('viewSub').textContent     = `${cfg.schoolName||SES.schoolName} · ${cfg.schoolCode||SES.schoolCode}`;
-}
-
-/* ─────────────────────────────────────────────────────────
-   CHART.JS DEFAULTS
-───────────────────────────────────────────────────────── */
-Chart.defaults.color        = '#8f9ab8';
-Chart.defaults.font.family  = 'Lexend';
-Chart.defaults.borderColor  = 'rgba(255,255,255,0.055)';
-let _charts = {};
-function destroyChart(id){ if(_charts[id]){ _charts[id].destroy(); delete _charts[id]; } }
-function mkChart(id, cfg){ destroyChart(id); _charts[id] = new Chart(document.getElementById(id), cfg); }
-
-/* ─────────────────────────────────────────────────────────
-   DASHBOARD
-───────────────────────────────────────────────────────── */
 function renderDashboard(){
-  const students = get(K.S);
-  const teachers = get(K.T);
-  const coins    = students.reduce((a,s)=>a+(s.coins||0),0);
-  const avg      = students.length ? Math.round(students.reduce((a,s)=>a+(s.accuracy||0),0)/students.length) : 0;
-  const active   = students.filter(s=>s.active).length;
-  const support  = students.filter(s=>(s.accuracy||0)<50);
+  const teachers = getData(K_TEACHERS);
+  const students = getData(K_STUDENTS);
+  const totalCoins = students.reduce((s,x)=>s+(x.coins||0),0);
+  const avgAcc = students.length ? Math.round(students.reduce((s,x)=>s+(x.accuracy||0),0)/students.length) : 0;
+  const active = students.filter(s=>s.active).length;
 
-  document.getElementById('ds-students').textContent  = students.length;
-  document.getElementById('ds-teachers').textContent  = teachers.length;
-  document.getElementById('ds-active').textContent    = active;
-  document.getElementById('ds-coins').textContent     = coins.toLocaleString('en-IN');
-  document.getElementById('ds-avg').textContent       = avg+'%';
-  document.getElementById('ds-active-d').textContent  = `${active} active now`;
+  $('#statTotalStudents').textContent = students.length;
+  $('#statTotalTeachers').textContent = teachers.length;
+  $('#statActiveStudents').textContent = active;
+  $('#statTotalCoins').textContent = totalCoins.toLocaleString();
+  $('#statAvgPerf').textContent = avgAcc + '%';
 
-  const supEl = document.getElementById('ds-support');
-  supEl.innerHTML = support.length
-    ? support.map(s=>`<li><span>${s.name}<small style="color:var(--ink3);margin-left:5px;">(${s.classGrade})</small></span><span class="pill p-red">${s.accuracy}%</span></li>`).join('')
-    : `<li class="ml-empty">🎉 No students flagged at this time!</li>`;
+  const support = students.filter(s => (s.accuracy||0) < 50);
+  $('#supportList').innerHTML = support.length ? support.map(s=>`
+    <li><span>${s.name} <span style="color:var(--ink-dim);">(${s.classGrade})</span></span><span class="pill pill-red">${s.accuracy}%</span></li>
+  `).join('') : `<li style="justify-content:center; color:var(--ink-dim);">No students currently flagged 🎉</li>`;
 
-  // Trend line
-  mkChart('ch-trend',{
+  Chart.defaults.color = '#8f98b8';
+  Chart.defaults.font.family = 'Lexend';
+  Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+  new Chart($('#progressChart'), {
     type:'line',
-    data:{ labels:['Wk1','Wk2','Wk3','Wk4','Wk5','Wk6','Wk7','Wk8'],
-      datasets:[
-        {label:'Avg Accuracy %',data:[54,58,61,64,67,70,72,avg||74],borderColor:'#a78bfa',backgroundColor:'rgba(167,139,250,0.1)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#a78bfa'},
-        {label:'Target',data:[60,60,60,60,60,60,60,60],borderColor:'rgba(52,216,176,0.4)',borderDash:[6,4],pointRadius:0,fill:false},
-      ]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{position:'top',labels:{boxWidth:10,padding:14,font:{size:11}}}},
-      scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%',stepSize:20}}}}
+    data:{ labels:['Wk1','Wk2','Wk3','Wk4','Wk5','Wk6'], datasets:[{ label:'Avg accuracy %', data:[58,61,64,67,71,avgAcc||74], borderColor:'#a78bfa', backgroundColor:'rgba(167,139,250,0.15)', fill:true, tension:0.4, pointRadius:3 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{ min:0, max:100, ticks:{ callback:v=>v+'%' } } } }
   });
 
-  // Needs doughnut
-  const nc={Dyslexia:0,Dysgraphia:0,ADHD:0,Dyscalculia:0};
-  students.forEach(s=>{ if(nc[s.need]!==undefined) nc[s.need]++; });
-  mkChart('ch-needs',{
+  const needCounts = {Dyslexia:0,Dysgraphia:0,ADHD:0,Dyscalculia:0};
+  students.forEach(s => { if(needCounts[s.need]!==undefined) needCounts[s.need]++; });
+  new Chart($('#moduleChart'), {
     type:'doughnut',
-    data:{labels:Object.keys(nc),datasets:[{data:Object.values(nc),backgroundColor:['#38bdf8','#fbbf24','#f472b6','#34d8b0'],borderWidth:0,hoverOffset:6}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'60%',
-      plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:14,font:{size:11}}}}}
+    data:{ labels:Object.keys(needCounts), datasets:[{ data:Object.values(needCounts), backgroundColor:['#38bdf8','#fbbf24','#f472b6','#34d8b0'], borderWidth:0 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{boxWidth:10, padding:14, font:{size:11}}}} }
   });
 
-  // Coins bar
-  const byClass={};
-  students.forEach(s=>{ byClass[s.classGrade]=(byClass[s.classGrade]||0)+(s.coins||0); });
-  mkChart('ch-coins',{
+  const byClass = {};
+  students.forEach(s => { byClass[s.classGrade] = (byClass[s.classGrade]||0) + (s.coins||0); });
+  new Chart($('#coinsChart'), {
     type:'bar',
-    data:{labels:Object.keys(byClass),datasets:[{label:'Coins',data:Object.values(byClass),backgroundColor:'#34d8b0',borderRadius:6,borderSkipped:false}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+    data:{ labels:Object.keys(byClass), datasets:[{ label:'Coins', data:Object.values(byClass), backgroundColor:'#34d8b0', borderRadius:6 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{ beginAtZero:true } } }
   });
 }
-
-/* ─────────────────────────────────────────────────────────
-   TEACHERS
-───────────────────────────────────────────────────────── */
-function buildSubjectFilter(){
-  const sel = document.getElementById('t-filter');
-  const saved = sel.value;
-  const subs = [...new Set(get(K.T).map(t=>t.subject))].sort();
-  sel.innerHTML = '<option value="">All Subjects</option>' + subs.map(s=>`<option value="${s}">${s}</option>`).join('');
-  if(saved) sel.value = saved;
-}
-function renderTeachers(){
-  const teachers = get(K.T), students = get(K.S);
-  const q  = (document.getElementById('t-srch').value||'').toLowerCase();
-  const fs = document.getElementById('t-filter').value;
-  let list = teachers;
-  if(q)  list = list.filter(t=>(t.name+t.tid+t.subject+t.email).toLowerCase().includes(q));
-  if(fs) list = list.filter(t=>t.subject===fs);
-
-  const aSet = new Set(students.map(s=>s.teacherTid).filter(Boolean));
-  document.getElementById('t-total').textContent      = teachers.length;
-  document.getElementById('t-assigned').textContent   = teachers.filter(t=>aSet.has(t.tid)).length;
-  document.getElementById('t-unassigned').textContent = teachers.filter(t=>!aSet.has(t.tid)).length;
-
-  const avColors=['av-blue','av-green','av-pink','av-amber','av-teal'];
-  document.getElementById('t-tbody').innerHTML = list.length
-    ? list.map((t,i)=>{
-        const cnt   = students.filter(s=>s.teacherTid===t.tid).length;
-        const joined= t.joinDate ? new Date(t.joinDate).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '—';
-        const av    = avColors[i%avColors.length];
-        return `<tr>
-          <td><span class="id-tag">${t.tid}</span></td>
-          <td><div class="name-cell"><span class="av-sm ${av}">${t.name[0]}</span>${t.name}</div></td>
-          <td><span class="pill p-blue">${t.subject}</span></td>
-          <td>${t.email}</td>
-          <td>${t.mobile}</td>
-          <td>${cnt?`<span class="pill p-green">${cnt} student${cnt===1?'':'s'}</span>`:`<span class="pill p-amber">Unassigned</span>`}</td>
-          <td>${joined}</td>
-          <td class="no-print"><div class="td-act">
-            <button class="btn btn-ghost btn-sm" onclick="editTeacher('${t.tid}')">Edit</button>
-            <button class="btn btn-danger btn-sm" onclick="askDelete('teacher','${t.tid}','${t.name}')">Delete</button>
-          </div></td>
-        </tr>`;
-      }).join('')
-    : `<tr><td class="td-empty" colspan="8">No teachers found.</td></tr>`;
-}
-function openTeacherModal(){
-  document.getElementById('t-modal-title').textContent = 'Add New Teacher';
-  document.getElementById('t-edit-id').value = '';
-  ['t-name','t-subject','t-email','t-mobile'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('t-joindate').value = new Date().toISOString().split('T')[0];
-  openModal('modal-teacher');
-}
-function editTeacher(tid){
-  const t = get(K.T).find(x=>x.tid===tid); if(!t) return;
-  document.getElementById('t-modal-title').textContent = `Edit — ${t.tid}`;
-  document.getElementById('t-edit-id').value   = t.tid;
-  document.getElementById('t-name').value      = t.name;
-  document.getElementById('t-subject').value   = t.subject;
-  document.getElementById('t-email').value     = t.email;
-  document.getElementById('t-mobile').value    = t.mobile;
-  document.getElementById('t-joindate').value  = t.joinDate||'';
-  openModal('modal-teacher');
-}
-function saveTeacher(){
-  const name=document.getElementById('t-name').value.trim();
-  const subject=document.getElementById('t-subject').value.trim();
-  const email=document.getElementById('t-email').value.trim();
-  const mobile=document.getElementById('t-mobile').value.trim();
-  const joinDate=document.getElementById('t-joindate').value;
-  if(!name||!subject||!email||!mobile){toast('Fill in all required fields.','error');return;}
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){toast('Invalid email address.','error');return;}
-  if(!/^[6-9]\d{9}$/.test(mobile)){toast('Enter a valid 10-digit mobile number.','error');return;}
-
-  let list=get(K.T); const eid=document.getElementById('t-edit-id').value;
-  if(eid){
-    list=list.map(t=>t.tid===eid?{...t,name,subject,email,mobile,joinDate}:t);
-    toast(`Teacher ${eid} updated.`,'success');
-  } else {
-    const tid=nextId('TID',list,'tid');
-    list.push({tid,name,subject,email,mobile,joinDate});
-    toast(`Teacher added — ${tid}`,'success');
-  }
-  set(K.T,list); closeModal('modal-teacher'); buildSubjectFilter(); renderTeachers();
-}
-
-/* ─────────────────────────────────────────────────────────
-   STUDENTS
-───────────────────────────────────────────────────────── */
-function renderStudents(){
-  const students=get(K.S), teachers=get(K.T);
-  const q   = (document.getElementById('s-srch').value||'').toLowerCase();
-  const fn  = document.getElementById('s-filter-need').value;
-  const fs  = document.getElementById('s-filter-status').value;
-  let list  = students;
-  if(q)  list=list.filter(s=>(s.name+s.sid+s.classGrade).toLowerCase().includes(q));
-  if(fn) list=list.filter(s=>s.need===fn);
-  if(fs) list=list.filter(s=>fs==='active'?s.active:!s.active);
-
-  const avg   = students.length ? Math.round(students.reduce((a,s)=>a+(s.accuracy||0),0)/students.length) : 0;
-  document.getElementById('s-total').textContent  = students.length;
-  document.getElementById('s-active').textContent = students.filter(s=>s.active).length;
-  document.getElementById('s-avgacc').textContent = avg+'%';
-  document.getElementById('s-atrisk').textContent = students.filter(s=>(s.accuracy||0)<50).length;
-
-  const needColors={Dyslexia:'p-blue',Dysgraphia:'p-amber',ADHD:'p-pink',Dyscalculia:'p-teal'};
-  const avColors  =['av-green','av-blue','av-pink','av-amber','av-teal'];
-  document.getElementById('s-tbody').innerHTML = list.length
-    ? list.map((s,i)=>{
-        const t   = teachers.find(x=>x.tid===s.teacherTid);
-        const acc = s.accuracy>=70?'p-green':s.accuracy>=50?'p-amber':'p-red';
-        const av  = avColors[i%avColors.length];
-        return `<tr>
-          <td><span class="id-tag">${s.sid}</span></td>
-          <td><div class="name-cell"><span class="av-sm ${av}">${s.name[0]}</span>${s.name}</div></td>
-          <td>${s.classGrade}</td>
-          <td><span class="pill ${needColors[s.need]||'p-accent'}">${s.need}</span></td>
-          <td>${t?t.name:'<span style="color:var(--ink3)">Unassigned</span>'}</td>
-          <td><span class="pill ${acc}">${s.accuracy}%</span></td>
-          <td>${(s.coins||0).toLocaleString('en-IN')}</td>
-          <td>${s.active?'<span class="pill p-green">Active</span>':'<span class="pill p-amber">Inactive</span>'}</td>
-          <td class="no-print"><div class="td-act">
-            <button class="btn btn-ghost btn-sm" onclick="editStudent('${s.sid}')">Edit</button>
-            <button class="btn btn-danger btn-sm" onclick="askDelete('student','${s.sid}','${s.name}')">Delete</button>
-          </div></td>
-        </tr>`;
-      }).join('')
-    : `<tr><td class="td-empty" colspan="9">No students found.</td></tr>`;
-}
-function openStudentModal(){
-  const teachers = get(K.T);
-  document.getElementById('s-modal-title').textContent = 'Add New Student';
-  document.getElementById('s-edit-id').value = '';
-  ['s-name','s-class','s-age','s-email','s-pmobile'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('s-gender').value  = '';
-  document.getElementById('s-need').value    = 'Dyslexia';
-  const tSel = document.getElementById('s-teacher');
-  tSel.innerHTML = '<option value="">— Unassigned —</option>'+teachers.map(t=>`<option value="${t.tid}">${t.name} (${t.tid})</option>`).join('');
-  openModal('modal-student');
-}
-function editStudent(sid){
-  const s=get(K.S).find(x=>x.sid===sid); if(!s) return;
-  const teachers=get(K.T);
-  document.getElementById('s-modal-title').textContent = `Edit — ${s.sid}`;
-  document.getElementById('s-edit-id').value  = s.sid;
-  document.getElementById('s-name').value     = s.name;
-  document.getElementById('s-class').value    = s.classGrade;
-  document.getElementById('s-age').value      = s.age||'';
-  document.getElementById('s-gender').value   = s.gender||'';
-  document.getElementById('s-need').value     = s.need;
-  document.getElementById('s-email').value    = s.email||'';
-  document.getElementById('s-pmobile').value  = s.pMobile||'';
-  const tSel = document.getElementById('s-teacher');
-  tSel.innerHTML = '<option value="">— Unassigned —</option>'+teachers.map(t=>`<option value="${t.tid}">${t.name} (${t.tid})</option>`).join('');
-  tSel.value = s.teacherTid||'';
-  openModal('modal-student');
-}
-function saveStudent(){
-  const name=document.getElementById('s-name').value.trim();
-  const classGrade=document.getElementById('s-class').value.trim();
-  const age=document.getElementById('s-age').value.trim();
-  const gender=document.getElementById('s-gender').value;
-  const need=document.getElementById('s-need').value;
-  const teacherTid=document.getElementById('s-teacher').value;
-  const email=document.getElementById('s-email').value.trim();
-  const pMobile=document.getElementById('s-pmobile').value.trim();
-  if(!name||!classGrade){toast('Name and class are required.','error');return;}
-
-  let list=get(K.S); const eid=document.getElementById('s-edit-id').value;
-  if(eid){
-    list=list.map(s=>s.sid===eid?{...s,name,classGrade,age,gender,need,teacherTid,email,pMobile}:s);
-    toast(`Student ${eid} updated.`,'success');
-  } else {
-    const sid=nextId('SID',list,'sid');
-    list.push({sid,name,classGrade,age,gender,need,teacherTid,email,pMobile,
-      accuracy:Math.floor(40+Math.random()*55), coins:Math.floor(50+Math.random()*500),
-      active:true, joinDate:new Date().toISOString().split('T')[0]});
-    toast(`Student added — ${sid}`,'success');
-  }
-  set(K.S,list); closeModal('modal-student'); renderStudents();
-}
-
-/* ─────────────────────────────────────────────────────────
-   PARENTS
-───────────────────────────────────────────────────────── */
-function renderParents(){
-  const parents=get(K.P), students=get(K.S);
-  const q = (document.getElementById('p-srch').value||'').toLowerCase();
-  let list = parents;
-  if(q) list=list.filter(p=>(p.name+p.pid+p.mobile).toLowerCase().includes(q));
-
-  document.getElementById('p-total').textContent    = parents.length;
-  document.getElementById('p-linked').textContent   = parents.filter(p=>p.studentSid).length;
-  document.getElementById('p-unlinked').textContent = parents.filter(p=>!p.studentSid).length;
-
-  const avColors=['av-pink','av-blue','av-green','av-amber','av-teal'];
-  document.getElementById('p-tbody').innerHTML = list.length
-    ? list.map((p,i)=>{
-        const s  = students.find(x=>x.sid===p.studentSid);
-        const av = avColors[i%avColors.length];
-        return `<tr>
-          <td><span class="id-tag">${p.pid}</span></td>
-          <td><div class="name-cell"><span class="av-sm ${av}">${p.name[0]}</span>${p.name}</div></td>
-          <td>${p.mobile}</td>
-          <td>${p.email||'<span style="color:var(--ink3)">—</span>'}</td>
-          <td>${s?`<span class="id-tag" style="color:var(--green)">${s.sid}</span> ${s.name}`:'<span style="color:var(--ink3)">Not linked</span>'}</td>
-          <td class="no-print"><div class="td-act">
-            <button class="btn btn-ghost btn-sm" onclick="editParent('${p.pid}')">Edit</button>
-            <button class="btn btn-danger btn-sm" onclick="askDelete('parent','${p.pid}','${p.name}')">Delete</button>
-          </div></td>
-        </tr>`;
-      }).join('')
-    : `<tr><td class="td-empty" colspan="6">No parents found.</td></tr>`;
-}
-function openParentModal(){
-  const students=get(K.S);
-  document.getElementById('p-modal-title').textContent = 'Add New Parent';
-  document.getElementById('p-edit-id').value = '';
-  ['p-name','p-mobile','p-email'].forEach(id=>document.getElementById(id).value='');
-  const sel=document.getElementById('p-student');
-  sel.innerHTML='<option value="">— Select student —</option>'+students.map(s=>`<option value="${s.sid}">${s.name} (${s.sid})</option>`).join('');
-  openModal('modal-parent');
-}
-function editParent(pid){
-  const p=get(K.P).find(x=>x.pid===pid); if(!p) return;
-  const students=get(K.S);
-  document.getElementById('p-modal-title').textContent = `Edit — ${p.pid}`;
-  document.getElementById('p-edit-id').value   = p.pid;
-  document.getElementById('p-name').value      = p.name;
-  document.getElementById('p-mobile').value    = p.mobile;
-  document.getElementById('p-email').value     = p.email||'';
-  const sel=document.getElementById('p-student');
-  sel.innerHTML='<option value="">— Select student —</option>'+students.map(s=>`<option value="${s.sid}">${s.name} (${s.sid})</option>`).join('');
-  sel.value=p.studentSid||'';
-  openModal('modal-parent');
-}
-function saveParent(){
-  const name=document.getElementById('p-name').value.trim();
-  const mobile=document.getElementById('p-mobile').value.trim();
-  const email=document.getElementById('p-email').value.trim();
-  const studentSid=document.getElementById('p-student').value;
-  if(!name||!mobile){toast('Name and mobile are required.','error');return;}
-  if(!/^[6-9]\d{9}$/.test(mobile)){toast('Enter a valid 10-digit mobile number.','error');return;}
-
-  let list=get(K.P); const eid=document.getElementById('p-edit-id').value;
-  if(eid){
-    list=list.map(p=>p.pid===eid?{...p,name,mobile,email,studentSid}:p);
-    toast(`Parent ${eid} updated.`,'success');
-  } else {
-    const pid=nextId('PID',list,'pid');
-    list.push({pid,name,mobile,email,studentSid});
-    toast(`Parent added — ${pid}`,'success');
-  }
-  set(K.P,list); closeModal('modal-parent'); renderParents();
-}
-
-/* ─────────────────────────────────────────────────────────
-   DELETE (shared confirm)
-───────────────────────────────────────────────────────── */
-function askDelete(type, id, name){
-  const msgs={
-    teacher:`"${name}" will be removed and their assigned students will be unassigned.`,
-    student:`"${name}" will be permanently deleted. Linked parent records will be unlinked.`,
-    parent:`Parent record for "${name}" will be permanently deleted.`,
-    class:`This class section will be removed.`,
-  };
-  document.getElementById('confirm-title').textContent = `Delete ${type.charAt(0).toUpperCase()+type.slice(1)}?`;
-  document.getElementById('confirm-msg').textContent   = msgs[type]||'This action cannot be undone.';
-  document.getElementById('confirm-ok').onclick = () => doDelete(type, id);
-  openModal('modal-confirm');
-}
-function doDelete(type, id){
-  if(type==='teacher'){
-    set(K.T, get(K.T).filter(t=>t.tid!==id));
-    set(K.S, get(K.S).map(s=>s.teacherTid===id?{...s,teacherTid:''}:s));
-    toast('Teacher removed.','info'); renderTeachers();
-  } else if(type==='student'){
-    set(K.S, get(K.S).filter(s=>s.sid!==id));
-    set(K.P, get(K.P).map(p=>p.studentSid===id?{...p,studentSid:''}:p));
-    toast('Student removed.','info'); renderStudents();
-  } else if(type==='parent'){
-    set(K.P, get(K.P).filter(p=>p.pid!==id));
-    toast('Parent removed.','info'); renderParents();
-  } else if(type==='class'){
-    set(K.C, get(K.C).filter(c=>c.id!==id));
-    toast('Class section removed.','info'); renderClasses();
-  }
-  closeModal('modal-confirm');
-}
-
-/* ─────────────────────────────────────────────────────────
-   REPORTS
-───────────────────────────────────────────────────────── */
-function renderReports(){
-  const students = get(K.S);
-  // Area bar chart
-  const needAvg={Dyslexia:[],Dysgraphia:[],ADHD:[],Dyscalculia:[]};
-  students.forEach(s=>{ if(needAvg[s.need]) needAvg[s.need].push(s.accuracy||0); });
-  const avgOf = arr => arr.length ? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length) : 0;
-
-  mkChart('rpt-area',{
-    type:'bar',
-    data:{
-      labels:Object.keys(needAvg),
-      datasets:[{label:'Avg Accuracy %',data:Object.values(needAvg).map(avgOf),
-        backgroundColor:['#38bdf8','#fbbf24','#f472b6','#34d8b0'],borderRadius:8,borderSkipped:false}]
-    },
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}}}
-  });
-
-  // Trend
-  const avg = students.length ? Math.round(students.reduce((a,s)=>a+(s.accuracy||0),0)/students.length) : 0;
-  mkChart('rpt-trend',{
-    type:'line',
-    data:{labels:['Wk1','Wk2','Wk3','Wk4','Wk5','Wk6','Wk7','Wk8'],
-      datasets:[{label:'Accuracy',data:[54,58,61,64,67,70,72,avg||74],borderColor:'#a78bfa',
-        backgroundColor:'rgba(167,139,250,0.1)',fill:true,tension:.4,pointRadius:3}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}}}
-  });
-
-  // Completion radar-like (bar)
-  mkChart('rpt-completion',{
-    type:'bar',
-    data:{labels:['Dyslexia\nGames','Dysgraphia\nActivities','ADHD\nGames','Dyscalculia\nActivities'],
-      datasets:[{label:'Completion %',data:[82,74,68,79],backgroundColor:['#38bdf8','#fbbf24','#f472b6','#34d8b0'],borderRadius:6}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}}}
-  });
-
-  // Top list
-  const top=[...students].sort((a,b)=>(b.accuracy||0)-(a.accuracy||0)).slice(0,5);
-  document.getElementById('rpt-top').innerHTML = top.length
-    ? top.map((s,i)=>{
-        const medal=['🥇','🥈','🥉','4️⃣','5️⃣'][i];
-        return `<li><span>${medal} ${s.name}<small style="color:var(--ink3);margin-left:5px;">(${s.classGrade})</small></span><span class="pill p-green">${s.accuracy}%</span></li>`;
-      }).join('')
-    : `<li class="ml-empty">No student data yet.</li>`;
-
-  // Support table
-  const support=students.filter(s=>(s.accuracy||0)<50);
-  document.getElementById('rpt-support-tbody').innerHTML = support.length
-    ? support.map(s=>`<tr>
-        <td><span class="id-tag">${s.sid}</span></td>
-        <td>${s.name}</td>
-        <td>${s.classGrade}</td>
-        <td><span class="pill ${({Dyslexia:'p-blue',Dysgraphia:'p-amber',ADHD:'p-pink',Dyscalculia:'p-teal'}[s.need]||'p-accent')}">${s.need}</span></td>
-        <td><span class="pill p-red">${s.accuracy}%</span></td>
-        <td>${(s.coins||0).toLocaleString('en-IN')}</td>
-        <td>${s.active?'<span class="pill p-green">Active</span>':'<span class="pill p-amber">Inactive</span>'}</td>
-      </tr>`).join('')
-    : `<tr><td class="td-empty" colspan="7">No students currently flagged. 🎉</td></tr>`;
-}
-
-/* ─────────────────────────────────────────────────────────
-   SETTINGS
-───────────────────────────────────────────────────────── */
-function loadSettings(){
-  const cfg=getO(K.ST)||{};
-  document.getElementById('set-sname').value     = cfg.schoolName||'';
-  document.getElementById('set-scode').value     = cfg.schoolCode||'';
-  document.getElementById('set-principal').value = cfg.principal||'';
-  document.getElementById('set-email').value     = cfg.email||'';
-  document.getElementById('set-phone').value     = cfg.phone||'';
-  document.getElementById('set-address').value   = cfg.address||'';
-  document.getElementById('set-year').value      = cfg.academicYear||'';
-  document.getElementById('set-status').value    = cfg.academicStatus||'Active';
-  if(cfg.logo) document.getElementById('logo-preview').src = cfg.logo;
-  renderClasses();
-}
-function saveSchoolProfile(){
-  const cfg = getO(K.ST)||{};
-  cfg.schoolName  = document.getElementById('set-sname').value.trim()||cfg.schoolName;
-  cfg.principal   = document.getElementById('set-principal').value.trim();
-  cfg.email       = document.getElementById('set-email').value.trim();
-  cfg.phone       = document.getElementById('set-phone').value.trim();
-  cfg.address     = document.getElementById('set-address').value.trim();
-  set(K.ST, cfg);
-  // Update session name
-  SES.schoolName = cfg.schoolName;
-  set(K.SE, SES);
-  document.getElementById('viewSub').textContent = `${cfg.schoolName} · ${cfg.schoolCode}`;
-  document.getElementById('sbSchoolCode').textContent = cfg.schoolCode;
-  toast('School profile saved.','success');
-}
-function saveAcadYear(){
-  const cfg=getO(K.ST)||{};
-  cfg.academicYear   = document.getElementById('set-year').value.trim();
-  cfg.academicStatus = document.getElementById('set-status').value;
-  set(K.ST,cfg);
-  toast('Academic year saved.','success');
-}
-function handleLogo(e){
-  const file=e.target.files[0]; if(!file) return;
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    document.getElementById('logo-preview').src=ev.target.result;
-    const cfg=getO(K.ST)||{};
-    cfg.logo=ev.target.result;
-    set(K.ST,cfg);
-    toast('Logo updated.','success');
-    // TODO: upload to Firebase Storage → store download URL instead of base64
-  };
-  reader.readAsDataURL(file);
-}
-
-function renderClasses(){
-  const classes=get(K.C);
-  document.getElementById('cls-tbody').innerHTML=classes.length
-    ? classes.map(c=>`<tr>
-        <td>${c.grade}</td>
-        <td>${c.section}</td>
-        <td style="text-align:right"><button class="btn btn-danger btn-sm" onclick="askDelete('class','${c.id}','')">Remove</button></td>
-      </tr>`).join('')
-    : `<tr><td class="td-empty" colspan="3">No classes added yet.</td></tr>`;
-}
-function addClass(){
-  const grade   = document.getElementById('cls-grade').value.trim();
-  const section = document.getElementById('cls-sec').value.trim();
-  if(!grade||!section){toast('Enter both class and section.','error');return;}
-  const list=get(K.C);
-  const id='c'+Date.now();
-  list.push({id,grade,section});
-  set(K.C,list);
-  document.getElementById('cls-grade').value='';
-  document.getElementById('cls-sec').value='';
-  toast(`Class ${grade}-${section} added.`,'success');
-  renderClasses();
-}
-
-/* ─────────────────────────────────────────────────────────
-   INIT
-───────────────────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded',()=>{
-  bootIdentity();
-  renderDashboard();
-  // Close sidebar on backdrop click (mobile)
-  document.querySelector('.shell').addEventListener('click', e => {
-    const sb = document.getElementById('sidebar');
-    if(sb.classList.contains('open') && !sb.contains(e.target) && !e.target.closest('.ham')) {
-      sb.classList.remove('open');
-    }
-  });
-});
+document.addEventListener('DOMContentLoaded', renderDashboard);
 </script>
 </body>
 </html>
