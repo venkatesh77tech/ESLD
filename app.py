@@ -13,9 +13,14 @@ Changes vs previous version:
   • /teacher-login returns both 'teacher_id' AND 'id' keys so any page
     referencing either one works.
   • All routes defined exactly once.
+  • NEW: /google-login — verifies a Google Identity Services ID token and
+    logs the student in, auto-creating an account on first sign-in.
 
 Run:  python app.py
-Env:  MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DB, ANTHROPIC_API_KEY
+Env:  MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DB, ANTHROPIC_API_KEY,
+      GOOGLE_CLIENT_ID   (from Google Cloud Console → OAuth Client ID, "Web application")
+
+Install:  pip install flask flask-cors flask-mysqldb bcrypt requests google-auth
 """
 
 from flask import Flask, request, jsonify, send_from_directory
@@ -27,6 +32,10 @@ import datetime
 import os
 import json
 import requests
+
+# Google ID token verification
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 app = Flask(__name__)
 
@@ -44,11 +53,20 @@ mysql = MySQL(app)
 
 VALID_MODULES = {'dyslexia', 'dysgraphia', 'adhd'}
 
+# Cache a single Google auth transport request object (re-used across calls)
+_google_http_request = google_requests.Request()
+
 
 def normalize_module(value):
     """Keep bad/missing module values from breaking the ENUM column."""
     v = (value or '').strip().lower()
     return v if v in VALID_MODULES else 'dyslexia'
+
+
+def next_student_id(cur):
+    cur.execute("SELECT COUNT(*) FROM students")
+    total = cur.fetchone()[0] + 1
+    return f"ESLD2026ST{total:03}"
 
 
 # ═══════════════════════════════════════════════════
@@ -97,9 +115,7 @@ def register():
     if cur.fetchone():
         return jsonify({"error": "Email already registered"}), 400
 
-    cur.execute("SELECT COUNT(*) FROM students")
-    total      = cur.fetchone()[0] + 1
-    student_id = f"ESLD2026ST{total:03}"
+    student_id = next_student_id(cur)
 
     cur.execute(
         """INSERT INTO students
@@ -135,6 +151,82 @@ def login():
         })
 
     return jsonify({"error": "Invalid email or password"}), 401
+
+
+# ═══════════════════════════════════════════════════
+#  GOOGLE SIGN-IN
+#  Front-end uses Google Identity Services to get an ID token (JWT),
+#  then POSTs { "credential": "<jwt>" } here. We verify it server-side
+#  with Google's public keys — the browser never sees a client secret.
+# ═══════════════════════════════════════════════════
+@app.route('/google-login', methods=['POST', 'OPTIONS'])
+def google_login():
+    if request.method == 'OPTIONS':
+        return jsonify({}), 200
+
+    data       = request.get_json() or {}
+    credential = data.get('credential', '')
+
+    if not credential:
+        return jsonify({"error": "Missing Google credential"}), 400
+
+    client_id = os.environ.get('GOOGLE_CLIENT_ID', '').strip()
+    if not client_id:
+        return jsonify({"error": "GOOGLE_CLIENT_ID not configured on server"}), 503
+
+    try:
+        idinfo = id_token.verify_oauth2_token(credential, _google_http_request, client_id)
+    except ValueError as e:
+        return jsonify({"error": f"Invalid Google token: {e}"}), 401
+
+    if not idinfo.get('email_verified', False):
+        return jsonify({"error": "Google account email is not verified"}), 401
+
+    email = (idinfo.get('email') or '').strip().lower()
+    name  = idinfo.get('name') or (email.split('@')[0] if email else 'Student')
+
+    if not email:
+        return jsonify({"error": "Google account has no email"}), 400
+
+    cur = mysql.connection.cursor()
+    cur.execute(
+        "SELECT student_id, name, disability, total_coins FROM students WHERE email=%s",
+        [email]
+    )
+    user = cur.fetchone()
+
+    if user:
+        return jsonify({
+            "student_id":  user[0],
+            "name":        user[1],
+            "disability":  user[2],
+            "total_coins": user[3] or 0,
+            "new_account": False
+        })
+
+    # First time signing in with Google — auto-create the student account.
+    # A random password is stored (never used) since the column is NOT NULL
+    # and this account will only ever be accessed via Google going forward.
+    random_password = uuid.uuid4().hex
+    hashed = bcrypt.hashpw(random_password.encode(), bcrypt.gensalt()).decode()
+    student_id = next_student_id(cur)
+
+    cur.execute(
+        """INSERT INTO students
+             (student_id, school_id, class_id, school, standard, section,
+              name, email, password, disability, total_coins)
+           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+        (student_id, 1, 1, '', '', '', name, email, hashed, 'dyslexia', 0)
+    )
+    mysql.connection.commit()
+
+    return jsonify({
+        "student_id":  student_id,
+        "name":        name,
+        "disability":  "dyslexia",
+        "total_coins": 0,
+        "new_account": True
+    })
 
 
 # ═══════════════════════════════════════════════════

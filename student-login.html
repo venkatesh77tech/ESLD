@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Lexend:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Google Identity Services (Sign in with Google) -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 /* ── TOKENS ─────────────────────────────────────────────── */
 :root{
@@ -285,25 +287,15 @@ input.valid{border-color:rgba(52,216,176,.4);}
 .btn.loading .btn-text{display:none;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
-/* ── TOGGLE / SWITCH ─────────────────────────────────────── */
-.toggle-line{
-  display:flex; align-items:center; justify-content:space-between;
-  margin:14px 0 18px; font-size:13px; color:var(--ink-dim);
+/* ── GOOGLE SIGN-IN BLOCK ────────────────────────────────── */
+.google-block{margin-top:14px;}
+#googleBtnContainer{display:flex;justify-content:center;min-height:44px;}
+.google-fallback{
+  display:none; align-items:center; justify-content:center; gap:10px;
+  width:100%; background:#fff; color:#3c4043; border:1px solid var(--line);
+  border-radius:999px; padding:11px 16px; font-size:14px; font-weight:600;
+  font-family:'Lexend',sans-serif; cursor:not-allowed; opacity:.6;
 }
-.switch{position:relative;width:40px;height:22px;}
-.switch input{display:none;}
-.switch .track{
-  position:absolute; inset:0; background:#1a2240;
-  border:1.5px solid var(--line); border-radius:20px;
-  cursor:pointer; transition:.28s var(--ease);
-}
-.switch .track::after{
-  content:''; position:absolute; width:14px; height:14px;
-  border-radius:50%; background:#fff; top:3px; left:3px;
-  transition:.28s var(--ease); box-shadow:0 1px 4px rgba(0,0,0,.3);
-}
-.switch input:checked + .track{background:var(--accent);border-color:var(--accent);}
-.switch input:checked + .track::after{transform:translateX(18px);}
 
 /* ── DIVIDERS ────────────────────────────────────────────── */
 .divider{
@@ -460,7 +452,7 @@ select option{background:#0e1630;}
 <div class="topbar">
   <a class="back" href="index.html">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-    Back to roles
+    Back to Home
   </a>
   <span class="badge">Student</span>
 </div>
@@ -481,12 +473,6 @@ select option{background:#0e1630;}
       <h1>Welcome back</h1>
       <p class="lede">Log in with your Student ID to continue your learning journey.</p>
 
-      <div class="toggle-line reveal">
-        <span>Use OTP instead of password</span>
-        <label class="switch"><input type="checkbox" id="otpLoginToggle" onchange="toggleOtpLogin()"><span class="track"></span></label>
-      </div>
-
-      <!-- Password mode -->
       <div id="loginPwBlock">
         <div class="field reveal">
           <label>
@@ -516,31 +502,13 @@ select option{background:#0e1630;}
           <span class="btn-text">Log In</span>
           <div class="spinner"></div>
         </button>
-      </div>
 
-      <!-- OTP mode -->
-      <div id="loginOtpBlock" style="display:none;">
-        <div class="field">
-          <label>Student ID</label>
-          <input id="loginOtpSid" placeholder="SID-ABC001-1234" oninput="this.value=this.value.toUpperCase()">
+        <!-- Google Sign-In -->
+        <div class="divider">or continue with</div>
+        <div class="google-block">
+          <div id="googleBtnContainer"></div>
+          <div class="google-fallback" id="googleFallback">Google Sign-In unavailable — check your connection</div>
         </div>
-        <div class="field">
-          <label>Registered Parent Mobile</label>
-          <input id="loginOtpMobile" placeholder="98765 43210" inputmode="numeric" maxlength="10">
-        </div>
-        <div class="field" id="loginOtpInputWrap" style="display:none;">
-          <label>Enter OTP</label>
-          <div class="otp-row">
-            <input id="loginOtpCode" maxlength="6" inputmode="numeric" placeholder="• • • • • •">
-            <button class="btn btn-ghost" id="loginResendBtn" onclick="sendLoginOtp()">Resend</button>
-          </div>
-          <p class="hint" id="loginOtpHint"></p>
-        </div>
-        <button class="btn btn-ghost" style="width:100%;margin-bottom:10px;" id="loginSendOtpBtn" onclick="sendLoginOtp()">Send OTP</button>
-        <button class="btn btn-primary" onclick="handleOtpLogin()">
-          <span class="btn-text">Verify &amp; Log In</span>
-          <div class="spinner"></div>
-        </button>
       </div>
 
       <!-- Forgot password -->
@@ -636,20 +604,9 @@ select option{background:#0e1630;}
             <div class="field"><label>Parent Email</label><input id="regParentEmail" placeholder="parent@example.com"></div>
             <div class="field"><label>Student Email</label><input id="regStudentEmail" placeholder="student@example.com"></div>
           </fieldset>
-
-          <!-- OTP in step 3 -->
-          <div class="field" id="regOtpInputWrap" style="display:none;">
-            <label>OTP sent to parent's mobile</label>
-            <div class="otp-row">
-              <input id="regOtpCode" maxlength="6" inputmode="numeric" placeholder="• • • • • •">
-              <button type="button" class="btn btn-ghost" id="regResendBtn" onclick="sendRegisterOtp()">Resend</button>
-            </div>
-            <p class="hint" id="regOtpHint"></p>
-          </div>
-          <button type="button" class="btn btn-ghost" style="width:100%;margin-top:10px;margin-bottom:10px;" id="regSendOtpBtn" onclick="sendRegisterOtp()">Send OTP to Parent</button>
-          <div style="display:flex;gap:10px;">
+          <div style="display:flex;gap:10px;margin-top:10px;">
             <button type="button" class="btn btn-ghost" style="flex:1;" onclick="prevStep(3)">← Back</button>
-            <button type="button" class="btn btn-primary" style="flex:2;" onclick="nextStep(3)" id="step3Next" disabled>Next — Security →</button>
+            <button type="button" class="btn btn-primary" style="flex:2;" onclick="nextStep(3)">Next — Security →</button>
           </div>
         </div>
 
@@ -714,6 +671,23 @@ select option{background:#0e1630;}
 </div>
 
 <script>
+/* ═══════════════════════════════════════════════════════════
+   CONFIG — fill these in for your setup
+═══════════════════════════════════════════════════════════ */
+// 1) Create an OAuth Client ID (type: "Web application") in
+//    https://console.cloud.google.com/apis/credentials
+// 2) Add your site's URL (e.g. http://localhost:5000 and your
+//    Render URL) under "Authorized JavaScript origins".
+// 3) Paste the client ID below. It must match GOOGLE_CLIENT_ID
+//    set as an environment variable on the Flask server.
+const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+
+// If this HTML file is served BY Flask (e.g. app.py's send_from_directory
+// route), leave API_BASE as ''. If you're opening this file directly
+// (file://) or serving it from a different origin than Flask, point this
+// at your Flask server, e.g. 'http://localhost:5000'.
+const API_BASE = '';
+
 /* ══ PARTICLES ═══════════════════════════════════════════ */
 (function createParticles(){
   const c = document.getElementById('particles');
@@ -867,7 +841,9 @@ function nextStep(from){
     if(!school||!code||!grade){ toast('Fill in all school details.','err'); return; }
     showStep(3);
   } else if(from===3){
-    if(!regOtpVerified){ toast('Verify the OTP first.','err'); return; }
+    const mobile=$('#regParentMobile').value.trim(), pEmail=$('#regParentEmail').value.trim(), sEmail=$('#regStudentEmail').value.trim();
+    if(!isValidMobile(mobile)){ toast('Enter a valid 10-digit parent mobile number.','err'); return; }
+    if(!isValidEmail(pEmail) || !isValidEmail(sEmail)){ toast('Check that both emails are valid.','err'); return; }
     showStep(4);
   }
 }
@@ -878,9 +854,6 @@ function prevStep(from){
 
 function resetSteps(){
   showStep(1);
-  regOtpVerified = false;
-  $('#step3Next') && ($('#step3Next').disabled=true);
-  $('#regOtpInputWrap').style.display='none';
   $('#registerForm').style.display='';
   $('#registerSuccess').style.display='none';
 }
@@ -904,36 +877,51 @@ async function handleLogin(){
   setTimeout(()=>{ setProgress(0); toast('Student Dashboard coming soon!','ok'); },1600);
 }
 
-/* ══ LOGIN: OTP ══════════════════════════════════════════ */
-let loginOtpValue=null;
-function toggleOtpLogin(){
-  const on=$('#otpLoginToggle').checked;
-  $('#loginPwBlock').style.display=on?'none':'block';
-  $('#loginOtpBlock').style.display=on?'block':'none';
+/* ══ GOOGLE SIGN-IN ═══════════════════════════════════════
+   Verifies the ID token against the Flask backend's /google-login
+   route (which checks it with Google's public keys server-side). */
+async function handleGoogleCredential(response){
+  setProgress(50);
+  try{
+    const res = await fetch(API_BASE + '/google-login', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ credential: response.credential })
+    });
+    const data = await res.json();
+    if(!res.ok){ throw new Error(data.error || 'Google sign-in failed.'); }
+
+    setProgress(100);
+    localStorage.setItem('esld-session', JSON.stringify({role:'student', id:data.student_id, name:data.name}));
+    toast(data.new_account
+      ? `Welcome, ${data.name.split(' ')[0]}! Account created with Google.`
+      : `Welcome back, ${data.name.split(' ')[0]}!`);
+    setTimeout(()=>{ setProgress(0); toast('Student Dashboard coming soon!','ok'); }, 1600);
+  }catch(err){
+    setProgress(0);
+    toast(err.message || 'Google sign-in failed. Please try again.', 'err');
+  }
 }
-function sendLoginOtp(){
-  const sid=$('#loginOtpSid').value.trim().toUpperCase();
-  const mobile=$('#loginOtpMobile').value.trim();
-  if(!sid){ toast('Enter your Student ID first.','err'); return; }
-  if(!isValidMobile(mobile)){ toast('Enter a valid 10-digit mobile number.','err'); return; }
-  const student=getStudents().find(s=>s.sid===sid&&s.parentMobile===mobile);
-  if(!student){ toast('Student ID and mobile don\'t match our records.','err'); return; }
-  loginOtpValue=genOtp();
-  $('#loginOtpInputWrap').style.display='block';
-  $('#loginOtpHint').textContent=`Demo mode — OTP: ${loginOtpValue}`;
-  toast(`OTP sent to ${mobile.slice(0,2)}••••••${mobile.slice(-2)}`);
-  startResendCooldown($('#loginResendBtn'));
-}
-async function handleOtpLogin(){
-  const code=$('#loginOtpCode').value.trim();
-  if(!loginOtpValue){ toast('Send an OTP first.','err'); return; }
-  if(code!==loginOtpValue){ toast('Incorrect OTP.','err'); return; }
-  const sid=$('#loginOtpSid').value.trim().toUpperCase();
-  const student=getStudents().find(s=>s.sid===sid);
-  setProgress(100);
-  localStorage.setItem('esld-session', JSON.stringify({role:'student',id:student.sid,name:student.fullName}));
-  toast(`Welcome back, ${student.fullName.split(' ')[0]}!`);
-  setTimeout(()=>setProgress(0),800);
+
+function initGoogleSignIn(){
+  if(!window.google || !window.google.accounts || !window.google.accounts.id){
+    document.getElementById('googleFallback').style.display = 'flex';
+    return;
+  }
+  if(GOOGLE_CLIENT_ID.startsWith('YOUR_GOOGLE_CLIENT_ID')){
+    // Not configured yet — show a disabled placeholder instead of a broken button
+    document.getElementById('googleFallback').textContent = 'Google Sign-In not configured yet';
+    document.getElementById('googleFallback').style.display = 'flex';
+    return;
+  }
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleGoogleCredential
+  });
+  google.accounts.id.renderButton(
+    document.getElementById('googleBtnContainer'),
+    { theme: 'filled_black', size: 'large', shape: 'pill', text: 'continue_with', width: 380 }
+  );
 }
 
 /* ══ FORGOT PASSWORD ══════════════════════════════════════ */
@@ -969,32 +957,6 @@ async function submitForgotPassword(){
 }
 
 /* ══ REGISTER ════════════════════════════════════════════ */
-let regOtpValue=null, regOtpVerified=false;
-
-function sendRegisterOtp(){
-  const mobile=$('#regParentMobile').value.trim();
-  if(!isValidMobile(mobile)){ toast('Enter a valid 10-digit parent mobile number.','err'); return; }
-  regOtpValue=genOtp();
-  regOtpVerified=false;
-  $('#regOtpInputWrap').style.display='block';
-  $('#regOtpHint').textContent=`Demo mode — OTP: ${regOtpValue}`;
-  toast(`OTP sent to parent's mobile (demo: ${regOtpValue})`);
-  startResendCooldown($('#regResendBtn'));
-}
-
-document.addEventListener('input', e=>{
-  if(e.target.id==='regOtpCode'){
-    if(e.target.value.trim()===regOtpValue&&regOtpValue){
-      regOtpVerified=true;
-      const btn=$('#step3Next');
-      if(btn) btn.disabled=false;
-      toast('Mobile number verified!');
-      $('#regOtpHint').textContent='✓ Verified';
-      $('#regOtpHint').className='hint ok';
-    }
-  }
-});
-
 async function handleRegister(){
   const data={
     fullName:$('#regName').value.trim(),
@@ -1048,17 +1010,6 @@ function prefillLogin(){
   if(window._lastSid) $('#loginSid').value=window._lastSid;
 }
 
-/* ══ RESEND COOLDOWN ══════════════════════════════════════ */
-function startResendCooldown(btn){
-  let n=30;
-  btn.disabled=true; btn.textContent=`Resend (${n})`;
-  const t=setInterval(()=>{
-    n--;
-    if(n<=0){ clearInterval(t); btn.disabled=false; btn.textContent='Resend'; }
-    else btn.textContent=`Resend (${n})`;
-  },1000);
-}
-
 /* ══ INIT ════════════════════════════════════════════════ */
 updateStepUI(1);
 // Trigger reveal animations
@@ -1067,6 +1018,17 @@ setTimeout(()=>{
     setTimeout(()=>el.classList.add('in'), i*80);
   });
 },200);
+
+// Google's gsi/client script loads async — poll briefly until it's ready
+(function waitForGoogle(tries){
+  if(window.google && window.google.accounts && window.google.accounts.id){
+    initGoogleSignIn();
+  } else if(tries > 0){
+    setTimeout(()=>waitForGoogle(tries-1), 200);
+  } else {
+    document.getElementById('googleFallback').style.display = 'flex';
+  }
+})(25);
 </script>
 </body>
 </html>
