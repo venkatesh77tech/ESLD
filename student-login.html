@@ -40,23 +40,14 @@ body{
 }
 
 /* ── ANIMATED BACKGROUND ─────────────────────────────────── */
-.bg-canvas{
-  position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
-}
-/* Orb blobs */
-.orb{
-  position:absolute; border-radius:50%; filter:blur(80px); opacity:0;
-  animation:orbFade 1.5s var(--ease) forwards;
-}
+.bg-canvas{ position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+.orb{ position:absolute; border-radius:50%; filter:blur(80px); opacity:0; animation:orbFade 1.5s var(--ease) forwards; }
 .orb-1{width:500px;height:500px;background:var(--accent);top:-180px;left:-160px;opacity:.28;animation:drift1 24s ease-in-out infinite;}
 .orb-2{width:400px;height:400px;background:var(--blue);bottom:-160px;right:-130px;opacity:.24;animation:drift2 30s ease-in-out infinite;}
 .orb-3{width:260px;height:260px;background:#ff8ab0;top:40%;right:8%;opacity:.14;animation:drift3 20s ease-in-out infinite;}
-
 @keyframes drift1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(60px,50px) scale(1.06);}}
 @keyframes drift2{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-50px,-35px) scale(1.04);}}
 @keyframes drift3{0%,100%{transform:translate(0,0);}50%{transform:translate(-30px,20px);}}
-
-/* Grid lines */
 .grid-lines{
   position:absolute; inset:0;
   background-image:
@@ -65,224 +56,127 @@ body{
   background-size:48px 48px;
   mask-image:radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 100%);
 }
-
-/* Floating particles */
 .particles{position:absolute;inset:0;}
-.particle{
-  position:absolute; border-radius:50%;
-  background:var(--accent); opacity:0;
-  animation:floatUp var(--dur,12s) ease-in-out var(--delay,0s) infinite;
-}
+.particle{ position:absolute; border-radius:50%; background:var(--accent); opacity:0; animation:floatUp var(--dur,12s) ease-in-out var(--delay,0s) infinite; }
 @keyframes floatUp{
   0%{transform:translateY(0) scale(0);opacity:0;}
-  10%{opacity:.6;}
-  90%{opacity:.2;}
+  10%{opacity:.6;} 90%{opacity:.2;}
   100%{transform:translateY(-80vh) scale(1.5);opacity:0;}
 }
 
 /* ── TOPBAR ──────────────────────────────────────────────── */
-.topbar{
-  position:relative; z-index:10;
-  display:flex; align-items:center; justify-content:space-between;
-  padding:20px 28px;
-  animation:slideDown .6s var(--ease) both;
-}
+.topbar{ position:relative; z-index:10; display:flex; align-items:center; justify-content:space-between; padding:20px 28px; animation:slideDown .6s var(--ease) both; }
 @keyframes slideDown{from{opacity:0;transform:translateY(-14px);}to{opacity:1;transform:translateY(0);}}
-
-.back{
-  color:var(--ink-dim); text-decoration:none; font-size:13px;
-  display:flex; align-items:center; gap:6px;
-  transition:color .2s, gap .2s;
-}
+.back{ color:var(--ink-dim); text-decoration:none; font-size:13px; display:flex; align-items:center; gap:6px; transition:color .2s, gap .2s; }
 .back:hover{color:var(--ink); gap:10px;}
 .back svg{transition:transform .2s;}
 .back:hover svg{transform:translateX(-2px);}
-
 .badge{
-  font-family:'JetBrains Mono',monospace; font-size:11px;
-  letter-spacing:.12em; text-transform:uppercase;
-  color:var(--accent); border:1px solid var(--accent-dim);
-  background:var(--accent-dim); padding:5px 14px; border-radius:20px;
+  font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--accent); border:1px solid var(--accent-dim); background:var(--accent-dim); padding:5px 14px; border-radius:20px;
   position:relative; overflow:hidden;
 }
-.badge::after{
-  content:''; position:absolute; inset:0;
-  background:linear-gradient(90deg,transparent,rgba(52,216,176,.18),transparent);
-  transform:translateX(-100%);
-  animation:shimmer 3s ease-in-out infinite;
-}
+.badge::after{ content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(52,216,176,.18),transparent); transform:translateX(-100%); animation:shimmer 3s ease-in-out infinite; }
 @keyframes shimmer{0%{transform:translateX(-100%);}60%,100%{transform:translateX(120%);}}
 
 /* ── STAGE + CARD ────────────────────────────────────────── */
-.stage{
-  position:relative; z-index:5;
-  display:flex; justify-content:center;
-  padding:0 18px 80px;
-  animation:riseUp .8s var(--ease) .15s both;
-}
+.stage{ position:relative; z-index:5; display:flex; justify-content:center; padding:0 18px 80px; animation:riseUp .8s var(--ease) .15s both; }
 @keyframes riseUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
-
 .card{
   width:100%; max-width:460px;
   background:linear-gradient(160deg, rgba(20,30,58,.96) 0%, rgba(8,14,34,.97) 100%);
-  border:1px solid var(--line-bright);
-  border-radius:26px; padding:32px 30px 28px;
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.04) inset,
-    0 40px 80px -30px rgba(0,0,0,.7),
-    0 0 60px -20px rgba(52,216,176,.08);
-  backdrop-filter:blur(12px);
-  position:relative; overflow:hidden;
+  border:1px solid var(--line-bright); border-radius:26px; padding:32px 30px 28px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.04) inset, 0 40px 80px -30px rgba(0,0,0,.7), 0 0 60px -20px rgba(52,216,176,.08);
+  backdrop-filter:blur(12px); position:relative; overflow:hidden;
 }
-/* Card shimmer border */
 .card::before{
-  content:''; position:absolute; inset:-1px;
-  border-radius:27px; z-index:-1;
+  content:''; position:absolute; inset:-1px; border-radius:27px; z-index:-1;
   background:conic-gradient(from 0deg, var(--accent-glow) 0%, transparent 25%, transparent 75%, var(--blue) 100%, transparent);
-  opacity:0;
-  animation:rotateBorder 6s linear infinite, borderAppear .8s .4s forwards;
+  opacity:0; animation:rotateBorder 6s linear infinite, borderAppear .8s .4s forwards;
 }
 @keyframes rotateBorder{to{transform:rotate(360deg);}}
 @keyframes borderAppear{to{opacity:.4;}}
-
 h1{font-family:'Outfit',sans-serif;font-weight:800;font-size:26px;line-height:1.2;letter-spacing:-.4px;}
 .lede{color:var(--ink-dim);font-size:13.5px;margin-top:5px;margin-bottom:22px;line-height:1.6;font-weight:300;}
 
-/* ── TABS ────────────────────────────────────────────────── */
-.tabs{
-  display:flex; background:var(--panel-inner);
-  border:1px solid var(--line); border-radius:14px;
-  padding:4px; margin-bottom:24px; gap:4px;
-  position:relative;
+/* ── MODE SWITCH (School vs Individual) ─────────────────── */
+.mode-switch{ display:flex; gap:8px; margin-bottom:20px; }
+.mode-btn{
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:3px;
+  padding:12px 10px; border-radius:14px; border:1.5px solid var(--line);
+  background:var(--panel-inner); color:var(--ink-dim); cursor:pointer;
+  font-family:'Lexend',sans-serif; transition:.22s var(--ease);
 }
-/* sliding indicator */
+.mode-btn .mb-icon{font-size:18px;}
+.mode-btn .mb-lbl{font-size:12.5px;font-weight:700;}
+.mode-btn .mb-sub{font-size:10px;color:var(--ink-dim);font-weight:400;}
+.mode-btn.active{
+  border-color:var(--accent); color:var(--ink);
+  background:linear-gradient(160deg, rgba(52,216,176,.14), rgba(52,216,176,.04));
+  box-shadow:0 0 0 3px var(--accent-dim);
+}
+.mode-btn.active .mb-icon,.mode-btn.active .mb-lbl{color:var(--accent);}
+
+/* ── TABS ────────────────────────────────────────────────── */
+.tabs{ display:flex; background:var(--panel-inner); border:1px solid var(--line); border-radius:14px; padding:4px; margin-bottom:24px; gap:4px; position:relative; }
 .tab-indicator{
-  position:absolute; top:4px; bottom:4px; left:4px;
-  width:calc(50% - 4px); border-radius:10px;
-  background:linear-gradient(95deg,var(--accent),#22b893);
-  transition:transform .3s var(--ease);
-  box-shadow:0 4px 16px -4px var(--accent-glow);
+  position:absolute; top:4px; bottom:4px; left:4px; width:calc(50% - 4px); border-radius:10px;
+  background:linear-gradient(95deg,var(--accent),#22b893); transition:transform .3s var(--ease); box-shadow:0 4px 16px -4px var(--accent-glow);
 }
 .tab-indicator.right{transform:translateX(calc(100% + 4px));}
-
 .tab{
-  flex:1; text-align:center; padding:10px 0;
-  border-radius:10px; font-size:13.5px; font-weight:600;
-  cursor:pointer; transition:.25s var(--ease); border:none;
-  background:none; font-family:'Lexend',sans-serif;
-  position:relative; z-index:1;
-  color:var(--ink-dim);
+  flex:1; text-align:center; padding:10px 0; border-radius:10px; font-size:13.5px; font-weight:600;
+  cursor:pointer; transition:.25s var(--ease); border:none; background:none; font-family:'Lexend',sans-serif;
+  position:relative; z-index:1; color:var(--ink-dim);
 }
 .tab.active{color:#06140f;}
-
 .panel{display:none;}
 .panel.active{display:block;animation:panelIn .35s var(--ease);}
 @keyframes panelIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 
 /* ── FIELDS ──────────────────────────────────────────────── */
 .field{margin-bottom:14px;}
-.field label{
-  display:flex; align-items:center; gap:6px;
-  font-size:12px; color:var(--ink-dim);
-  margin-bottom:7px; font-weight:500; letter-spacing:.03em;
-}
+.field label{ display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-dim); margin-bottom:7px; font-weight:500; letter-spacing:.03em; }
 .field label svg{width:13px;height:13px;opacity:.6;}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-
 .input-wrap{position:relative;}
-.input-wrap .icon{
-  position:absolute; left:13px; top:50%; transform:translateY(-50%);
-  color:var(--ink-dim); pointer-events:none; transition:color .2s;
-}
+.input-wrap .icon{ position:absolute; left:13px; top:50%; transform:translateY(-50%); color:var(--ink-dim); pointer-events:none; transition:color .2s; }
 .input-wrap.has-icon input{ padding-left:40px; }
-
 input,select{
-  width:100%; background:var(--panel-inner); border:1.5px solid var(--line);
-  color:var(--ink); padding:11px 13px; border-radius:var(--r-xs);
-  font-size:14px; font-family:'Lexend',sans-serif;
-  outline:none; transition:border-color .2s,box-shadow .2s,background .2s;
-  appearance:none;
+  width:100%; background:var(--panel-inner); border:1.5px solid var(--line); color:var(--ink); padding:11px 13px; border-radius:var(--r-xs);
+  font-size:14px; font-family:'Lexend',sans-serif; outline:none; transition:border-color .2s,box-shadow .2s,background .2s; appearance:none;
 }
 input::placeholder{color:#3d4a6e;}
-input:focus,select:focus{
-  border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-dim);
-  background:#0b1330;
-}
-input:focus + .input-line{transform:scaleX(1);}
+input:focus,select:focus{ border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-dim); background:#0b1330; }
 input.invalid{border-color:var(--red); box-shadow:0 0 0 3px rgba(255,93,122,.12);}
 input.valid{border-color:rgba(52,216,176,.4);}
-
-/* Strength bar */
 .pw-wrap{position:relative;}
-.pw-toggle{
-  position:absolute; right:12px; top:50%; transform:translateY(-50%);
-  background:none; border:none; cursor:pointer; color:var(--ink-dim);
-  padding:4px; display:flex; align-items:center;
-}
+.pw-toggle{ position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--ink-dim); padding:4px; display:flex; align-items:center; }
 .pw-toggle:hover{color:var(--ink);}
-.strength-bar{
-  height:3px; border-radius:2px; margin-top:6px;
-  background:var(--line); overflow:hidden;
-}
-.strength-fill{
-  height:100%; border-radius:2px; width:0%;
-  transition:width .4s var(--ease), background .4s;
-}
-
+.strength-bar{ height:3px; border-radius:2px; margin-top:6px; background:var(--line); overflow:hidden; }
+.strength-fill{ height:100%; border-radius:2px; width:0%; transition:width .4s var(--ease), background .4s; }
 .hint{font-size:11.5px; color:#5a6380; margin-top:5px; line-height:1.4;}
 .hint.err{color:#ff8aa0;}
 .hint.ok{color:var(--accent);}
 
 /* ── OTP BOX ─────────────────────────────────────────────── */
 .otp-row{display:flex;gap:10px;}
-.otp-row input{
-  font-family:'JetBrains Mono',monospace;
-  letter-spacing:.35em; font-size:18px; text-align:center;
-}
+.otp-row input{ font-family:'JetBrains Mono',monospace; letter-spacing:.35em; font-size:18px; text-align:center; }
 
 /* ── BUTTONS ─────────────────────────────────────────────── */
-.btn{
-  border:none; cursor:pointer; font-family:'Lexend',sans-serif;
-  font-weight:600; font-size:14px; border-radius:var(--r-xs);
-  padding:12px 16px; transition:.22s var(--ease); white-space:nowrap;
-  display:inline-flex; align-items:center; justify-content:center; gap:7px;
-}
-.btn-primary{
-  background:linear-gradient(95deg,var(--accent),#22b893);
-  color:#06140f; width:100%; position:relative; overflow:hidden;
-}
-.btn-primary::after{
-  content:''; position:absolute; inset:0;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);
-  transform:translateX(-100%);
-}
+.btn{ border:none; cursor:pointer; font-family:'Lexend',sans-serif; font-weight:600; font-size:14px; border-radius:var(--r-xs); padding:12px 16px; transition:.22s var(--ease); white-space:nowrap; display:inline-flex; align-items:center; justify-content:center; gap:7px; }
+.btn-primary{ background:linear-gradient(95deg,var(--accent),#22b893); color:#06140f; width:100%; position:relative; overflow:hidden; }
+.btn-primary::after{ content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent); transform:translateX(-100%); }
 .btn-primary:not(:disabled):hover::after{animation:btnShimmer .5s forwards;}
 @keyframes btnShimmer{to{transform:translateX(100%);}}
 .btn-primary:disabled{opacity:.35;cursor:not-allowed;}
-.btn-primary:not(:disabled):hover{
-  transform:translateY(-2px);
-  box-shadow:0 12px 28px -8px var(--accent-glow);
-}
+.btn-primary:not(:disabled):hover{ transform:translateY(-2px); box-shadow:0 12px 28px -8px var(--accent-glow); }
 .btn-primary:not(:disabled):active{transform:translateY(0);}
-.btn-ghost{
-  background:var(--panel-soft); border:1.5px solid var(--line);
-  color:var(--ink);
-}
+.btn-ghost{ background:var(--panel-soft); border:1.5px solid var(--line); color:var(--ink); }
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
-.btn-link{
-  background:none; border:none; color:var(--accent);
-  font-size:12.5px; cursor:pointer; padding:0;
-  font-family:'Lexend',sans-serif; font-weight:500;
-  transition:opacity .2s;
-}
+.btn-link{ background:none; border:none; color:var(--accent); font-size:12.5px; cursor:pointer; padding:0; font-family:'Lexend',sans-serif; font-weight:500; transition:opacity .2s; }
 .btn-link:hover{opacity:.75;}
-
-/* Loading spinner on button */
-.btn .spinner{
-  width:16px; height:16px; border:2px solid rgba(6,20,15,.3);
-  border-top-color:#06140f; border-radius:50%;
-  animation:spin .7s linear infinite; display:none;
-}
+.btn .spinner{ width:16px; height:16px; border:2px solid rgba(6,20,15,.3); border-top-color:#06140f; border-radius:50%; animation:spin .7s linear infinite; display:none; }
 .btn.loading .spinner{display:block;}
 .btn.loading .btn-text{display:none;}
 @keyframes spin{to{transform:rotate(360deg);}}
@@ -291,113 +185,60 @@ input.valid{border-color:rgba(52,216,176,.4);}
 .google-block{margin-top:14px;}
 #googleBtnContainer{display:flex;justify-content:center;min-height:44px;}
 .google-fallback{
-  display:none; align-items:center; justify-content:center; gap:10px;
-  width:100%; background:#fff; color:#3c4043; border:1px solid var(--line);
-  border-radius:999px; padding:11px 16px; font-size:14px; font-weight:600;
-  font-family:'Lexend',sans-serif; cursor:not-allowed; opacity:.6;
+  display:none; align-items:center; justify-content:center; gap:10px; width:100%; background:#fff; color:#3c4043; border:1px solid var(--line);
+  border-radius:999px; padding:11px 16px; font-size:14px; font-weight:600; font-family:'Lexend',sans-serif; cursor:not-allowed; opacity:.6;
 }
 
 /* ── DIVIDERS ────────────────────────────────────────────── */
-.divider{
-  display:flex; align-items:center; gap:10px;
-  margin:18px 0; color:#3d4a6e; font-size:11px;
-  letter-spacing:.1em; text-transform:uppercase;
-}
+.divider{ display:flex; align-items:center; gap:10px; margin:18px 0; color:#3d4a6e; font-size:11px; letter-spacing:.1em; text-transform:uppercase; }
 .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--line);}
 
 /* ── SUCCESS STATE ───────────────────────────────────────── */
 .success{text-align:center;padding:8px 0 4px;}
 .check-ring{
-  width:60px; height:60px; border-radius:50%;
-  border:2px solid var(--accent); display:flex;
-  align-items:center; justify-content:center;
-  margin:0 auto 18px; position:relative;
-  animation:ringPop .6s var(--ease) both;
+  width:60px; height:60px; border-radius:50%; border:2px solid var(--accent); display:flex; align-items:center; justify-content:center;
+  margin:0 auto 18px; position:relative; animation:ringPop .6s var(--ease) both;
 }
-.check-ring::before{
-  content:''; position:absolute; inset:-6px;
-  border-radius:50%; border:1px solid var(--accent-dim);
-  animation:ringPulse 2s ease-in-out 1s infinite;
-}
+.check-ring::before{ content:''; position:absolute; inset:-6px; border-radius:50%; border:1px solid var(--accent-dim); animation:ringPulse 2s ease-in-out 1s infinite; }
 @keyframes ringPop{0%{transform:scale(0);opacity:0;}60%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
 @keyframes ringPulse{0%,100%{transform:scale(1);opacity:.5;}50%{transform:scale(1.15);opacity:.1;}}
-
 .check-ring svg{animation:checkDraw .5s .3s both;}
 @keyframes checkDraw{from{stroke-dashoffset:30;}to{stroke-dashoffset:0;}}
 .check-ring svg path{stroke-dasharray:30;stroke-dashoffset:0;}
-
 .id-box{
-  background:var(--panel-inner); border:1px dashed rgba(52,216,176,.35);
-  border-radius:var(--r-sm); padding:16px; margin:18px 0;
-  display:flex; align-items:center; justify-content:space-between;
-  position:relative; overflow:hidden;
+  background:var(--panel-inner); border:1px dashed rgba(52,216,176,.35); border-radius:var(--r-sm); padding:16px; margin:18px 0;
+  display:flex; align-items:center; justify-content:space-between; position:relative; overflow:hidden;
 }
-.id-box::before{
-  content:''; position:absolute; inset:0;
-  background:linear-gradient(90deg,var(--accent-dim),transparent);
-  opacity:.5;
-}
-.id-box .id{
-  font-family:'JetBrains Mono',monospace; font-size:17px;
-  letter-spacing:.06em; color:var(--accent); position:relative; z-index:1;
-}
-.copy-btn{
-  background:none; border:1px solid var(--line); color:var(--ink-dim);
-  border-radius:8px; padding:6px 11px; font-size:11.5px;
-  cursor:pointer; transition:.2s; position:relative; z-index:1;
-  font-family:'Lexend',sans-serif;
-}
+.id-box::before{ content:''; position:absolute; inset:0; background:linear-gradient(90deg,var(--accent-dim),transparent); opacity:.5; }
+.id-box .id{ font-family:'JetBrains Mono',monospace; font-size:17px; letter-spacing:.06em; color:var(--accent); position:relative; z-index:1; }
+.copy-btn{ background:none; border:1px solid var(--line); color:var(--ink-dim); border-radius:8px; padding:6px 11px; font-size:11.5px; cursor:pointer; transition:.2s; position:relative; z-index:1; font-family:'Lexend',sans-serif; }
 .copy-btn:hover{border-color:var(--accent);color:var(--accent);}
 
 /* ── STEP INDICATOR (register) ───────────────────────────── */
-.steps{
-  display:flex; align-items:center; gap:0; margin-bottom:24px;
-}
-.step-item{
-  display:flex; flex-direction:column; align-items:center; gap:4px; flex:1;
-}
+.steps{ display:flex; align-items:center; gap:0; margin-bottom:24px; }
+.step-item{ display:flex; flex-direction:column; align-items:center; gap:4px; flex:1; }
 .step-dot{
-  width:28px; height:28px; border-radius:50%;
-  border:2px solid var(--line); background:var(--panel-inner);
-  display:flex; align-items:center; justify-content:center;
-  font-family:'JetBrains Mono',monospace; font-size:11px;
-  color:var(--ink-dim); transition:.35s var(--ease); position:relative; z-index:1;
+  width:28px; height:28px; border-radius:50%; border:2px solid var(--line); background:var(--panel-inner); display:flex; align-items:center; justify-content:center;
+  font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-dim); transition:.35s var(--ease); position:relative; z-index:1;
 }
-.step-dot.active{
-  border-color:var(--accent); color:var(--accent);
-  box-shadow:0 0 0 3px var(--accent-dim);
-}
-.step-dot.done{
-  background:var(--accent); border-color:var(--accent); color:#06140f;
-}
+.step-dot.active{ border-color:var(--accent); color:var(--accent); box-shadow:0 0 0 3px var(--accent-dim); }
+.step-dot.done{ background:var(--accent); border-color:var(--accent); color:#06140f; }
 .step-label{font-size:10px; color:var(--ink-dim); text-align:center; white-space:nowrap;}
 .step-label.active{color:var(--accent);}
 .step-line{flex:1; height:1.5px; background:var(--line); margin-top:-14px; position:relative;}
-.step-line-fill{
-  height:100%; background:var(--accent); width:0%;
-  transition:width .4s var(--ease);
-}
+.step-line-fill{ height:100%; background:var(--accent); width:0%; transition:width .4s var(--ease); }
 
 /* ── FIELDSET ────────────────────────────────────────────── */
 fieldset{border:none;}
-legend{
-  font-size:10.5px; text-transform:uppercase; letter-spacing:.1em;
-  color:#3d4a6e; margin-bottom:12px; font-weight:600;
-  display:flex; align-items:center; gap:8px;
-}
+legend{ font-size:10.5px; text-transform:uppercase; letter-spacing:.1em; color:#3d4a6e; margin-bottom:12px; font-weight:600; display:flex; align-items:center; gap:8px; }
 legend::after{content:''; flex:1; height:1px; background:var(--line);}
 .section-gap{margin-top:20px;}
 
 /* ── TOAST ───────────────────────────────────────────────── */
 .toast{
-  position:fixed; bottom:24px; left:50%;
-  transform:translateX(-50%) translateY(20px);
-  z-index:100; background:var(--panel); border:1px solid var(--line-bright);
-  color:var(--ink); padding:13px 20px; border-radius:14px;
-  font-size:13px; box-shadow:0 16px 40px -12px rgba(0,0,0,.7);
-  opacity:0; transition:.3s var(--ease); pointer-events:none;
-  max-width:92vw; display:flex; align-items:center; gap:10px;
-  backdrop-filter:blur(10px);
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); z-index:100; background:var(--panel); border:1px solid var(--line-bright);
+  color:var(--ink); padding:13px 20px; border-radius:14px; font-size:13px; box-shadow:0 16px 40px -12px rgba(0,0,0,.7);
+  opacity:0; transition:.3s var(--ease); pointer-events:none; max-width:92vw; display:flex; align-items:center; gap:10px; backdrop-filter:blur(10px);
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .toast.ok .t-icon{color:var(--accent);}
@@ -406,40 +247,26 @@ legend::after{content:''; flex:1; height:1px; background:var(--line);}
 .t-icon{font-size:16px; flex-shrink:0;}
 
 /* ── FORGOT ──────────────────────────────────────────────── */
-#forgotBlock{
-  border:1px solid var(--line); border-radius:var(--r-sm);
-  padding:18px; margin-top:18px;
-  background:rgba(0,0,0,.2);
-  animation:panelIn .3s var(--ease);
-}
+.forgot-block{ border:1px solid var(--line); border-radius:var(--r-sm); padding:18px; margin-top:18px; background:rgba(0,0,0,.2); animation:panelIn .3s var(--ease); }
 
 /* ── PROGRESS BAR ────────────────────────────────────────── */
-.top-progress{
-  position:fixed; top:0; left:0; height:2.5px; z-index:999;
-  background:linear-gradient(90deg,var(--accent),var(--blue));
-  width:0%; transition:width .4s var(--ease);
-}
+.top-progress{ position:fixed; top:0; left:0; height:2.5px; z-index:999; background:linear-gradient(90deg,var(--accent),var(--blue)); width:0%; transition:width .4s var(--ease); }
 
 /* ── SECTION REVEAL ──────────────────────────────────────── */
-.reveal{
-  opacity:0; transform:translateY(10px);
-  transition:opacity .4s var(--ease), transform .4s var(--ease);
-}
+.reveal{ opacity:0; transform:translateY(10px); transition:opacity .4s var(--ease), transform .4s var(--ease); }
 .reveal.in{opacity:1; transform:translateY(0);}
 
 /* ── MISC ────────────────────────────────────────────────── */
 select option{background:#0e1630;}
 .mt10{margin-top:10px;}
-@media(max-width:420px){.row2{grid-template-columns:1fr;}}
+@media(max-width:420px){.row2{grid-template-columns:1fr;} .mode-switch{flex-direction:column;}}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important;}}
 </style>
 </head>
 <body>
 
-<!-- Progress bar -->
 <div class="top-progress" id="topProgress"></div>
 
-<!-- Background -->
 <div class="bg-canvas">
   <div class="grid-lines"></div>
   <div class="orb orb-1"></div>
@@ -448,7 +275,6 @@ select option{background:#0e1630;}
   <div class="particles" id="particles"></div>
 </div>
 
-<!-- Top bar -->
 <div class="topbar">
   <a class="back" href="index.html">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
@@ -457,214 +283,284 @@ select option{background:#0e1630;}
   <span class="badge">Student</span>
 </div>
 
-<!-- Card -->
 <div class="stage">
   <div class="card">
 
-    <!-- TABS -->
-    <div class="tabs">
-      <div class="tab-indicator" id="tabIndicator"></div>
-      <button class="tab active" id="tabLoginBtn" onclick="switchTab('login')">Log In</button>
-      <button class="tab" id="tabRegisterBtn" onclick="switchTab('register')">Register</button>
+    <!-- ══ MODE SWITCH: School Login vs Individual Login ══ -->
+    <div class="mode-switch">
+      <button class="mode-btn active" id="modeSchoolBtn" onclick="switchMode('school')">
+        <span class="mb-icon">🏫</span>
+        <span class="mb-lbl">School Login</span>
+        <span class="mb-sub">Account made by your admin</span>
+      </button>
+      <button class="mode-btn" id="modeIndividualBtn" onclick="switchMode('individual')">
+        <span class="mb-icon">🌐</span>
+        <span class="mb-lbl">Individual Login</span>
+        <span class="mb-sub">Self sign-up / Google</span>
+      </button>
     </div>
 
-    <!-- ══ LOGIN PANEL ══ -->
-    <div class="panel active" id="loginPanel">
+    <!-- ══════════════════ SCHOOL LOGIN MODE ══════════════════
+         Minimal: Student ID + Password + Forgot Password only.
+         Used for accounts an admin created directly (default
+         password ESLD@123 unless already changed). ═════════ -->
+    <div id="schoolModeWrap">
       <h1>Welcome back</h1>
-      <p class="lede">Log in with your Student ID to continue your learning journey.</p>
+      <p class="lede">Log in with the Student ID and password given to you by your school.</p>
 
-      <div id="loginPwBlock">
-        <div class="field reveal">
-          <label>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            Student ID
-          </label>
-          <div class="input-wrap">
-            <input id="loginSid" placeholder="SID-ABC001-1234" autocomplete="username" oninput="this.value=this.value.toUpperCase()">
-          </div>
-        </div>
-        <div class="field reveal">
-          <label>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
-            Password
-          </label>
-          <div class="input-wrap pw-wrap">
-            <input id="loginPw" type="password" placeholder="••••••••" autocomplete="current-password">
-            <button class="pw-toggle" type="button" onclick="togglePw('loginPw',this)" aria-label="Toggle password visibility">
-              <svg width="16" height="16" id="eyeLogin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-        </div>
-        <div style="text-align:right;margin:-4px 0 18px;">
-          <button class="btn-link" onclick="toggleForgot()">Forgot password?</button>
-        </div>
-        <button class="btn btn-primary" id="loginBtn" onclick="window.location.href='student-dashboard.html'">
-          <span class="btn-text">Log In</span>
-          <div class="spinner"></div>
-        </button>
-
-        <!-- Google Sign-In -->
-        <div class="divider">or continue with</div>
-        <div class="google-block">
-          <div id="googleBtnContainer"></div>
-          <div class="google-fallback" id="googleFallback">Google Sign-In unavailable — check your connection</div>
+      <div class="field reveal in">
+        <label>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Student ID
+        </label>
+        <div class="input-wrap">
+          <input id="schoolSid" placeholder="SID-ABC001-1234" autocomplete="username" oninput="this.value=this.value.toUpperCase()">
         </div>
       </div>
+      <div class="field reveal in">
+        <label>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
+          Password
+        </label>
+        <div class="input-wrap pw-wrap">
+          <input id="schoolPw" type="password" placeholder="••••••••" autocomplete="current-password">
+          <button class="pw-toggle" type="button" onclick="togglePw('schoolPw',this)" aria-label="Toggle password visibility">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div style="text-align:right;margin:-4px 0 18px;">
+        <button class="btn-link" onclick="toggleForgot('fps')">Forgot password?</button>
+      </div>
+      <button class="btn btn-primary" id="schoolLoginBtn" onclick="handleLogin('schoolSid','schoolPw','schoolLoginBtn')">
+        <span class="btn-text">Log In</span>
+        <div class="spinner"></div>
+      </button>
+      <p class="hint" style="text-align:center;margin-top:14px;">New account from your school? Your password starts as <strong style="color:var(--accent)">ESLD@123</strong> — change it after logging in.</p>
 
-      <!-- Forgot password -->
-      <div id="forgotBlock" style="display:none;">
+      <!-- Forgot password (School mode) -->
+      <div class="forgot-block" id="forgotBlock_fps" style="display:none;">
         <div class="divider">Reset Password</div>
-        <div class="field"><label>Student ID</label><input id="fpSid" placeholder="SID-ABC001-1234" oninput="this.value=this.value.toUpperCase()"></div>
-        <div class="field"><label>Registered Student Email</label><input id="fpEmail" placeholder="you@example.com"></div>
-        <div class="field" id="fpOtpWrap" style="display:none;">
+        <div class="field"><label>Student ID</label><input id="fpsSid" placeholder="SID-ABC001-1234" oninput="this.value=this.value.toUpperCase()"></div>
+        <div class="field"><label>Registered Student Email</label><input id="fpsEmail" placeholder="you@example.com"></div>
+        <div class="field" id="fpsOtpWrap" style="display:none;">
           <label>Enter OTP</label>
           <div class="otp-row">
-            <input id="fpOtpCode" maxlength="6" inputmode="numeric" placeholder="• • • • • •">
-            <button class="btn btn-ghost" onclick="sendForgotOtp()">Resend</button>
+            <input id="fpsOtpCode" maxlength="6" inputmode="numeric" placeholder="• • • • • •">
+            <button class="btn btn-ghost" onclick="sendForgotOtp('fps')">Resend</button>
           </div>
         </div>
-        <div class="field" id="fpNewPwWrap" style="display:none;">
+        <div class="field" id="fpsNewPwWrap" style="display:none;">
           <label>New Password</label>
-          <input id="fpNewPw" type="password" placeholder="At least 8 characters">
+          <input id="fpsNewPw" type="password" placeholder="At least 8 characters">
         </div>
-        <button class="btn btn-ghost" style="width:100%;margin-bottom:10px;" onclick="sendForgotOtp()">Send OTP to Email</button>
-        <button class="btn btn-primary" id="fpSubmitBtn" style="display:none;" onclick="submitForgotPassword()">
+        <button class="btn btn-ghost" style="width:100%;margin-bottom:10px;" onclick="sendForgotOtp('fps')">Send OTP to Email</button>
+        <button class="btn btn-primary" id="fpsSubmitBtn" style="display:none;" onclick="submitForgotPassword('fps')">
           <span class="btn-text">Reset Password</span>
           <div class="spinner"></div>
         </button>
       </div>
     </div>
 
-    <!-- ══ REGISTER PANEL ══ -->
-    <div class="panel" id="registerPanel">
-      <h1>Create account</h1>
-      <p class="lede">Fill in a few details — your Student ID is generated automatically.</p>
+    <!-- ══════════════════ INDIVIDUAL MODE ══════════════════
+         Full experience: Login/Register tabs, Google sign-in,
+         multi-step self-registration. ═══════════════════════ -->
+    <div id="individualModeWrap" style="display:none;">
 
-      <!-- Step indicator -->
-      <div class="steps" id="regSteps">
-        <div class="step-item">
-          <div class="step-dot active" id="step1dot">1</div>
-          <div class="step-label active" id="step1lbl">Personal</div>
+      <div class="tabs">
+        <div class="tab-indicator" id="tabIndicator"></div>
+        <button class="tab active" id="tabLoginBtn" onclick="switchTab('login')">Log In</button>
+        <button class="tab" id="tabRegisterBtn" onclick="switchTab('register')">Register</button>
+      </div>
+
+      <!-- ══ LOGIN PANEL ══ -->
+      <div class="panel active" id="loginPanel">
+        <h1>Welcome back</h1>
+        <p class="lede">Log in with your Student ID to continue your learning journey.</p>
+
+        <div id="loginPwBlock">
+          <div class="field reveal">
+            <label>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Student ID
+            </label>
+            <div class="input-wrap">
+              <input id="loginSid" placeholder="SID-ABC001-1234" autocomplete="username" oninput="this.value=this.value.toUpperCase()">
+            </div>
+          </div>
+          <div class="field reveal">
+            <label>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
+              Password
+            </label>
+            <div class="input-wrap pw-wrap">
+              <input id="loginPw" type="password" placeholder="••••••••" autocomplete="current-password">
+              <button class="pw-toggle" type="button" onclick="togglePw('loginPw',this)" aria-label="Toggle password visibility">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <div style="text-align:right;margin:-4px 0 18px;">
+            <button class="btn-link" onclick="toggleForgot('fp')">Forgot password?</button>
+          </div>
+          <button class="btn btn-primary" id="loginBtn" onclick="handleLogin('loginSid','loginPw','loginBtn')">
+            <span class="btn-text">Log In</span>
+            <div class="spinner"></div>
+          </button>
+
+          <div class="divider">or continue with</div>
+          <div class="google-block">
+            <div id="googleBtnContainer"></div>
+            <div class="google-fallback" id="googleFallback">Google Sign-In unavailable — check your connection</div>
+          </div>
         </div>
-        <div class="step-line"><div class="step-line-fill" id="line1"></div></div>
-        <div class="step-item">
-          <div class="step-dot" id="step2dot">2</div>
-          <div class="step-label" id="step2lbl">School</div>
-        </div>
-        <div class="step-line"><div class="step-line-fill" id="line2"></div></div>
-        <div class="step-item">
-          <div class="step-dot" id="step3dot">3</div>
-          <div class="step-label" id="step3lbl">Contact</div>
-        </div>
-        <div class="step-line"><div class="step-line-fill" id="line3"></div></div>
-        <div class="step-item">
-          <div class="step-dot" id="step4dot">4</div>
-          <div class="step-label" id="step4lbl">Security</div>
+
+        <div class="forgot-block" id="forgotBlock_fp" style="display:none;">
+          <div class="divider">Reset Password</div>
+          <div class="field"><label>Student ID</label><input id="fpSid" placeholder="SID-ABC001-1234" oninput="this.value=this.value.toUpperCase()"></div>
+          <div class="field"><label>Registered Student Email</label><input id="fpEmail" placeholder="you@example.com"></div>
+          <div class="field" id="fpOtpWrap" style="display:none;">
+            <label>Enter OTP</label>
+            <div class="otp-row">
+              <input id="fpOtpCode" maxlength="6" inputmode="numeric" placeholder="• • • • • •">
+              <button class="btn btn-ghost" onclick="sendForgotOtp('fp')">Resend</button>
+            </div>
+          </div>
+          <div class="field" id="fpNewPwWrap" style="display:none;">
+            <label>New Password</label>
+            <input id="fpNewPw" type="password" placeholder="At least 8 characters">
+          </div>
+          <button class="btn btn-ghost" style="width:100%;margin-bottom:10px;" onclick="sendForgotOtp('fp')">Send OTP to Email</button>
+          <button class="btn btn-primary" id="fpSubmitBtn" style="display:none;" onclick="submitForgotPassword('fp')">
+            <span class="btn-text">Reset Password</span>
+            <div class="spinner"></div>
+          </button>
         </div>
       </div>
 
-      <form id="registerForm" autocomplete="off">
+      <!-- ══ REGISTER PANEL ══ -->
+      <div class="panel" id="registerPanel">
+        <h1>Create account</h1>
+        <p class="lede">Fill in a few details — your Student ID is generated automatically.</p>
 
-        <!-- Step 1: Personal -->
-        <div id="regStep1">
-          <fieldset>
-            <legend>Personal Details</legend>
-            <div class="field"><label>Full Name</label><input id="regName" placeholder="Aanya Sharma"></div>
-            <div class="row2">
-              <div class="field"><label>Age</label><input id="regAge" type="number" min="4" max="20" placeholder="10"></div>
-              <div class="field"><label>Gender</label>
-                <select id="regGender"><option value="">Select</option><option>Female</option><option>Male</option><option>Other</option><option>Prefer not to say</option></select>
-              </div>
-            </div>
-          </fieldset>
-          <button type="button" class="btn btn-primary mt10" onclick="nextStep(1)">Next — School Details →</button>
-        </div>
-
-        <!-- Step 2: School -->
-        <div id="regStep2" style="display:none;">
-          <fieldset>
-            <legend>School Details</legend>
-            <div class="field"><label>School Name</label><input id="regSchoolName" placeholder="Sri Sairam Public School"></div>
-            <div class="row2">
-              <div class="field"><label>School Code</label><input id="regSchoolCode" placeholder="ABC001" oninput="this.value=this.value.toUpperCase()"></div>
-              <div class="field"><label>Class / Grade</label><input id="regGrade" placeholder="6"></div>
-            </div>
-          </fieldset>
-          <div style="display:flex;gap:10px;margin-top:10px;">
-            <button type="button" class="btn btn-ghost" style="flex:1;" onclick="prevStep(2)">← Back</button>
-            <button type="button" class="btn btn-primary" style="flex:2;" onclick="nextStep(2)">Next — Contact →</button>
+        <div class="steps" id="regSteps">
+          <div class="step-item">
+            <div class="step-dot active" id="step1dot">1</div>
+            <div class="step-label active" id="step1lbl">Personal</div>
+          </div>
+          <div class="step-line"><div class="step-line-fill" id="line1"></div></div>
+          <div class="step-item">
+            <div class="step-dot" id="step2dot">2</div>
+            <div class="step-label" id="step2lbl">School</div>
+          </div>
+          <div class="step-line"><div class="step-line-fill" id="line2"></div></div>
+          <div class="step-item">
+            <div class="step-dot" id="step3dot">3</div>
+            <div class="step-label" id="step3lbl">Contact</div>
+          </div>
+          <div class="step-line"><div class="step-line-fill" id="line3"></div></div>
+          <div class="step-item">
+            <div class="step-dot" id="step4dot">4</div>
+            <div class="step-label" id="step4lbl">Security</div>
           </div>
         </div>
 
-        <!-- Step 3: Contact -->
-        <div id="regStep3" style="display:none;">
-          <fieldset>
-            <legend>Contact Details</legend>
-            <div class="field"><label>Parent Mobile</label><input id="regParentMobile" placeholder="98765 43210" inputmode="numeric" maxlength="10"></div>
-            <div class="field"><label>Parent Email</label><input id="regParentEmail" placeholder="parent@example.com"></div>
-            <div class="field"><label>Student Email</label><input id="regStudentEmail" placeholder="student@example.com"></div>
-          </fieldset>
-          <div style="display:flex;gap:10px;margin-top:10px;">
-            <button type="button" class="btn btn-ghost" style="flex:1;" onclick="prevStep(3)">← Back</button>
-            <button type="button" class="btn btn-primary" style="flex:2;" onclick="nextStep(3)">Next — Security →</button>
-          </div>
-        </div>
-
-        <!-- Step 4: Security -->
-        <div id="regStep4" style="display:none;">
-          <fieldset>
-            <legend>Security</legend>
-            <div class="field">
-              <label>Password</label>
-              <div class="input-wrap pw-wrap">
-                <input id="regPw" type="password" placeholder="At least 8 characters" oninput="updateStrength(this.value)">
-                <button class="pw-toggle" type="button" onclick="togglePw('regPw',this)">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                </button>
+        <form id="registerForm" autocomplete="off">
+          <div id="regStep1">
+            <fieldset>
+              <legend>Personal Details</legend>
+              <div class="field"><label>Full Name</label><input id="regName" placeholder="Aanya Sharma"></div>
+              <div class="row2">
+                <div class="field"><label>Age</label><input id="regAge" type="number" min="4" max="20" placeholder="10"></div>
+                <div class="field"><label>Gender</label>
+                  <select id="regGender"><option value="">Select</option><option>Female</option><option>Male</option><option>Other</option><option>Prefer not to say</option></select>
+                </div>
               </div>
-              <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
-              <p class="hint" id="strengthHint"></p>
-            </div>
-            <div class="field">
-              <label>Confirm Password</label>
-              <div class="input-wrap pw-wrap">
-                <input id="regPwConfirm" type="password" placeholder="Re-enter password">
-                <button class="pw-toggle" type="button" onclick="togglePw('regPwConfirm',this)">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                </button>
-              </div>
-            </div>
-          </fieldset>
-          <div style="display:flex;gap:10px;margin-top:10px;">
-            <button type="button" class="btn btn-ghost" style="flex:1;" onclick="prevStep(4)">← Back</button>
-            <button type="button" class="btn btn-primary" style="flex:2;" id="regSubmitBtn" onclick="handleRegister()">
-              <span class="btn-text">Create Account</span>
-              <div class="spinner"></div>
-            </button>
+            </fieldset>
+            <button type="button" class="btn btn-primary mt10" onclick="nextStep(1)">Next — School Details →</button>
           </div>
-        </div>
 
-      </form>
+          <div id="regStep2" style="display:none;">
+            <fieldset>
+              <legend>School Details</legend>
+              <div class="field"><label>School Name</label><input id="regSchoolName" placeholder="Sri Sairam Public School"></div>
+              <div class="row2">
+                <div class="field"><label>School Code</label><input id="regSchoolCode" placeholder="ABC001" oninput="this.value=this.value.toUpperCase()"></div>
+                <div class="field"><label>Class / Grade</label><input id="regGrade" placeholder="6"></div>
+              </div>
+            </fieldset>
+            <div style="display:flex;gap:10px;margin-top:10px;">
+              <button type="button" class="btn btn-ghost" style="flex:1;" onclick="prevStep(2)">← Back</button>
+              <button type="button" class="btn btn-primary" style="flex:2;" onclick="nextStep(2)">Next — Contact →</button>
+            </div>
+          </div>
 
-      <!-- Success -->
-      <div class="success" id="registerSuccess" style="display:none;">
-        <div class="check-ring">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#34d8b0" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          <div id="regStep3" style="display:none;">
+            <fieldset>
+              <legend>Contact Details</legend>
+              <div class="field"><label>Parent Mobile</label><input id="regParentMobile" placeholder="98765 43210" inputmode="numeric" maxlength="10"></div>
+              <div class="field"><label>Parent Email</label><input id="regParentEmail" placeholder="parent@example.com"></div>
+              <div class="field"><label>Student Email</label><input id="regStudentEmail" placeholder="student@example.com"></div>
+            </fieldset>
+            <div style="display:flex;gap:10px;margin-top:10px;">
+              <button type="button" class="btn btn-ghost" style="flex:1;" onclick="prevStep(3)">← Back</button>
+              <button type="button" class="btn btn-primary" style="flex:2;" onclick="nextStep(3)">Next — Security →</button>
+            </div>
+          </div>
+
+          <div id="regStep4" style="display:none;">
+            <fieldset>
+              <legend>Security</legend>
+              <div class="field">
+                <label>Password</label>
+                <div class="input-wrap pw-wrap">
+                  <input id="regPw" type="password" placeholder="At least 8 characters" oninput="updateStrength(this.value)">
+                  <button class="pw-toggle" type="button" onclick="togglePw('regPw',this)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+                <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+                <p class="hint" id="strengthHint"></p>
+              </div>
+              <div class="field">
+                <label>Confirm Password</label>
+                <div class="input-wrap pw-wrap">
+                  <input id="regPwConfirm" type="password" placeholder="Re-enter password">
+                  <button class="pw-toggle" type="button" onclick="togglePw('regPwConfirm',this)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+              </div>
+            </fieldset>
+            <div style="display:flex;gap:10px;margin-top:10px;">
+              <button type="button" class="btn btn-ghost" style="flex:1;" onclick="prevStep(4)">← Back</button>
+              <button type="button" class="btn btn-primary" style="flex:2;" id="regSubmitBtn" onclick="handleRegister()">
+                <span class="btn-text">Create Account</span>
+                <div class="spinner"></div>
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <div class="success" id="registerSuccess" style="display:none;">
+          <div class="check-ring">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#34d8b0" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+          <h1 style="font-size:22px;">Account created!</h1>
+          <p class="lede">Your Student ID has been generated. Save it — you'll need it to log in every time.</p>
+          <div class="id-box">
+            <span class="id" id="newSidDisplay">SID-ABC001-1234</span>
+            <button class="copy-btn" onclick="copySid()">Copy</button>
+          </div>
+          <button class="btn btn-primary" onclick="switchTab('login'); prefillLogin();">Continue to Log In →</button>
         </div>
-        <h1 style="font-size:22px;">Account created!</h1>
-        <p class="lede">Your Student ID has been generated. Save it — you'll need it to log in every time.</p>
-        <div class="id-box">
-          <span class="id" id="newSidDisplay">SID-ABC001-1234</span>
-          <button class="copy-btn" onclick="copySid()">Copy</button>
-        </div>
-        <button class="btn btn-primary" onclick="switchTab('login'); prefillLogin();">Continue to Log In →</button>
       </div>
+
     </div>
 
   </div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast">
   <span class="t-icon" id="toastIcon">✓</span>
   <span id="toastMsg"></span>
@@ -672,20 +568,9 @@ select option{background:#0e1630;}
 
 <script>
 /* ═══════════════════════════════════════════════════════════
-   CONFIG — fill these in for your setup
+   CONFIG
 ═══════════════════════════════════════════════════════════ */
-// 1) Create an OAuth Client ID (type: "Web application") in
-//    https://console.cloud.google.com/apis/credentials
-// 2) Add your site's URL (e.g. http://localhost:5000 and your
-//    Render URL) under "Authorized JavaScript origins".
-// 3) Paste the client ID below. It must match GOOGLE_CLIENT_ID
-//    set as an environment variable on the Flask server.
 const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
-
-// If this HTML file is served BY Flask (e.g. app.py's send_from_directory
-// route), leave API_BASE as ''. If you're opening this file directly
-// (file://) or serving it from a different origin than Flask, point this
-// at your Flask server, e.g. 'http://localhost:5000'.
 const API_BASE = '';
 
 /* ══ PARTICLES ═══════════════════════════════════════════ */
@@ -708,7 +593,6 @@ const API_BASE = '';
   }
 })();
 
-/* ══ REVEAL ON SCROLL ════════════════════════════════════ */
 const io = new IntersectionObserver(entries=>{
   entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
 },{threshold:.1});
@@ -716,6 +600,7 @@ document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
 /* ══ UTILS ════════════════════════════════════════════════ */
 const $ = s => document.querySelector(s);
+/* Shared with admin.html — students the admin creates directly land here too */
 const STORE_KEY = 'esld-students';
 function getStudents(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)||'[]'); }catch(e){ return []; } }
 function saveStudents(a){ localStorage.setItem(STORE_KEY, JSON.stringify(a)); }
@@ -728,16 +613,13 @@ function toast(msg, type='ok'){
   clearTimeout(window._tt);
   window._tt = setTimeout(()=> t.classList.remove('show'), 3400);
 }
-
 async function sha256(text){
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
   return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
 }
-
 function genOtp(){ return Math.floor(100000+Math.random()*900000).toString(); }
 function isValidMobile(v){ return /^[6-9]\d{9}$/.test(v); }
 function isValidEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
-
 function genSid(schoolCode){
   const code = (schoolCode||'GEN').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6)||'GEN';
   const existing = getStudents();
@@ -745,22 +627,9 @@ function genSid(schoolCode){
   do{ id=`SID-${code}-${Math.floor(1000+Math.random()*9000)}`; }while(existing.some(s=>s.sid===id));
   return id;
 }
-
-/* Progress bar */
-function setProgress(pct){
-  $('#topProgress').style.width = pct + '%';
-}
-
-/* Button loading state */
-function setLoading(btn, on){
-  btn.classList.toggle('loading', on);
-  btn.disabled = on;
-}
-
-/* Fake async delay (remove in production) */
+function setProgress(pct){ $('#topProgress').style.width = pct + '%'; }
+function setLoading(btn, on){ btn.classList.toggle('loading', on); btn.disabled = on; }
 const fakeDelay = ms => new Promise(r=>setTimeout(r,ms));
-
-/* Password visibility toggle */
 function togglePw(id, btn){
   const inp = document.getElementById(id);
   const isText = inp.type === 'text';
@@ -768,7 +637,17 @@ function togglePw(id, btn){
   btn.querySelector('svg').style.opacity = isText ? '1' : '.4';
 }
 
-/* ══ PASSWORD STRENGTH ════════════════════════════════════ */
+/* ══ MODE SWITCH (School / Individual) ════════════════════ */
+function switchMode(mode){
+  const isSchool = mode === 'school';
+  document.getElementById('schoolModeWrap').style.display = isSchool ? 'block' : 'none';
+  document.getElementById('individualModeWrap').style.display = isSchool ? 'none' : 'block';
+  document.getElementById('modeSchoolBtn').classList.toggle('active', isSchool);
+  document.getElementById('modeIndividualBtn').classList.toggle('active', !isSchool);
+  setProgress(0);
+}
+
+/* ══ PASSWORD STRENGTH (individual register) ═════════════ */
 function updateStrength(pw){
   const fill=$('#strengthFill'), hint=$('#strengthHint');
   let score=0;
@@ -788,7 +667,7 @@ function updateStrength(pw){
   hint.textContent=l.txt; hint.className=`hint ${score>=3?'ok':''}`;
 }
 
-/* ══ TABS ════════════════════════════════════════════════ */
+/* ══ INDIVIDUAL: LOGIN/REGISTER TABS ══════════════════════ */
 function switchTab(which){
   const ind=$('#tabIndicator');
   $('#tabLoginBtn').classList.toggle('active', which==='login');
@@ -799,10 +678,9 @@ function switchTab(which){
   if(which==='register') resetSteps();
 }
 
-/* ══ REGISTER: MULTI-STEP ════════════════════════════════ */
+/* ══ REGISTER: MULTI-STEP (individual only) ══════════════ */
 let currentStep = 1;
 const totalSteps = 4;
-
 function updateStepUI(step){
   for(let i=1;i<=totalSteps;i++){
     const dot=$(`#step${i}dot`), lbl=$(`#step${i}lbl`);
@@ -812,14 +690,12 @@ function updateStepUI(step){
     else if(i===step){ dot.classList.add('active'); dot.textContent=i; lbl.classList.add('active'); }
     else{ dot.textContent=i; }
   }
-  // fill step lines
   for(let i=1;i<totalSteps;i++){
     const fill=$(`#line${i}`);
     if(fill) fill.style.width = i<step ? '100%' : '0%';
   }
   setProgress((step-1)/totalSteps*100);
 }
-
 function showStep(step){
   for(let i=1;i<=totalSteps;i++){
     const el=$(`#regStep${i}`);
@@ -830,7 +706,6 @@ function showStep(step){
   currentStep = step;
   updateStepUI(step);
 }
-
 function nextStep(from){
   if(from===1){
     const name=$('#regName').value.trim(), age=$('#regAge').value.trim(), gender=$('#regGender').value;
@@ -847,39 +722,34 @@ function nextStep(from){
     showStep(4);
   }
 }
-
-function prevStep(from){
-  showStep(from-1);
-}
-
+function prevStep(from){ showStep(from-1); }
 function resetSteps(){
   showStep(1);
   $('#registerForm').style.display='';
   $('#registerSuccess').style.display='none';
 }
 
-/* ══ LOGIN: PASSWORD ══════════════════════════════════════ */
-async function handleLogin(){
-  const sid=$('#loginSid').value.trim().toUpperCase();
-  const pw=$('#loginPw').value;
+/* ══ LOGIN — shared by School mode + Individual mode ══════
+   sidId / pwId / btnId let one function serve both forms.  */
+async function handleLogin(sidId='loginSid', pwId='loginPw', btnId='loginBtn'){
+  const sid=document.getElementById(sidId).value.trim().toUpperCase();
+  const pw=document.getElementById(pwId).value;
   if(!sid||!pw){ toast('Enter your Student ID and password.','err'); return; }
-  const btn=$('#loginBtn');
+  const btn=document.getElementById(btnId);
   setLoading(btn,true); setProgress(40);
-  await fakeDelay(700);
+  await fakeDelay(600);
   const student=getStudents().find(s=>s.sid===sid);
   if(!student){ setLoading(btn,false); setProgress(0); toast('No account found for that Student ID.','err'); return; }
   const hash=await sha256(pw);
   if(hash!==student.passwordHash){ setLoading(btn,false); setProgress(0); toast('Incorrect password.','err'); return; }
   setProgress(100);
-  localStorage.setItem('esld-session', JSON.stringify({role:'student',id:student.sid,name:student.fullName}));
-  toast(`Welcome back, ${student.fullName.split(' ')[0]}! Redirecting…`);
+  localStorage.setItem('esld-session', JSON.stringify({role:'student',id:student.sid,name:student.fullName||student.name}));
+  toast(`Welcome back, ${(student.fullName||student.name||'').split(' ')[0]}! Redirecting…`);
   setLoading(btn,false);
   setTimeout(()=>{ setProgress(0); toast('Student Dashboard coming soon!','ok'); },1600);
 }
 
-/* ══ GOOGLE SIGN-IN ═══════════════════════════════════════
-   Verifies the ID token against the Flask backend's /google-login
-   route (which checks it with Google's public keys server-side). */
+/* ══ GOOGLE SIGN-IN (individual mode only) ════════════════ */
 async function handleGoogleCredential(response){
   setProgress(50);
   try{
@@ -890,7 +760,6 @@ async function handleGoogleCredential(response){
     });
     const data = await res.json();
     if(!res.ok){ throw new Error(data.error || 'Google sign-in failed.'); }
-
     setProgress(100);
     localStorage.setItem('esld-session', JSON.stringify({role:'student', id:data.student_id, name:data.name}));
     toast(data.new_account
@@ -902,61 +771,60 @@ async function handleGoogleCredential(response){
     toast(err.message || 'Google sign-in failed. Please try again.', 'err');
   }
 }
-
 function initGoogleSignIn(){
   if(!window.google || !window.google.accounts || !window.google.accounts.id){
     document.getElementById('googleFallback').style.display = 'flex';
     return;
   }
   if(GOOGLE_CLIENT_ID.startsWith('YOUR_GOOGLE_CLIENT_ID')){
-    // Not configured yet — show a disabled placeholder instead of a broken button
     document.getElementById('googleFallback').textContent = 'Google Sign-In not configured yet';
     document.getElementById('googleFallback').style.display = 'flex';
     return;
   }
-  google.accounts.id.initialize({
-    client_id: GOOGLE_CLIENT_ID,
-    callback: handleGoogleCredential
-  });
+  google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleGoogleCredential });
   google.accounts.id.renderButton(
     document.getElementById('googleBtnContainer'),
     { theme: 'filled_black', size: 'large', shape: 'pill', text: 'continue_with', width: 380 }
   );
 }
 
-/* ══ FORGOT PASSWORD ══════════════════════════════════════ */
-let fpOtpValue=null;
-function toggleForgot(){
-  const el=$('#forgotBlock');
-  el.style.display=el.style.display==='none'?'block':'none';
+/* ══ FORGOT PASSWORD — generalized with a prefix ══════════
+   prefix 'fp'  → individual-mode forgot block (ids: fpSid, fpEmail, ...)
+   prefix 'fps' → school-mode forgot block      (ids: fpsSid, fpsEmail, ...) */
+const fpOtpValues = {};
+function toggleForgot(prefix='fp'){
+  const el=document.getElementById('forgotBlock_'+prefix);
+  el.style.display = el.style.display==='none' ? 'block' : 'none';
 }
-function sendForgotOtp(){
-  const sid=$('#fpSid').value.trim().toUpperCase();
-  const email=$('#fpEmail').value.trim();
+function sendForgotOtp(prefix='fp'){
+  const sid=document.getElementById(prefix+'Sid').value.trim().toUpperCase();
+  const email=document.getElementById(prefix+'Email').value.trim();
   if(!isValidEmail(email)){ toast('Enter a valid email.','err'); return; }
-  const student=getStudents().find(s=>s.sid===sid&&s.studentEmail.toLowerCase()===email.toLowerCase());
+  const student=getStudents().find(s=>s.sid===sid && (s.studentEmail||s.email||'').toLowerCase()===email.toLowerCase());
   if(!student){ toast('Student ID and email don\'t match.','err'); return; }
-  fpOtpValue=genOtp();
-  $('#fpOtpWrap').style.display='block';
-  $('#fpNewPwWrap').style.display='block';
-  $('#fpSubmitBtn').style.display='block';
-  toast(`OTP sent (demo: ${fpOtpValue})`);
+  fpOtpValues[prefix]=genOtp();
+  document.getElementById(prefix+'OtpWrap').style.display='block';
+  document.getElementById(prefix+'NewPwWrap').style.display='block';
+  document.getElementById(prefix+'SubmitBtn').style.display='block';
+  toast(`OTP sent (demo: ${fpOtpValues[prefix]})`);
 }
-async function submitForgotPassword(){
-  const code=$('#fpOtpCode').value.trim();
-  const newPw=$('#fpNewPw').value;
-  if(code!==fpOtpValue){ toast('Incorrect OTP.','err'); return; }
+async function submitForgotPassword(prefix='fp'){
+  const code=document.getElementById(prefix+'OtpCode').value.trim();
+  const newPw=document.getElementById(prefix+'NewPw').value;
+  if(code!==fpOtpValues[prefix]){ toast('Incorrect OTP.','err'); return; }
   if(newPw.length<8){ toast('Password must be at least 8 characters.','err'); return; }
-  const sid=$('#fpSid').value.trim().toUpperCase();
+  const sid=document.getElementById(prefix+'Sid').value.trim().toUpperCase();
   const students=getStudents();
   const idx=students.findIndex(s=>s.sid===sid);
+  if(idx<0){ toast('Student not found.','err'); return; }
   students[idx].passwordHash=await sha256(newPw);
+  students[idx].pwPlain=undefined;
   saveStudents(students);
   toast('Password updated! You can now log in.');
-  toggleForgot();
+  toggleForgot(prefix);
 }
 
-/* ══ REGISTER ════════════════════════════════════════════ */
+/* ══ REGISTER (individual mode only) ══════════════════════ */
 async function handleRegister(){
   const data={
     fullName:$('#regName').value.trim(),
@@ -978,22 +846,21 @@ async function handleRegister(){
 
   const btn=$('#regSubmitBtn');
   setLoading(btn,true); setProgress(60);
-  await fakeDelay(800);
+  await fakeDelay(700);
 
   const sid=genSid(data.schoolCode);
   const passwordHash=await sha256(data.pw);
   const students=getStudents();
   students.push({
-    sid, fullName:data.fullName, age:data.age, gender:data.gender,
+    sid, name:data.fullName, fullName:data.fullName, age:data.age, gender:data.gender,
     schoolName:data.schoolName, schoolCode:data.schoolCode, classGrade:data.classGrade,
-    parentMobile:data.parentMobile, parentEmail:data.parentEmail, studentEmail:data.studentEmail,
-    passwordHash, createdAt:new Date().toISOString()
+    parentMobile:data.parentMobile, parentEmail:data.parentEmail, studentEmail:data.studentEmail, email:data.studentEmail,
+    passwordHash, accuracy:0, coins:0, active:true, createdAt:new Date().toISOString()
   });
   saveStudents(students);
 
   setProgress(100);
   setLoading(btn,false);
-
   $('#registerForm').style.display='none';
   $('#regSteps').style.display='none';
   $('#registerSuccess').style.display='block';
@@ -1001,25 +868,14 @@ async function handleRegister(){
   window._lastSid=sid;
   setTimeout(()=>setProgress(0),600);
 }
-
-function copySid(){
-  navigator.clipboard?.writeText(window._lastSid||'');
-  toast('Student ID copied to clipboard!');
-}
-function prefillLogin(){
-  if(window._lastSid) $('#loginSid').value=window._lastSid;
-}
+function copySid(){ navigator.clipboard?.writeText(window._lastSid||''); toast('Student ID copied to clipboard!'); }
+function prefillLogin(){ if(window._lastSid) $('#loginSid').value=window._lastSid; }
 
 /* ══ INIT ════════════════════════════════════════════════ */
 updateStepUI(1);
-// Trigger reveal animations
 setTimeout(()=>{
-  document.querySelectorAll('.reveal').forEach((el,i)=>{
-    setTimeout(()=>el.classList.add('in'), i*80);
-  });
+  document.querySelectorAll('.reveal').forEach((el,i)=>{ setTimeout(()=>el.classList.add('in'), i*80); });
 },200);
-
-// Google's gsi/client script loads async — poll briefly until it's ready
 (function waitForGoogle(tries){
   if(window.google && window.google.accounts && window.google.accounts.id){
     initGoogleSignIn();
