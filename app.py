@@ -25,7 +25,7 @@ Install:  pip install flask flask-cors flask-mysqldb bcrypt requests google-auth
 
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from flask_mysqldb import MySQL
+import pymysql
 import bcrypt
 import uuid
 import datetime

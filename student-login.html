@@ -765,7 +765,8 @@
       toast(data.new_account
         ? `Welcome, ${data.name.split(' ')[0]}! Account created with Google.`
         : `Welcome back, ${data.name.split(' ')[0]}!`);
-      setTimeout(()=>{ setProgress(0); toast('Student Dashboard coming soon!','ok'); }, 1600);
+      setTimeout(() => {
+    window.location.href = "student-dashboard.html";}, 1000);
     }catch(err){
       setProgress(0);
       toast(err.message || 'Google sign-in failed. Please try again.', 'err');
