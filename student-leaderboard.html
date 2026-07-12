@@ -17,8 +17,11 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:#f1f5f9;min-heig
 .sidebar-coins{margin-top:auto;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.2);border-radius:14px;padding:14px;text-align:center}
 .coins-num{font-family:'Fredoka One';font-size:2rem;color:var(--yellow)}
 .coins-label{font-size:.8rem;color:#64748b}
-.topbar{grid-column:2;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(15,23,42,.6);backdrop-filter:blur(12px);position:sticky;top:0;z-index:10}
+.topbar{grid-column:2;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(15,23,42,.6);backdrop-filter:blur(12px);position:sticky;top:0;z-index:10;flex-wrap:wrap;gap:10px}
 .topbar h2{font-family:'Fredoka One';font-size:1.4rem}
+.tb-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.refresh-btn{padding:7px 16px;border-radius:999px;border:1px solid var(--border);background:var(--card);color:#f1f5f9;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.8rem;transition:.2s}
+.refresh-btn:hover{background:rgba(255,255,255,.14)}
 main{grid-column:2;padding:24px 28px;overflow-y:auto}
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
 .stat{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:center}
@@ -71,6 +74,7 @@ main{grid-column:2;padding:24px 28px;overflow-y:auto}
 .tag.dyslexia{background:rgba(34,197,94,.13);color:var(--green)}
 .tag.dysgraphia{background:rgba(56,189,248,.13);color:var(--blue)}
 .tag.adhd{background:rgba(251,146,60,.13);color:var(--orange)}
+.tag.dyscalculia{background:rgba(167,139,250,.13);color:var(--purple)}
 .loading{text-align:center;padding:80px;color:#64748b;font-size:1rem}
 .loading .spin{font-size:48px;animation:spin 1s linear infinite;display:block;margin-bottom:16px}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -96,7 +100,10 @@ main{grid-column:2;padding:24px 28px;overflow-y:auto}
 
 <div class="topbar">
   <h2>🏆 Leaderboard</h2>
-  <span style="color:#64748b;font-size:.85rem" id="stuLabel"></span>
+  <div class="tb-right">
+    <span style="color:#64748b;font-size:.85rem" id="stuLabel"></span>
+    <button class="refresh-btn" onclick="loadLeaderboard()" title="Reload the latest saved data">🔄 Refresh</button>
+  </div>
 </div>
 
 <main>
@@ -127,6 +134,7 @@ main{grid-column:2;padding:24px 28px;overflow-y:auto}
       <button class="filter-btn" onclick="filterLB('dyslexia',this)">📖 Dyslexia</button>
       <button class="filter-btn" onclick="filterLB('dysgraphia',this)">✍️ Dysgraphia</button>
       <button class="filter-btn" onclick="filterLB('adhd',this)">⚡ ADHD</button>
+      <button class="filter-btn" onclick="filterLB('dyscalculia',this)">🔢 Dyscalculia</button>
     </div>
   </div>
 
@@ -136,49 +144,120 @@ main{grid-column:2;padding:24px 28px;overflow-y:auto}
 </main>
 
 <script>
-const API = 'http://localhost:5000';
+'use strict';
+
+// ══════════════════════════════════
+// AUTH
+// ══════════════════════════════════
 const myId   = sessionStorage.getItem('studentId');
 const myName = sessionStorage.getItem('studentName') || 'Student';
-const myDisability = sessionStorage.getItem('disability') || '';
 
 if(!myId) location.href = 'student-login.html';
 
 document.getElementById('stuLabel').textContent = '👤 ' + myName;
 
-let allPlayers   = [];
-let currentFilter = 'all';
-
 function go(url){ location.href = url; }
 function logout(){ sessionStorage.clear(); location.href = 'student-login.html'; }
 
+// ══════════════════════════════════
+// DATA SOURCES
+// ══════════════════════════════════
+// Same key admin.html writes student records to (K.S = 'esld-students').
+// This IS the roster: any student the admin adds/edits/removes here shows
+// up on the leaderboard immediately, no backend required.
+const STUDENTS_KEY = 'esld-students';
+
 const avatarColors = ['#22c55e','#38bdf8','#a78bfa','#f472b6','#fbbf24','#fb923c','#e879f9','#34d399','#60a5fa','#f87171','#a3e635','#4ade80'];
 
-async function loadLeaderboard(){
-  try{
-    const r    = await fetch(`${API}/all-students-progress`);
-    const data = await r.json();
-    allPlayers = data.students || [];
-
-    // Find my own data and set sidebar coins
-    const me = allPlayers.find(p => p.student_id === myId);
-    const myCoins = me ? me.total_coins : 0;
-    document.getElementById('sideCoins').textContent  = myCoins;
-    document.getElementById('myCoinsStat').textContent = myCoins;
-
-    renderLeaderboard();
-  } catch(e){
-    document.getElementById('lbContainer').innerHTML = `<div class="empty-state"><div style="font-size:48px">⚠️</div><p style="margin-top:10px">Cannot connect to server.</p></div>`;
+// Same find-key helper as student-progress.html — resolves a student's
+// game-data keys ('coins-*', 'ml-history-*') whether their id was saved as
+// a bare number, a legacy "ST007" id, or an admin-panel "SID007" id.
+function findKey(id) {
+  if (localStorage.getItem('coins-' + id) !== null) return id;
+  const m = String(id).match(/(?:ST|SID)0*(\d+)$/i);
+  if (m) {
+    const n = String(parseInt(m[1], 10));
+    if (localStorage.getItem('coins-' + n) !== null) return n;
   }
+  return id;
 }
 
-function filterLB(f, btn){
+function avg(arr) { return arr.length ? Math.round(arr.reduce((a,b) => a+b, 0) / arr.length) : 0; }
+
+function loadStudentRecords() {
+  try {
+    const list = JSON.parse(localStorage.getItem(STUDENTS_KEY) || '[]');
+    return Array.isArray(list) ? list : [];
+  } catch (e) { return []; }
+}
+
+// Build the leaderboard roster: every student the admin has on file, each
+// layered with their REAL play data — coins, session count, and average
+// accuracy — read straight from the same localStorage keys
+// student-progress.html reads. A student with no sessions yet shows 0,
+// exactly as expected; playing a game updates this immediately.
+function buildPlayers() {
+  const records = loadStudentRecords();
+  return records.map(s => {
+    const key = findKey(s.sid);
+
+    let hist = [];
+    try {
+      hist = JSON.parse(localStorage.getItem('ml-history-' + key) || '[]');
+      if (!Array.isArray(hist)) hist = [];
+    } catch (e) { hist = []; }
+
+    const storedCoins = localStorage.getItem('coins-' + key);
+    const coins = storedCoins !== null ? Number(storedCoins) : (Number(s.coins) || 0);
+    const sessions = hist.length;
+    const avgAcc = sessions
+      ? avg(hist.map(h => parseFloat(h.accuracy) || 0))
+      : (Number(s.accuracy) || 0);
+
+    return {
+      student_id: s.sid,
+      name: s.name || 'Unknown',
+      disability: (s.need || '').toLowerCase(),
+      total_coins: coins,
+      sessions: sessions,
+      avg_accuracy: avgAcc,
+    };
+  });
+}
+
+let allPlayers   = [];
+let currentFilter = 'all';
+
+function loadLeaderboard() {
+  document.getElementById('lbContainer').innerHTML = `<div class="loading"><span class="spin">🏆</span>Loading leaderboard...</div>`;
+
+  allPlayers = buildPlayers();
+
+  if (!allPlayers.length) {
+    document.getElementById('lbContainer').innerHTML = `<div class="empty-state"><div style="font-size:48px">😴</div><p style="margin-top:10px">No students found yet. Ask your admin to add students.</p></div>`;
+    document.getElementById('podium').innerHTML = '';
+    document.getElementById('totalPlayersStat').textContent = 0;
+    document.getElementById('topScoreStat').textContent = '--';
+    document.getElementById('myRankStat').textContent = '--';
+    return;
+  }
+
+  const me = allPlayers.find(p => p.student_id === myId);
+  const myCoins = me ? me.total_coins : 0;
+  document.getElementById('sideCoins').textContent  = myCoins;
+  document.getElementById('myCoinsStat').textContent = myCoins;
+
+  renderLeaderboard();
+}
+
+function filterLB(f, btn) {
   currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderLeaderboard();
 }
 
-function renderLeaderboard(){
+function renderLeaderboard() {
   let players = currentFilter === 'all'
     ? [...allPlayers]
     : allPlayers.filter(p => p.disability === currentFilter);
@@ -200,6 +279,8 @@ function renderLeaderboard(){
     document.getElementById('myRankName').textContent   = me.name + ' (You)';
     document.getElementById('myRankSub').textContent    = (me.disability||'') + ' • ' + me.sessions + ' sessions • avg ' + me.avg_accuracy + '%';
     document.getElementById('myRankCoins').textContent  = '🪙 ' + me.total_coins;
+  } else {
+    document.getElementById('myRankCard').style.display = 'none';
   }
 
   renderPodium(players.slice(0, 3));
@@ -267,6 +348,15 @@ function renderPodium(top3){
     </div>`;
   }).join('');
 }
+
+// Keep the leaderboard fresh if another browser tab changes localStorage —
+// e.g. the admin adds a new student, or the student plays a game in
+// another tab of the same browser.
+window.addEventListener('storage', (e) => {
+  if (!e.key || e.key === STUDENTS_KEY || e.key.startsWith('coins-') || e.key.startsWith('ml-history-')) {
+    loadLeaderboard();
+  }
+});
 
 loadLeaderboard();
 </script>

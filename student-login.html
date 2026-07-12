@@ -745,7 +745,7 @@
     setProgress(100);
     localStorage.setItem('esld-session', JSON.stringify({role:'student',id:student.sid,name:student.fullName||student.name}));
     toast(`Welcome back, ${(student.fullName||student.name||'').split(' ')[0]}! Redirecting…`);
-    setLoading(btn,false);
+    setLoading(btn,true);
    setTimeout(() => {
     window.location.href = "student-dashboard.html";}, 1000);
   }

@@ -959,6 +959,12 @@ function bootApp(){
 
 /* ═══════════════════════════════════════════════════════════════
    SEED DEMO APP DATA (teachers/students/parents/classes/settings)
+   NOTE: the demo students (SID001–SID008) now start at accuracy:0,
+   coins:0, active:false — they are DEMO NAMES/CLASSES/NEEDS only, so
+   the Admin console isn't a totally empty table on first load, but
+   they carry ZERO fake progress. Real progress only ever comes from
+   a student actually playing a game (localStorage 'coins-*' /
+   'ml-history-*'), same as any student a teacher/admin adds later.
 ═══════════════════════════════════════════════════════════════ */
 async function seedAppData(){
   if(!get(K.T).length) set(K.T,[
@@ -970,14 +976,14 @@ async function seedAppData(){
   if(!get(K.S).length){
     const demoHash = await sha256(DEFAULT_STUDENT_PW);
     set(K.S,[
-      {sid:'SID001',name:'Aarav Singh',  classGrade:'5-A',need:'Dyslexia',  teacherTid:'TID003',accuracy:78,coins:420,active:true, age:11,gender:'Male',  email:'aarav@s.esld',  studentEmail:'aarav@s.esld',  pMobile:'9900011111',parentMobile:'9900011111',joinDate:'2024-06-15',passwordHash:demoHash,pwPlain:DEFAULT_STUDENT_PW},
-      {sid:'SID002',name:'Diya Patel',   classGrade:'6-B',need:'Dysgraphia',teacherTid:'TID001',accuracy:64,coins:310,active:true, age:12,gender:'Female',email:'diya@s.esld',   studentEmail:'diya@s.esld',   pMobile:'9900022222',parentMobile:'9900022222',joinDate:'2024-06-18',passwordHash:demoHash,pwPlain:DEFAULT_STUDENT_PW},
-      {sid:'SID003',name:'Kabir Rao',    classGrade:'4-A',need:'ADHD',      teacherTid:'TID002',accuracy:45,coins:150,active:false,age:10,gender:'Male',  email:'kabir@s.esld',  studentEmail:'kabir@s.esld',  pMobile:'9900033333',parentMobile:'9900033333',joinDate:'2024-07-02',passwordHash:demoHash,pwPlain:DEFAULT_STUDENT_PW},
-      {sid:'SID004',name:'Meera Iyer',   classGrade:'7-C',need:'Dyscalculia',teacherTid:'TID002',accuracy:38,coins:90, active:false,age:13,gender:'Female',email:'meera@s.esld',  studentEmail:'meera@s.esld',  pMobile:'9900044444',parentMobile:'9900044444',joinDate:'2024-07-10',passwordHash:demoHash,pwPlain:DEFAULT_STUDENT_PW},
-      {sid:'SID005',name:'Vivaan Joshi', classGrade:'5-A',need:'Dyslexia',  teacherTid:'TID003',accuracy:91,coins:610,active:true, age:11,gender:'Male',  email:'vivaan@s.esld', studentEmail:'vivaan@s.esld', pMobile:'9900055555',parentMobile:'9900055555',joinDate:'2024-08-05',passwordHash:demoHash,pwPlain:DEFAULT_STUDENT_PW},
-      {sid:'SID006',name:'Ira Nair',     classGrade:'6-B',need:'ADHD',      teacherTid:'TID001',accuracy:88,coins:540,active:true, age:12,gender:'Female',email:'ira@s.esld',    studentEmail:'ira@s.esld',    pMobile:'9900066666',parentMobile:'9900066666',joinDate:'2024-08-20',passwordHash:demoHash,pwPlain:DEFAULT_STUDENT_PW},
-      {sid:'SID007',name:'Aryan Sharma', classGrade:'4-A',need:'Dyslexia',  teacherTid:'TID003',accuracy:55,coins:230,active:true, age:10,gender:'Male',  email:'aryan@s.esld',  studentEmail:'aryan@s.esld',  pMobile:'9900077777',parentMobile:'9900077777',joinDate:'2025-01-05',passwordHash:demoHash,pwPlain:DEFAULT_STUDENT_PW},
-      {sid:'SID008',name:'Nisha Reddy',  classGrade:'7-C',need:'Dysgraphia',teacherTid:'TID004',accuracy:70,coins:380,active:true, age:13,gender:'Female',email:'nisha@s.esld',  studentEmail:'nisha@s.esld',  pMobile:'9900088888',parentMobile:'9900088888',joinDate:'2025-01-12',passwordHash:demoHash,pwPlain:DEFAULT_STUDENT_PW},
+      {sid:'SID001',name:'Aarav Singh',  classGrade:'5-A',need:'Dyslexia',  teacherTid:'TID003',accuracy:0,coins:0,active:false, age:11,gender:'Male',  email:'aarav@s.esld',  studentEmail:'aarav@s.esld',  pMobile:'9900011111',parentMobile:'9900011111',joinDate:'2024-06-15',passwordHash:demoHash,pwPlain:DEFAULT_STUDENT_PW},
+      {sid:'SID002',name:'Diya Patel',   classGrade:'6-B',need:'Dysgraphia',teacherTid:'TID001',accuracy:0,coins:0,active:false, age:12,gender:'Female',email:'diya@s.esld',   studentEmail:'diya@s.esld',   pMobile:'9900022222',parentMobile:'9900022222',joinDate:'2024-06-18',passwordHash:demoHash,pwPlain:DEFAULT_STUDENT_PW},
+      {sid:'SID003',name:'Kabir Rao',    classGrade:'4-A',need:'ADHD',      teacherTid:'TID002',accuracy:0,coins:0,active:false,age:10,gender:'Male',  email:'kabir@s.esld',  studentEmail:'kabir@s.esld',  pMobile:'9900033333',parentMobile:'9900033333',joinDate:'2024-07-02',passwordHash:demoHash,pwPlain:DEFAULT_STUDENT_PW},
+      {sid:'SID004',name:'Meera Iyer',   classGrade:'7-C',need:'Dyscalculia',teacherTid:'TID002',accuracy:0,coins:0, active:false,age:13,gender:'Female',email:'meera@s.esld',  studentEmail:'meera@s.esld',  pMobile:'9900044444',parentMobile:'9900044444',joinDate:'2024-07-10',passwordHash:demoHash,pwPlain:DEFAULT_STUDENT_PW},
+      {sid:'SID005',name:'Vivaan Joshi', classGrade:'5-A',need:'Dyslexia',  teacherTid:'TID003',accuracy:0,coins:0,active:false, age:11,gender:'Male',  email:'vivaan@s.esld', studentEmail:'vivaan@s.esld', pMobile:'9900055555',parentMobile:'9900055555',joinDate:'2024-08-05',passwordHash:demoHash,pwPlain:DEFAULT_STUDENT_PW},
+      {sid:'SID006',name:'Ira Nair',     classGrade:'6-B',need:'ADHD',      teacherTid:'TID001',accuracy:0,coins:0,active:false, age:12,gender:'Female',email:'ira@s.esld',    studentEmail:'ira@s.esld',    pMobile:'9900066666',parentMobile:'9900066666',joinDate:'2024-08-20',passwordHash:demoHash,pwPlain:DEFAULT_STUDENT_PW},
+      {sid:'SID007',name:'Aryan Sharma', classGrade:'4-A',need:'Dyslexia',  teacherTid:'TID003',accuracy:0,coins:0,active:false, age:10,gender:'Male',  email:'aryan@s.esld',  studentEmail:'aryan@s.esld',  pMobile:'9900077777',parentMobile:'9900077777',joinDate:'2025-01-05',passwordHash:demoHash,pwPlain:DEFAULT_STUDENT_PW},
+      {sid:'SID008',name:'Nisha Reddy',  classGrade:'7-C',need:'Dysgraphia',teacherTid:'TID004',accuracy:0,coins:0,active:false, age:13,gender:'Female',email:'nisha@s.esld',  studentEmail:'nisha@s.esld',  pMobile:'9900088888',parentMobile:'9900088888',joinDate:'2025-01-12',passwordHash:demoHash,pwPlain:DEFAULT_STUDENT_PW},
     ]);
   }
   if(!get(K.P).length) set(K.P,[
@@ -1323,9 +1329,12 @@ async function saveStudent(){
     const sid=nextId('SID',list,'sid');
     const passwordHash = await sha256(DEFAULT_STUDENT_PW);
     const cfg = getO(K.ST)||{};
+    // A brand-new student always starts at 0 accuracy / 0 coins / inactive —
+    // real progress only ever comes from ml-history-*/coins-* localStorage
+    // once they actually play a game (see student-progress.html).
     list.push({sid,name,classGrade,age,gender,need,teacherTid,email,studentEmail:email,pMobile,parentMobile:pMobile,
-      accuracy:Math.floor(40+Math.random()*55), coins:Math.floor(50+Math.random()*500),
-      active:true, joinDate:new Date().toISOString().split('T')[0],
+      accuracy:0, coins:0,
+      active:false, joinDate:new Date().toISOString().split('T')[0],
       passwordHash, pwPlain:DEFAULT_STUDENT_PW,
       schoolCode:cfg.schoolCode||(SES&&SES.schoolCode)||'', schoolName:cfg.schoolName||(SES&&SES.schoolName)||''});
     set(K.S,list); closeModal('modal-student'); renderStudents();
