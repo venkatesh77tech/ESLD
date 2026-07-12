@@ -22,7 +22,7 @@ Env:  MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DB, ANTHROPIC_API_KEY,
 
 Install:  pip install flask flask-cors flask-mysqldb bcrypt requests google-auth
 """
-
+from flask_mysqldb import MySQL
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import pymysql
