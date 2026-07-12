@@ -746,7 +746,8 @@
     localStorage.setItem('esld-session', JSON.stringify({role:'student',id:student.sid,name:student.fullName||student.name}));
     toast(`Welcome back, ${(student.fullName||student.name||'').split(' ')[0]}! Redirecting…`);
     setLoading(btn,false);
-    setTimeout(()=>{ setProgress(0); toast('Student Dashboard coming soon!','ok'); },1600);
+   setTimeout(() => {
+    window.location.href = "student-dashboard.html";}, 1000);
   }
 
   /* ══ GOOGLE SIGN-IN (individual mode only) ════════════════ */
