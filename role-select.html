@@ -62,6 +62,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--ink);min-h
   font-weight:800;font-size:.82rem;
   transition:.25s;
   opacity:0;animation:rise .7s ease forwards .3s;
+  cursor:pointer;
 }
 .admin-corner:hover{
   background:rgba(167,139,250,0.18);
@@ -161,7 +162,7 @@ h1 .grad{
 .scan-ring{position:fixed;top:50%;left:50%;border-radius:50%;border:1px solid;pointer-events:none;z-index:0;transform:translate(-50%,-50%);animation:ringExpand var(--ring-dur,4s) ease-in-out infinite var(--ring-delay,0s);opacity:0}
 @keyframes ringExpand{0%{opacity:0;width:100px;height:100px}20%{opacity:.3}100%{opacity:0;width:900px;height:900px}}
 
-#transOverlay{position:fixed;inset:0;z-index:9999;background:var(--bg);opacity:0;pointer-events:none;transition:opacity .45s;display:flex;align-items:center;justify-content:center}
+#transOverlay{position:fixed;inset:0;z-index:9999;background:var(--bg);opacity:0;pointer-events:none;transition:opacity .25s;display:flex;align-items:center;justify-content:center}
 #transOverlay.active{opacity:1;pointer-events:all}
 .trans-content{text-align:center}
 .trans-emoji{font-size:64px;animation:spinIn .6s cubic-bezier(.34,1.56,.64,1) forwards}
@@ -194,7 +195,7 @@ h1 .grad{
   Back to home
 </a>
 
-<!-- Admin moved to its own corner entry point, separate from the student/teacher/parent row -->
+<!-- Admin corner entry point -->
 <a class="admin-corner" href="admin.html" data-role="admin" data-emoji="🏫" data-label="Admin Console">
   <span class="ac-icon">🏫</span>
   <span class="ac-label">School Admin</span>
@@ -304,6 +305,20 @@ function frame(){
 resize(); frame();
 window.addEventListener('resize', resize);
 
+/* ═══════════════════════════════════════════════════════════════
+   NAVIGATION
+   FIX: the previous version called e.preventDefault() and then
+   navigated with window.location.href INSIDE a setTimeout(…,520).
+   Several browsers (Safari in particular) do not treat a navigation
+   that happens asynchronously after the click — even ~500ms later —
+   as directly tied to the user's gesture, and will silently block it
+   as if it were a pop-up. That is why the Admin corner link (and,
+   intermittently, the other role cards) sometimes did nothing when
+   clicked. The fix: let the anchor's normal `href` navigation happen
+   immediately/natively — never prevented or delayed. The transition
+   overlay is now purely a cosmetic flash shown in the same click
+   handler, with no navigation logic depending on it.
+═══════════════════════════════════════════════════════════════ */
 const overlay = document.getElementById('transOverlay');
 const transEmoji = document.getElementById('transEmoji');
 const transText = document.getElementById('transText');
@@ -314,18 +329,16 @@ const ROLE_META = {
   admin:{emoji:'🏫',text:'Loading Admin Console…'},
 };
 document.querySelectorAll('.role-card, .admin-corner').forEach(card=>{
-  card.addEventListener('click', e=>{
-    e.preventDefault();
+  card.addEventListener('click', ()=>{
     const role = card.dataset.role;
-    const href = card.getAttribute('href');
     const meta = ROLE_META[role] || {emoji:'✨',text:'Loading…'};
     try{ localStorage.setItem('esld-role', role); }catch(_){}
     transEmoji.textContent = meta.emoji;
     transText.textContent = meta.text;
     overlay.classList.add('active');
-    setTimeout(()=>{ window.location.href = href; }, 520);
+    // No preventDefault(), no setTimeout(): the browser's native <a href>
+    // navigation proceeds immediately and reliably.
   });
-  card.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') card.click(); });
 });
 
 document.querySelectorAll('.role-card').forEach(card=>{
